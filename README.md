@@ -8,13 +8,15 @@ Tarayıcıda çalışan, 1950'lerin el çizimi animasyon filmlerini andıran 3D 
 
 - **Fare:** Sürükleyerek gez, sağ tıkla döndür, tekerlekle yakınlaş.
 - **Dokunmatik:** Tek parmakla gez, iki parmakla döndür ve yakınlaş.
-- Binaya tıklayınca paneli açılır. Çift tıklayınca ya da "İçeri gir" ile kümes, ahır, ağıl, hara, besi ahırı ve evin içine girersin.
-- Hazır ürünün üstündeki baloncuğa dokununca ürün toplanır.
+- Ana ekran bir hub haritasıdır. Tabelalara (Çiftlik Evi, Tarlalar, Kümes, Ahır, Değirmen Sokağı, Köy Pazarı, Tüccar Hanı, Yarış Alanı…) dokununca o bölüme gidilir.
+- Ev, kümes, ahır, ağıl ve besi ahırında doğrudan binanın içine girilir. Sol üstteki düğme haritaya döndürür.
+- Tarlalar'da seçili tohum boş parsele dokununca ekilir, olgun parsele dokununca hasat edilir.
+- Kilitli araziler satın alındıkça haritada yeni bölümler açılır.
 
 ## İçerik
 
-- 10 arazi bölgesi ve 18 bina türü. Binalar 3, ev 4 seviyeye kadar büyür.
+- 13 konum, 5 satın alınabilir arazi bölgesi, 16 bina türü ve 9 tarla parseli. Binalar 3, ev 4 seviyeye kadar büyür.
 - Üretim zincirleri: mısır → yem → süt → peynir, buğday → un → ekmek ve kek…
 - Köy pazarı (dalgalanan fiyatlar), sipariş panosu ve itibar sistemi, hedef zinciri.
-- İsteğe bağlı "arka sokaklar" (bahisli at yarışı, horoz dövüşü). Ayarlar'dan açılır, varsayılan olarak kapalıdır.
+- Yarış Alanı'nda harada yetiştirilen taylarla yarış. İsteğe bağlı "arka sokaklar" (bahis, horoz dövüşü) Ayarlar'dan açılır, varsayılan olarak kapalıdır.
 - İlerleme tarayıcının yerel deposuna kaydedilir.
