@@ -8,7 +8,8 @@ Tarayıcıda çalışan, 1950'lerin el çizimi animasyon filmlerini andıran 3D 
 
 - **Fare:** Sürükleyerek gez, sağ tıkla döndür, tekerlekle yakınlaş.
 - **Dokunmatik:** Tek parmakla gez, iki parmakla döndür ve yakınlaş.
-- Ana ekran bir hub haritasıdır. Tabelalara (Çiftlik Evi, Tarlalar, Kümes, Ahır, Değirmen Sokağı, Köy Pazarı, Tüccar Hanı, Yarış Alanı…) dokununca o bölüme gidilir.
+- Ana menü çiftçinin masasıdır. Penceredeki çiftlik canlı akar. Masadaki nesneler menüdür: harita (çiftliğe çık), sipariş defteri, posta (sözleşmeler), takvim (günlük ödül ve hedefler), radyo (müzik), kumbara (dükkân), kupa rafı (koleksiyon), sepet (ambar), duvar saati (ayarlar). Telefonda masa parmakla kaydırılır.
+- Haritada etiketlere (Çiftlik Evi, Tarlalar, Kümes, Ahır, Değirmen Sokağı, Köy Pazarı, Tüccar Hanı, Panayır, Yarış Alanı…) dokununca o bölüme gidilir.
 - Ev, kümes, ahır, ağıl ve besi ahırında doğrudan binanın içine girilir. Sol üstteki düğme haritaya döndürür.
 - Tarlalar'da seçili tohum boş parsele dokununca ekilir, olgun parsele dokununca hasat edilir.
 - Kilitli araziler satın alındıkça haritada yeni bölümler açılır.
