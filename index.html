@@ -52,7 +52,15 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--honey);outline-
 .back{position:fixed;z-index:6;left:max(12px,env(safe-area-inset-left,0px));top:calc(62px + env(safe-area-inset-top,0px));border:2.5px solid var(--ink);border-radius:999px;padding:7px 16px 7px 12px;background:var(--forest);color:#fff;font-weight:900;box-shadow:2px 3px 0 var(--ink)}
 
 /* Haritadaki isim etiketleri */
-.mk{position:absolute;left:0;top:0;will-change:transform}
+.mk{position:absolute;left:0;top:0}
+.tag.below{transform:translate(-50%,7px);margin-top:0}.tag.below:hover,.tag.below.hot{transform:translate(-50%,7px) scale(1.08)}
+.tag.below::after{bottom:auto;top:-7px;border-top:0;border-bottom:6px solid var(--ink);border-top-color:transparent}
+.tag.dk{height:24px;padding:0 9px 0 3px;gap:5px;background:#fffaf0;box-shadow:2px 2px 0 var(--ink);-webkit-font-smoothing:antialiased}
+.tag.dk b{font-family:var(--f-body);font-weight:900;font-size:12px;letter-spacing:.1px;color:#2a1a10}
+.tag.dk .ti{width:19px;height:19px;font-size:11px}
+.tag.dk .s{top:-9px;left:-9px;right:auto;min-width:18px;height:18px;font-size:9.5px}
+.tag.side{transform:translate(8px,-50%);margin-top:0}.tag.side:hover,.tag.side.hot{transform:translate(8px,-50%) scale(1.08)}
+.tag.side::after{left:-7px;bottom:auto;top:50%;margin:-6px 0 0;border:6px solid transparent;border-right-color:var(--ink);border-left:0}
 .tag{pointer-events:auto;position:relative;transform:translate(-50%,-100%);display:flex;align-items:center;gap:6px;height:28px;padding:0 11px 0 3px;border-radius:999px;background:var(--paper);border:2px solid var(--ink);box-shadow:2px 2px 0 var(--ink);white-space:nowrap;transition:transform .15s,background .15s;margin-top:-8px}
 .tag::after{content:"";position:absolute;left:50%;bottom:-8px;margin-left:-6px;border:6px solid transparent;border-top-color:var(--ink);border-bottom:0}
 .tag:hover,.tag.hot{transform:translate(-50%,-100%) scale(1.1);background:#fff8e3}
@@ -236,7 +244,7 @@ body.desk .dock,body.desk .cam{display:none}
 .meterbar .pbar{flex:1}
 .pill.bump{animation:boing .45s}
 @media (max-width:700px){
-  body.desk .tag{height:22px;padding:0 7px 0 2px;gap:4px}body.desk .tag b{font-size:10px}body.desk .tag .ti{width:17px;height:17px;font-size:10px}
+  body.desk .tag.dk{height:21px;padding:0 7px 0 2px;gap:3px}body.desk .tag.dk b{font-size:10.5px}body.desk .tag.dk .ti{width:16px;height:16px;font-size:9.5px}
   .plate small{display:none}.plate h1{font-size:14px}.plate{padding:4px 10px 5px}
   .pill{height:31px;font-size:12.5px;padding-right:9px}
   .coin,.star,.barnic{width:21px;height:21px;font-size:11px}.ring{width:24px;height:24px}.ring b{width:18px;height:18px;font-size:10px}
@@ -485,17 +493,17 @@ if(THREE.ColorManagement)THREE.ColorManagement.legacyMode=false;
 const V3=THREE.Vector3;
 const stage=$('#stage');
 const R=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
-R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
+R.setPixelRatio(Math.min(devicePixelRatio,2.5));const MAXANI=R.capabilities.getMaxAnisotropy?R.capabilities.getMaxAnisotropy():8;R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
 R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.08;
 stage.appendChild(R.domElement);
-const GRAD=(()=>{const t=new THREE.DataTexture(new Uint8Array([88,170,255]),3,1,THREE.RedFormat);t.minFilter=t.magFilter=THREE.NearestFilter;t.generateMipmaps=false;t.needsUpdate=true;return t})();
+const GRAD=(()=>{const t=new THREE.DataTexture(new Uint8Array([96,150,205,255]),4,1,THREE.RedFormat);t.minFilter=t.magFilter=THREE.NearestFilter;t.generateMipmaps=false;t.needsUpdate=true;return t})();
 function grade(c){const col=new THREE.Color(c);const h={};col.getHSL(h);const hh=h.h+((h.h>.5?1.1:.1)-h.h)*.05;col.setHSL(hh,h.s*.8,Math.min(.93,h.l*.96+.025));return col}
 const KEEP=['emissive','emissiveIntensity','transparent','opacity','depthWrite','map','side'];
 function toonMat(o){const p={gradientMap:GRAD};for(const k of KEEP)if(o&&o[k]!=null)p[k]=o[k];p.color=o&&o.color!=null?grade(o.color):new THREE.Color(0xffffff);if(p.emissive!=null)p.emissive=grade(p.emissive);return new THREE.MeshToonMaterial(p)}
 const MC={};
 function M(c,o){const k=c+'|'+(o?JSON.stringify(o):'');return MC[k]||(MC[k]=toonMat(Object.assign({color:c},o)))}
-const OUT=new THREE.ShaderMaterial({side:THREE.BackSide,uniforms:{thick:{value:.0027},col:{value:new THREE.Color(0x2a1a10)},jit:{value:0}},
-  vertexShader:'attribute vec3 onormal;uniform float thick;uniform float jit;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);vec3 n=normalize(normalMatrix*onormal);float w=thick*(1.+.35*sin(jit+position.x*9.+position.y*7.+position.z*5.));mv.xyz+=n*w*(-mv.z);gl_Position=projectionMatrix*mv;}',
+const OUT=new THREE.ShaderMaterial({side:THREE.BackSide,uniforms:{thick:{value:.0024},col:{value:new THREE.Color(0x2a1a10)},jit:{value:0}},
+  vertexShader:'attribute vec3 onormal;uniform float thick;uniform float jit;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);vec3 n=normalize(normalMatrix*onormal);float w=thick*(1.+.12*sin(jit+position.x*9.+position.y*7.+position.z*5.));mv.xyz+=n*w*(-mv.z);gl_Position=projectionMatrix*mv;}',
   fragmentShader:'uniform vec3 col;void main(){gl_FragColor=vec4(col,1.);}'});
 function smoothN(g){if(g.attributes.onormal)return;const pos=g.attributes.position,nor=g.attributes.normal,acc=new Map(),key=i=>pos.getX(i).toFixed(3)+','+pos.getY(i).toFixed(3)+','+pos.getZ(i).toFixed(3);
   for(let i=0;i<pos.count;i++){const k=key(i);const a=acc.get(k)||[0,0,0];a[0]+=nor.getX(i);a[1]+=nor.getY(i);a[2]+=nor.getZ(i);acc.set(k,a)}
@@ -512,7 +520,8 @@ function P(par,g,c,s,p,r,o){const m=new THREE.Mesh(typeof g==='string'?GE[g]:g,(
 function F(par,c,s,p,r){const m=new THREE.Mesh(GE.box,(c&&c.isMaterial)?c:M(c));m.scale.set(...s);m.position.set(...p);if(r)m.rotation.set(...r);m.receiveShadow=true;par.add(m);return m}
 function G(par,p,ry){const g=new THREE.Group();if(p)g.position.set(p[0],p[1],p[2]);if(ry)g.rotation.y=ry;if(par)par.add(g);return g}
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-function canvasTex(w,h,draw,rep){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;if(rep){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep[0],rep[1])}return t}
+const TEXQ=Math.min(2,Math.max(1,devicePixelRatio||1)*1.5);
+function canvasTex(w,h,draw,rep){const c=document.createElement('canvas');c.width=Math.round(w*TEXQ);c.height=Math.round(h*TEXQ);const cx=c.getContext('2d');cx.scale(TEXQ,TEXQ);cx.imageSmoothingQuality='high';draw(cx,w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=MAXANI;if(rep){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep[0],rep[1])}return t}
 const TEX={
   grass:()=>canvasTex(256,256,(x,w,h)=>{x.fillStyle='#78ad45';x.fillRect(0,0,w,h);const r=rng(3);for(let i=0;i<2600;i++){x.fillStyle=['#6ea23e','#86ba52','#7bb049','#91c25c'][i%4];x.fillRect(r()*w,r()*h,2,3+r()*3)}},[70,70]),
   planks:(c1,c2,rep,vert)=>canvasTex(256,256,(x,w,h)=>{const r=rng(9);for(let i=0;i<8;i++){x.fillStyle=i%2?c1:c2;const k=i*32;vert?x.fillRect(k,0,32,h):x.fillRect(0,k,w,32);x.fillStyle='rgba(0,0,0,.28)';vert?x.fillRect(k,0,2,h):x.fillRect(0,k,w,2);
@@ -540,7 +549,7 @@ function signBoard(lines){const key=JSON.stringify(lines);if(SIGNC[key])return S
   rr(0,0);x.lineWidth=7;x.strokeStyle='#24160c';x.stroke();for(const nx of[22,W-22]){x.fillStyle='#3a2a1a';x.beginPath();x.arc(nx,21,5,0,7);x.fill()}
   let y=pad*.7;x.textAlign='center';x.textBaseline='top';x.lineJoin='round';
   L.forEach(l=>{x.font=font(l.s);x.lineWidth=l.s*.22;x.strokeStyle='#24160c';x.strokeText(l.t,W/2,y);x.fillStyle=l.c||'#fff1cf';x.fillText(l.t,W/2,y);y+=l.s*1.1});
-  const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;return SIGNC[key]={tex:t,aspect:c.width/c.height}}
+  const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=MAXANI;return SIGNC[key]={tex:t,aspect:c.width/c.height}}
 function signMesh(lines,H){const sb=signBoard(lines);const m=new THREE.Mesh(PLANE,new THREE.MeshBasicMaterial({map:sb.tex,transparent:true,alphaTest:.3,side:THREE.DoubleSide,toneMapped:false}));m.scale.set(H*sb.aspect,H,1);return m}
 // --- kıvrımlı şeritler (dere, patika) ---
 function ribbon(par,pts,w,mat,y=.04,segK=1.5,vRep=4){const curve=new THREE.CatmullRomCurve3(pts.map(p=>new V3(p[0],0,p[1])),false,'catmullrom',.5);const N=Math.max(8,Math.round(curve.getLength()*segK));const pos=[],uv=[],idx=[];
@@ -833,7 +842,7 @@ function hubLimits(){ctl.enablePan=true;ctl.minDistance=28;ctl.maxDistance=105}
 hubLimits();
 ctl.addEventListener('change',()=>{if(mode!=='hub')return;const t=ctl.target;const cx=Math.max(-32,Math.min(46,t.x)),cz=Math.max(-24,Math.min(24,t.z));if(cx!==t.x||cz!==t.z){cam.position.x+=cx-t.x;cam.position.z+=cz-t.z;t.x=cx;t.z=cz}});
 const hemiL=new THREE.HemisphereLight(0xf3ead2,0x7d6a3a,.75);world.add(hemiL);
-const sun=new THREE.DirectionalLight(0xffe6c0,1.25);sun.position.set(-30,48,26);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+const sun=new THREE.DirectionalLight(0xffe6c0,1.25);sun.position.set(-30,48,26);sun.castShadow=true;sun.shadow.mapSize.set(innerWidth<700?2048:4096,innerWidth<700?2048:4096);sun.shadow.radius=3;
 Object.assign(sun.shadow.camera,{left:-55,right:55,top:45,bottom:-45,near:1,far:160});sun.shadow.bias=-.0004;sun.shadow.normalBias=.04;world.add(sun);
 const worldFx=[];let waterTex,lampPost,GROUND;
 const inAnyRect=(x,z,m=0)=>Object.values(REG).some(r=>r.rect&&x>r.rect[0]-m&&x<r.rect[2]+m&&z>r.rect[1]-m&&z<r.rect[3]+m);
@@ -1010,18 +1019,19 @@ function updateMarks(){for(const id in MK){const m=MK[id],[t,k]=id.split(':');
     const h=`<button class="tag" data-go="${k}" title="${st.t||L.n}"><span class="ti">${L.e}</span><b>${L.n}</b>${dot}</button>`;if(h!==m.sig){m.sig=h;m.el.innerHTML=h;m.w=0}}
   else if(t==='R'){const d=REG[k],[x1,z1,x2,z2]=d.rect;m.pos=new V3((x1+x2)/2,3,(z1+z2)/2);m.tag='R';
     const h=`<button class="tag lock" data-region="${k}"><span class="ti">🔒</span><span><b>${d.n}</b><small>₺${fmt(regCost(k))} · Sv ${d.lvl}</small></span></button>`;if(h!==m.sig){m.sig=h;m.el.innerHTML=h;m.w=0}}
-  else if(t==='D'){const g=deskObjs[k];if(!g)continue;const v=new V3();g.getWorldPosition(v);v.y+=(g.userData.tagY||.5)*(g.userData.s0||1)+.08;m.pos=v;m.tag=k;const st=deskStatus(k),[ic,nm]=DNAMES[k];
-    const h=`<button class="tag" data-desk="${k}"><span class="ti">${ic}</span><b>${nm}</b>${st?`<i class="s ${st.c}">${st.n}</i>`:''}</button>`;if(h!==m.sig){m.sig=h;m.el.innerHTML=h;m.w=0}}
+  else if(t==='D'){const g=deskObjs[k];if(!g)continue;const an=DANCH[k]||[0,0,.4];g.updateMatrixWorld();const v=g.localToWorld(new V3(an[0],an[1],an[2]));m.pos=v;m.tag=k;m.below=1;const sd=an[3]==='side';const st=deskStatus(k),[ic,nm]=DNAMES[k];
+    const h=`<button class="tag ${sd?'side':'below'} dk" data-desk="${k}"><span class="ti">${ic}</span><b>${nm}</b>${st?`<i class="s ${st.c}">${st.n}</i>`:''}</button>`;if(h!==m.sig){m.sig=h;m.el.innerHTML=h;m.w=0}}
   else if(t==='P'){const f=S.fields[+k];if(!f||!f.job)continue;m.pos=plotWorld(+k,1.7);bubble(m,ITEMS[f.job.r].e,prog(f.job),'harvestP',k)}
   else if(t==='U'){const s=S.units[k];if(!s||!s.job)continue;m.pos=unitWorld(k,markH(k));bubble(m,ITEMS[Object.keys(unitRecipe(k).out)[0]].e,prog(s.job),'collectU',k)}}}
 const _v=new V3();
 function placeMarks(){const W=R.domElement.clientWidth,H=R.domElement.clientHeight,tags=[];
   for(const k in MK){const m=MK[k];if(!m.pos)continue;_v.copy(m.pos).project(mode==='desk'?dcam:cam);const vis=_v.z<1&&mode!=='interior'&&Math.abs(_v.x)<1.15&&Math.abs(_v.y)<1.15;m.el.style.display=vis?'':'none';if(!vis)continue;
     const x=(_v.x+1)/2*W,y=(1-_v.y)/2*H;if(m.tag){if(!m.w){const c=m.el.firstElementChild;m.w=c?c.offsetWidth:0;m.h=c?c.offsetHeight:0}tags.push({m,x,y});const c=m.el.firstElementChild;if(c)c.classList.toggle('hot',(mode==='desk'?hoverDesk:hoverLoc)===m.tag);continue}
-    m.el.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`}
+    m.el.style.transform=`translate(${Math.round(x)}px,${Math.round(y)}px)`}
   tags.sort((a,b)=>b.y-a.y);const placed=[];
-  for(const t of tags){let y=t.y;for(let it=0;it<5;it++){const hit=placed.find(p=>Math.abs(p.x-t.x)<(p.w+t.m.w)/2+6&&Math.abs(p.y-y)<t.m.h+10);if(!hit)break;y=hit.y-(t.m.h+10)}
-    placed.push({x:t.x,y,w:t.m.w});t.m.el.style.transform=`translate(${t.x.toFixed(1)}px,${y.toFixed(1)}px)`}}
+  if(tags.some(t=>t.m.below))tags.sort((a,b)=>a.y-b.y);
+  for(const t of tags){let y=t.y;const dn=t.m.below?1:-1;for(let it=0;it<6;it++){const hit=placed.find(p=>Math.abs(p.x-t.x)<(p.w+t.m.w)/2+4&&Math.abs(p.y-y)<t.m.h+6);if(!hit)break;y=hit.y+dn*(t.m.h+6)}
+    placed.push({x:t.x,y,w:t.m.w});t.m.el.style.transform=`translate(${Math.round(t.x)}px,${Math.round(y)}px)`}}
 function screenOfW(p){_v.copy(p).project(cam);return{x:(_v.x+1)/2*R.domElement.clientWidth,y:(1-_v.y)/2*R.domElement.clientHeight-30}}
 
 // ================= İÇ MEKÂN =================
@@ -1555,10 +1565,11 @@ function migrate(s){const d=fresh();for(const k in d)if(s[k]==null)s[k]=d[k];for
 // ================= ÇİFTÇİNİN MASASI (ana menü) =================
 const deskScene=new THREE.Scene();deskScene.background=new THREE.Color(0x3a2a1c);
 const dcam=new THREE.PerspectiveCamera(42,1,.1,100);
-const rt=new THREE.WebGLRenderTarget(768,448);rt.texture.encoding=THREE.sRGBEncoding;
-const winCam=new THREE.PerspectiveCamera(34,768/448,.5,500);winCam.position.set(2,24,40);winCam.lookAt(2,0,-4);
+const rt=new THREE.WebGLRenderTarget(1280,760,{samples:4});rt.texture.encoding=THREE.sRGBEncoding;
+const winCam=new THREE.PerspectiveCamera(34,1280/760,.5,500);winCam.position.set(2,24,40);winCam.lookAt(2,0,-4);
 const skyTop=new THREE.Color(0xa3c4c0);
 let deskPortrait=false,deskObjs={},DESKP=[],deskFx=[],deskSig='',deskL={},hoverDesk=null,dcamX=0,dPar={x:0,y:0},winFrame=0;
+const DANCH={clock:[.4,0,.05,'side'],borsa:[0,-.72,.05],calendar:[0,-.56,.05],trophy:[0,-.2,.12],map:[0,0,.8],ledger:[0,0,.52],mail:[0,0,.36],radio:[0,0,.3],piggy:[0,0,.5],basket:[0,0,.46],gazete:[0,0,.4],butce:[0,0,.32]};
 const DNAMES={borsa:['📈','Borsa'],gazete:['📰','İstatistik'],butce:['🧮','Bütçe'],map:['🗺️','Harita'],ledger:['📒','Sipariş Defteri'],mail:['✉️','Posta'],calendar:['📅','Takvim'],radio:['📻','Radyo'],piggy:['🐷','Kumbara'],trophy:['🏆','Koleksiyon'],basket:['🧺','Ambar'],clock:['🕰️','Ayarlar']};
 function dobj(k,p,ry){const g=G(deskScene,p,ry);g.userData.desk=k;g.userData.base=g.position.clone();deskObjs[k]=g;DESKP.push(g);return g}
 function faceMesh(par,size,pos,faceIdx,tex,side){const sm=M(side);const mats=[sm,sm,sm,sm,sm,sm];mats[faceIdx]=toonMat({map:tex});const m=new THREE.Mesh(GE.box,mats);m.scale.set(...size);m.position.set(...pos);m.castShadow=m.receiveShadow=true;outline(m);par.add(m);return m}
@@ -1627,7 +1638,7 @@ function deskFrame(dt,t){const d=dayFactor();if(deskL.fill){deskL.fill.intensity
     g.position.y+=(b.y+(hv?.07:0)-g.position.y)*.2;const s=1+(hv?.05:0)+Math.sin((1-pop)*Math.PI*3)*pop*.12;const s0=g.userData.s0||1;g.scale.set(s*s0,s*s0*(1+(hv?Math.sin(t*12)*.02:0)),s*s0)}
   const a=dcam.aspect,vf=dcam.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*a),PT=a<.85,W=PT?1.5:a<1.3?3:3.9,dist=Math.max(PT?2.95/Math.tan(vf/2):2.25/Math.tan(vf/2),Math.min(12,W/Math.tan(hf/2))),ly=PT?2.62:2.6;if(PT)dcamX=0;
   dcam.position.set(dcamX+dPar.x*(PT?.06:.18),(PT?4.9:3.2)+dPar.y*.1,PT?dist*.93:dist);dcam.lookAt(dcamX*.9,ly,-.8)}
-function renderWindow(){winFrame=(winFrame+1)%2;if(winFrame)return;const bg=world.background;world.background=skyTop;R.setRenderTarget(rt);R.clear();R.render(world,winCam);R.setRenderTarget(null);world.background=bg}
+function renderWindow(){winFrame=(winFrame+1)%3;if(winFrame)return;const bg=world.background;world.background=skyTop;R.setRenderTarget(rt);R.clear();R.render(world,winCam);R.setRenderTarget(null);world.background=bg}
 function deskStatus(k){switch(k){case'borsa':{const n=Object.keys(ITEMS).filter(x=>has(x)>0&&(S.market.m[x]||1)>=1.12).length;return n?{c:'ok',n:'▲'+n}:null}case'map':{const n=countReady();return n?{c:'ok',n}:null}case'ledger':{const n=readyOrders();return n?{c:'ok',n}:null}case'mail':{const n=S.contracts.filter(c=>has(c.k)>0).length;return n?{c:'ok',n}:null}
   case'calendar':return(S.daily&&(!S.daily.login||S.daily.tasks.some(t=>t.p>=t.n&&!t.c)))||goalReady()?{c:'new',n:'!'}:null;case'basket':return stored()/cap()>=.9?{c:'warn',n:'!'}:null;case'radio':return{c:'idle',n:S.sound.music?'♪':'✕'};default:return null}}
 function deskAction(k){const g=deskObjs[k];if(g)g.userData.pop=1;
@@ -1677,7 +1688,7 @@ function makeThumbs(){let tr;try{tr=new THREE.WebGLRenderer({antialias:true,alph
   doOne('tarla',g=>fieldBed(g,{job:{r:'bugday',s:0,e:1}}));doOne('pazar',g=>marketModel(g),5);doOne('han',g=>hanModel(g),4);
   doOne('panayir',g=>fairModel(g),5);
   doOne('hipo',g=>{const h=horse(0x8a5530,0x2e1d12,0xc4492e);g.add(h)},1.6);
-  tr.dispose();if(tr.forceContextLoss)tr.forceContextLoss();OUT.uniforms.thick.value=.0027}
+  tr.dispose();if(tr.forceContextLoss)tr.forceContextLoss();OUT.uniforms.thick.value=.0024}
 
 // ================= DÖNGÜ =================
 const clock=new THREE.Clock();
