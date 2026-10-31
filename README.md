@@ -15,8 +15,18 @@ Tarayıcıda çalışan, 1950'lerin el çizimi animasyon filmlerini andıran 3D 
 
 ## İçerik
 
-- 13 konum, 5 satın alınabilir arazi bölgesi, 16 bina türü ve 9 tarla parseli. Binalar 3, ev 4 seviyeye kadar büyür.
-- Üretim zincirleri: mısır → yem → süt → peynir, buğday → un → ekmek ve kek…
-- Köy pazarı (dalgalanan fiyatlar), sipariş panosu ve itibar sistemi, hedef zinciri.
-- Yarış Alanı'nda harada yetiştirilen taylarla yarış. İsteğe bağlı "arka sokaklar" (bahis, horoz dövüşü) Ayarlar'dan açılır, varsayılan olarak kapalıdır.
+- **Harita:** 14 konum, 5 satın alınabilir arazi bölgesi, 16 bina türü, 9 tarla parseli. Binalar 3, ev 4 seviyeye kadar büyür.
+- **Üretim zincirleri:** mısır → yem → süt → peynir, buğday → un → ekmek ve kek. Kısa ürünlerin yanında 1–8 saatlik uzun ürünler de var (kabak, eski kaşar, kestane balı, büyük elma hasadı).
+- **Yaşayan dünya:** 12 dakikalık gün-gece döngüsü, saat başı değişen dört mevsim (karlı kış, turuncu sonbahar, çiçekli ilkbahar), yağmur, fırtına ve kar. Yağmur ekinleri hızlandırır, fırtınada tavuklar kümese kaçar.
+- **Karakterler:** dolaşan çiftçi ve köpeği, pazarcılar, handaki tüccar, panayır jürisi ve ziyaretçileri, yolda yürüyen köylüler, ördekli gölet.
+- **Ses:** Web Audio ile üretilen 50'ler tarzı çiftlik müziği ve hayvan sesleri. Ayarlar'dan kapatılabilir.
+- **Ev dekorasyonu:** Dükkândan alınan eşyalar evin içinde (duvar, köşe, sofra, tavan, kilim) ve bahçede görünür.
+- **İşçiler (seviye 5):** Tarlayı ve binaları otomatik toplar, aynı üretimi yeniden başlatır.
+- **Tüccar Hanı:** Siparişlerin yanında saatler süren tedarik sözleşmeleri.
+- **Koleksiyon:** Üretim ve hasatta rastgele çıkan 12 nadir buluntu. Her biri kalıcı bir bonus verir.
+- **Panayır:** Her gün yenilenen üç yarışma (en büyük kabak, peynir, en güzel inek…).
+- **Yarış Alanı:** Tay yetiştir, ahıra al, antrenman yaptır, Köy Ligi'nden Ulusal Lig'e yüksel.
+- **Günlük döngü:** 7 günlük giriş ödülü takvimi, her gün üç görev, uzun aradan sonra "sen yokken" özeti, hazır bildirimleri.
+- **Mini oyunlar:** Sağım ritmi (ahır), yumurta yakala (kümes), tüccarla pazarlık (pazar).
+- **Gelir modeli:** Oyun içinde kazanılan yonca (🍀) para birimi. Ödüllü reklamla ya da yoncayla hızlandırma, yonca ile özel süsler. Reklam şu an 5 saniyelik bir yer tutucu. Yonca paketleri mağaza sürümüne bırakıldı, bu sürümde ödeme alınmıyor.
 - İlerleme tarayıcının yerel deposuna kaydedilir.
