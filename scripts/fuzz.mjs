@@ -90,7 +90,7 @@ async function run(b,seed){const r=mulberry(seed),R=n=>Math.floor(r()*n);const [
   await p.route(/^https?:/,rt=>rt.abort());
   const save=makeSave(r,kind);
   await p.addInitScript(([seed,save,env])=>{let a=seed*7919;Math.random=()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
-    if(!sessionStorage.getItem('fz')){sessionStorage.setItem('fz','1');localStorage.clear();if(save!=null)localStorage.setItem('ciftlik-imparatorlugu-v3',save);
+    if(window.name!=='fz'){window.name='fz';localStorage.clear();if(save!=null)localStorage.setItem('ciftlik-imparatorlugu-v3',save);
       if(env==='gfx-dusuk')localStorage.setItem('ci-gfx','low');if(env==='gfx-yuksek')localStorage.setItem('ci-gfx','high')}
     // gizli sekme / engellenmiş depolama: her erişim hata fırlatır; dolu depolama: yazma hata fırlatır
     if(env==='depolama-yok'){const th=()=>{throw new DOMException('SecurityError','SecurityError')};Storage.prototype.getItem=th;Storage.prototype.setItem=th;Storage.prototype.removeItem=th}
@@ -108,9 +108,9 @@ async function run(b,seed){const r=mulberry(seed),R=n=>Math.floor(r()*n);const [
       else if(t<.70){act='kaydır';await p.mouse.wheel(0,R(800)-400)}
       else if(t<.72){const [w2,h2]=VPS[R(VPS.length)];act=`ekran ${w2}x${h2}`;await p.setViewportSize({width:w2,height:h2})}
       else if(t<.73){act='Escape';await p.keyboard.press('Escape')}
-      else if(t<.735&&env!=='depolama-yok'&&env!=='depolama-dolu'){act='yeniden başlat';const before=await p.evaluate(()=>{save();return S.coins});await p.reload({timeout:240000});
+      else if(t<.735&&env!=='depolama-yok'&&env!=='depolama-dolu'){act='yeniden başlat';const before=await p.evaluate(()=>{save();return S.coins});const raw0=await p.evaluate(()=>{try{return (localStorage.getItem(SAVE)||'YOK').slice(0,160)}catch(e){return 'ERR '+e.message}});await p.reload({timeout:240000});
         await p.waitForFunction(()=>typeof S==='object'&&S&&!document.getElementById('boot'),null,{timeout:240000});await p.evaluate(()=>{window.__R=n=>Math.floor(Math.random()*n);window.__P=a=>a[Math.floor(Math.random()*a.length)]});
-        const after=await p.evaluate(()=>S.coins);if(Math.abs(after-before)>1e-6&&after<before)errs.push(`kayıt kaybı: yeniden açınca para ${before} → ${after}`)}
+        const after=await p.evaluate(()=>S.coins);if(Math.abs(after-before)>1e-6&&after<before){const raw1=await p.evaluate(()=>{try{return (localStorage.getItem(SAVE)||'YOK').slice(0,160)}catch(e){return 'ERR '+e.message}});errs.push(`kayıt kaybı: yeniden açınca para ${before} → ${after} · önce: ${raw0} · sonra: ${raw1} · son: ${log.slice(-5).join(' › ')}`)}}
       else if(t<.745&&env==='webgl-kayip'){act='webgl kayıp';await p.evaluate(()=>{const x=R.getContext().getExtension('WEBGL_lose_context');if(x){x.loseContext();setTimeout(()=>x.restoreContext(),400)}})}
       else if(t<.76){const n=3+R(6);act=`hızlı ${n} dokunuş`;const ms=[];for(let k=0;k<n;k++){const m=await p.evaluate(PICK,r());if(m)ms.push(m)}for(const m of ms)p.mouse.click(m.x,m.y).catch(()=>{});await p.waitForTimeout(30)}
       else if(t<.77){act='çift dokunuş';const m=await p.evaluate(PICK,r());if(m){await p.mouse.click(m.x,m.y,{clickCount:2})}}
