@@ -1,0 +1,46 @@
+<title>Çiftlik İmparatorluğu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:wght@600;700;800;900&display=swap">
+<style>
+/*@@STYLE@@*/
+</style>
+
+<div id="boot"><div>Çiftlik<br>İmparatorluğu</div></div>
+<div id="stage"></div>
+<div id="grain"></div><div id="vignette"></div>
+<div id="marks"></div>
+<header class="hud">
+  <div class="plate"><h1>Çiftlik İmparatorluğu</h1><small id="era">Kulübe dönemi</small></div>
+  <div class="pills">
+    <div class="pill" id="pCoin" title="Para"><span class="coin">₺</span><span id="coins">0</span></div>
+    <div class="pill" id="pGem" title="Yonca: hızlandırma ve özel süsler"><span class="gem">🍀</span><span id="gems">0</span></div>
+    <div class="pill lvl" id="pLv" title="Seviye"><span class="ring" id="lvring"><b id="lv">1</b></span></div>
+    <div class="pill" title="İtibar"><span class="star">★</span><span id="rep">50</span></div>
+    <div class="pill" id="pStore" title="Ambar"><span class="barnic">📦</span><span id="store">0/0</span></div>
+  </div>
+</header>
+<button class="back" id="backBtn" data-act="back" hidden>← Harita</button>
+<nav class="dock" aria-label="Menü">
+  <button data-act="home" title="Masaya dön" aria-label="Masaya dön">🪑</button>
+  <button data-open="places" title="Konumlar" aria-label="Konumlar">📍</button>
+  <button data-open="goals" title="Hedefler" aria-label="Hedefler">🎯<i class="dot" id="goalDot" hidden>!</i></button>
+  <button data-open="shop" title="Dükkân" aria-label="Dükkân">🛍️</button>
+  <button data-open="album" title="Koleksiyon" aria-label="Koleksiyon">📖</button>
+  <button data-open="barn" title="Ambar" aria-label="Ambar">📦</button>
+  <button data-open="settings" title="Ayarlar" aria-label="Ayarlar">⚙️</button>
+</nav>
+<div class="cam" id="camCtl">
+  <button data-act="rotL" aria-label="Sola döndür">⟲</button><button data-act="rotR" aria-label="Sağa döndür">⟳</button>
+  <button data-act="zin" aria-label="Yakınlaş">+</button><button data-act="zout" aria-label="Uzaklaş">−</button>
+  <button class="ph" data-act="photo" aria-label="Fotoğraf modu">📷</button>
+</div>
+<button class="shutter" data-act="shoot" aria-label="Fotoğraf çek">📸</button><button class="photo-x" data-act="photoOff">✕ Fotoğraf modundan çık</button>
+<aside class="sheet" id="sheet" hidden></aside>
+<div id="iris"><i></i></div>
+
+
+<!--@@VENDOR@@-->
+<script>
+/*@@SCRIPTS@@*/
+</script>

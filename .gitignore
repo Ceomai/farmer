@@ -1,0 +1,7 @@
+node_modules/
+.font-cache/
+android/app/build/
+android/.gradle/
+android/build/
+*.log
+www/

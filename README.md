@@ -1,33 +1,67 @@
 # Çiftlik İmparatorluğu
 
-Tarayıcıda çalışan, 1950'lerin el çizimi animasyon filmlerini andıran 3D bir çiftlik simülasyonu. Bir kulübe, bir tarla ve bir kümesle başlıyorsun. Arazi satın alıp yeni binalar kurarak çiftliği konaklı bir tarım imparatorluğuna büyütüyorsun.
+50'lerin el çizimi çizgi filmlerinden ilham alan, mobil öncelikli 3D çiftlik simülasyonu. Kulübe, tarla ve kümesle başla; ek, biç, hayvan besle, kasabayla ticaret yap ve çiftliğini konaklı bir tarım imparatorluğuna büyüt.
 
-## Oynamak
+**Hemen oyna:** `dist/index.html` dosyasını tarayıcıda aç. İnternet gerekmez; 3D motoru, yazı tipleri ve emoji fontu dosyanın içindedir.
 
-`index.html` dosyasını bir tarayıcıda aç. Kurulum gerekmez. Three.js ve yazı tipleri CDN üzerinden yüklenir.
+## Proje yapısı
 
-- **Fare:** Sürükleyerek gez, sağ tıkla döndür, tekerlekle yakınlaş.
-- **Dokunmatik:** Tek parmakla gez, iki parmakla döndür ve yakınlaş.
-- Ana menü çiftçinin masasıdır. Penceredeki çiftlik canlı akar. Masadaki nesneler menüdür: harita (çiftliğe çık), sipariş defteri, posta (sözleşmeler), takvim (günlük ödül ve hedefler), radyo (müzik), kumbara (dükkân), kupa rafı (koleksiyon), sepet (ambar), duvar saati (ayarlar). Telefonda masa parmakla kaydırılır.
-- Haritada etiketlere (Çiftlik Evi, Tarlalar, Kümes, Ahır, Değirmen Sokağı, Köy Pazarı, Tüccar Hanı, Panayır, Yarış Alanı…) dokununca o bölüme gidilir.
-- Ev, kümes, ahır, ağıl ve besi ahırında doğrudan binanın içine girilir. Sol üstteki düğme haritaya döndürür.
-- Tarlalar'da seçili tohum boş parsele dokununca ekilir, olgun parsele dokununca hasat edilir.
-- Kilitli araziler satın alındıkça haritada yeni bölümler açılır.
+```
+src/
+  index.template.html   HTML iskeleti (HUD, dok, panel kapları)
+  styles/game.css       Tüm stiller
+  js/ORDER              Modüllerin yüklenme sırası
+  js/000-config.js      Yayın öncesi doldurulacak ayarlar (bulut, reklam, satın alma, yasal bağlantılar)
+  js/00-boot.js … 35-cloud.js   Oyun modülleri (veri, ekonomi, 3D motor, masa, paneller, ses, platform, bulut…)
+scripts/
+  build.mjs             Tek dosyalık çevrimdışı derleme → dist/index.html ve www/index.html (Capacitor)
+  smoke-test.mjs        İnternet kapalıyken telefon ve masaüstü boyutunda otomatik akış testi
+  store-screenshots.mjs Uygulama simgesi, açılış görseli, özellik grafiği ve 1080×1920 mağaza ekran görüntüleri
+android/                Capacitor Android projesi
+supabase/schema.sql     Bulut kaydı, analitik ve hata raporu şeması
+docs/                   Gizlilik politikası, kullanım koşulları, mağaza metinleri ve görselleri
+assets/                 Simge ve açılış görselinin kaynakları
+```
 
-## İçerik
+Modüller birlikte tek bir betik olarak birleştirilir; aynı küresel kapsamı paylaşırlar. Yeni dosya eklerken `src/js/ORDER` listesine eklemeyi unutma.
 
-- **Harita:** 14 konum, 5 satın alınabilir arazi bölgesi, 16 bina türü, 9 tarla parseli. Binalar 3, ev 4 seviyeye kadar büyür.
-- **Üretim zincirleri:** mısır → yem → süt → peynir, buğday → un → ekmek ve kek. Kısa ürünlerin yanında 1–8 saatlik uzun ürünler de var (kabak, eski kaşar, kestane balı, büyük elma hasadı).
-- **Yaşayan dünya:** 12 dakikalık gün-gece döngüsü, saat başı değişen dört mevsim (karlı kış, turuncu sonbahar, çiçekli ilkbahar), yağmur, fırtına ve kar. Yağmur ekinleri hızlandırır, fırtınada tavuklar kümese kaçar.
-- **Karakterler:** dolaşan çiftçi ve köpeği, pazarcılar, handaki tüccar, panayır jürisi ve ziyaretçileri, yolda yürüyen köylüler, ördekli gölet.
-- **Ses:** Web Audio ile üretilen 50'ler tarzı çiftlik müziği ve hayvan sesleri. Ayarlar'dan kapatılabilir.
-- **Ev dekorasyonu:** Dükkândan alınan eşyalar evin içinde (duvar, köşe, sofra, tavan, kilim) ve bahçede görünür.
-- **İşçiler (seviye 5):** Tarlayı ve binaları otomatik toplar, aynı üretimi yeniden başlatır.
-- **Tüccar Hanı:** Siparişlerin yanında saatler süren tedarik sözleşmeleri.
-- **Koleksiyon:** Üretim ve hasatta rastgele çıkan 12 nadir buluntu. Her biri kalıcı bir bonus verir.
-- **Panayır:** Her gün yenilenen üç yarışma (en büyük kabak, peynir, en güzel inek…).
-- **Yarış Alanı:** Tay yetiştir, ahıra al, antrenman yaptır, Köy Ligi'nden Ulusal Lig'e yüksel.
-- **Günlük döngü:** 7 günlük giriş ödülü takvimi, her gün üç görev, uzun aradan sonra "sen yokken" özeti, hazır bildirimleri.
-- **Mini oyunlar:** Sağım ritmi (ahır), yumurta yakala (kümes), tüccarla pazarlık (pazar).
-- **Gelir modeli:** Oyun içinde kazanılan yonca (🍀) para birimi. Ödüllü reklamla ya da yoncayla hızlandırma, yonca ile özel süsler. Reklam şu an 5 saniyelik bir yer tutucu. Yonca paketleri mağaza sürümüne bırakıldı, bu sürümde ödeme alınmıyor.
-- İlerleme tarayıcının yerel deposuna kaydedilir.
+## Geliştirme
+
+```bash
+npm install
+npm run build        # dist/index.html + www/index.html
+npm test             # duman testi (Playwright gerekir: npm i -D playwright && npx playwright install chromium)
+npm run screenshots  # mağaza görsellerini yeniden üret
+```
+
+`npm run build:fast` yazı tiplerini gömmeden (Google Fonts bağlantısıyla) derler.
+
+## Android uygulaması
+
+```bash
+npm run build
+npx cap sync android
+npx cap open android      # Android Studio açılır → Run
+```
+
+Her `main` gönderiminde GitHub Actions oyunu derler, duman testini çalıştırır ve indirilebilir bir **debug APK** üretir (Actions → son çalışma → Artifacts).
+
+iOS için bir Mac'te: `npx cap add ios && npx cap sync ios && npx cap open ios`.
+
+### Yayından önce doldurulacaklar (`src/js/000-config.js`)
+
+| Ayar | Ne yapılmalı |
+|---|---|
+| `cloudUrl`, `cloudKey` | Supabase projesi aç, `supabase/schema.sql`'i çalıştır, Project URL ve anon key'i yaz. Boşsa bulut kaydı, analitik ve hata raporu kapalıdır. |
+| `admobRewarded…`, `admobTesting` | AdMob'da ödüllü reklam birimi oluştur, kimlikleri yaz, `admobTesting:false` yap. `android/app/src/main/AndroidManifest.xml` ve `capacitor.config.json`'daki AdMob **uygulama kimliğini** de değiştir (şu an Google test kimliği). |
+| `iapProducts` | Play Console / App Store Connect'te aynı kimliklerle tüketilebilir ürünler oluştur. |
+| `privacyUrl`, `termsUrl`, `supportEmail` | `docs/` altındaki taslakları hukuki kontrolden geçirip yayınla, bağlantıları güncelle. |
+
+## Özellikler
+
+- **Ana menü:** Çiftçinin masası; penceredeki çiftlik canlı akar. Borsa panosu, bütçe, istatistik, takvim, sipariş defteri, posta, kumbara.
+- **Çiftlik:** 14 konum, 5 satın alınabilir arazi, 16 bina, 9 tarla parseli, iç mekânlar, gün-gece, 4 mevsim, hava olayları.
+- **Oynanış:** üretim zincirleri, siparişler ve sözleşmeler, kasabalılarla dostluk, işçiler, panayır, at ligi, 12 parçalık koleksiyon, mini oyunlar, hayvan isimleri ve sevgi, ev dekorasyonu, fotoğraf modu.
+- **Geri dönüş:** günlük giriş ödülü ve görevler, "sen yokken" özeti, hazır bildirimleri (uygulamada yerel bildirim).
+- **Gelir:** yonca para birimi, AdMob ödüllü reklam, uygulama içi yonca paketleri (uygulamada).
+- **Altyapı:** çevrimdışı tek dosya, grafik kalitesi (Otomatik / Yüksek / Pil tasarrufu, otomatik çözünürlük ayarı), bulut kaydı ve kurtarma kodu, sunucu saatiyle saat hilesi koruması, izne bağlı anonim analitik ve hata raporu, KVKK onay ekranı, Android geri tuşu, titreşim, kalıcı yedek kayıt.

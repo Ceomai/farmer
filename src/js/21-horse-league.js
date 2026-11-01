@@ -1,0 +1,20 @@
+// ================= AT LİGİ =================
+const TIERS=[{n:'Köy Ligi',fee:100,prize:400,g:1,opp:10},{n:'İl Ligi',fee:300,prize:1200,g:2,opp:14},{n:'Bölge Ligi',fee:800,prize:3000,g:4,opp:18},{n:'Ulusal Lig',fee:2000,prize:8000,g:8,opp:23}];
+function stableHorse(){if(!has('at'))return;if(S.horses.length>=4)return toast('Ahırda en fazla 4 at olabilir');S.items.at--;const hl=lvOf('hara')||1;
+  S.horses.push({n:HNAMES[Math.floor(Math.random()*HNAMES.length)],spd:4+hl+Math.floor(Math.random()*4),sta:4+hl+Math.floor(Math.random()*4),w:0,rest:0,train:0});sfx('neigh');toast('🐴 Yeni at ahırda!');commit()}
+function trainHorse(i){const h=S.horses[i];if(!h||now()<h.train)return;if(has('yem')<4)return toast('Antrenman için 4 yem gerekli');S.items.yem-=4;const k=Math.random()<.5?'spd':'sta';h[k]=Math.min(20,h[k]+1);h.train=now()+300000;sfx('neigh');toast(`${h.n}: ${k==='spd'?'Hız':'Dayanıklılık'} +1`);commit()}
+function leagueRace(i){const h=S.horses[i],T=TIERS[S.league.tier];if(!h||now()<h.rest||(race&&race.running))return;if(S.coins<T.fee)return toast('Giriş ücreti için paran yok');pay(T.fee,'Yarış');
+  const power=h.spd+h.sta*.6+(has1('arap')?2:0);const field=[{n:h.n,p:power,own:1}];for(let k=0;k<4;k++)field.push({n:HNAMES[(k*3+S.league.pts+7+i)%HNAMES.length],p:T.opp*(.85+Math.random()*.35)});
+  const rc={horses:field.sort(()=>Math.random()-.5).map(x=>({n:x.n,own:x.own,sp:.9+x.p/30,pos:0})),running:true};race=rc;h.rest=now()+180000;renderSheet();sfx('neigh');
+  const tk=()=>{const race=rc;let fin=race.horses.filter(x=>x.place).length;race.horses.forEach((x,j)=>{if(!x.place){x.pos=Math.min(90,x.pos+x.sp*(.7+Math.random()*.9));if(x.pos>=90)x.place=++fin}const el=document.querySelector(`#lane${j} .h`);if(el)el.style.left=x.pos+'%'});
+    if(race.horses.some(x=>!x.place)){setTimeout(tk,90);return}race.running=false;race.done=true;const me=race.horses.find(x=>x.own),pl=me.place,pts=[0,3,2,1,0,0][pl];S.league.pts+=pts;let msg=`${me.n} ${pl}. oldu · +${pts} puan`;
+    if(pl===1){gain(T.prize,'Yarış');h.w++;msg+=` · +₺${fmt(T.prize)}`;sfx('win');flyCoins(8)}else if(pl<=3){const p2=Math.round(T.prize*(pl===2?.4:.15));gain(p2,'Yarış');msg+=` · +₺${fmt(p2)}`;sfx('coin')}else sfx('fail');
+    if(S.league.pts>=9&&S.league.tier<TIERS.length-1){S.league.tier++;S.league.pts=0;S.gems+=T.g;msg+=` · 🎉 ${TIERS[S.league.tier].n}'ne yükseldin! +🍀${T.g}`}
+    stat('race');addXP(pl===1?50:15);race.msg=msg;commit()};setTimeout(tk,300)}
+function raceBody(){const T=TIERS[S.league.tier];let h=`<div class="unit"><div class="uhead"><span>🏆 ${T.n}</span><span class="tm">Puan ${S.league.pts}/9</span></div><div class="pbar"><i style="width:${S.league.pts/9*100}%;animation:none"></i></div>`;
+  if(race&&(race.running||race.done)){h+=`<div class="track">${race.horses.map((x,i)=>`<div class="lane ${x.own?'pick':''}" id="lane${i}"><span class="h" style="left:${x.pos}%">🐎</span><span class="nm">${x.n}${x.place?' · '+x.place+'.':''}</span></div>`).join('')}</div>`;
+    if(race.done)h+=`<div class="log">${race.msg}</div><button class="btn big" data-act="rnew">Tamam</button>`;return h+'</div>'}
+  if(has('at'))h+=`<button class="pill-btn go" data-act="stable">🐴 Tayı ahıra al (${has('at')})</button>`;
+  h+=S.horses.length?S.horses.map((x,i)=>{const rest=now()<x.rest,tr=now()<x.train;return `<div class="job"><span class="big">🐎</span><span class="pw"><b>${x.n} · ${x.w} galibiyet</b><small>⚡ Hız ${x.spd} · 🫀 Dayanıklılık ${x.sta}</small>${rest?`<small data-left="${x.rest}" data-pre="💤"></small>`:''}</span>
+    <span style="display:flex;flex-direction:column;gap:5px"><button class="pill-btn gold" data-act="lrace" data-i="${i}" ${rest||S.coins<T.fee?'disabled':''}>🏁 ₺${T.fee}</button><button class="pill-btn" data-act="htrain" data-i="${i}" ${tr||has('yem')<4?'disabled':''} title="4 yem">🏋️ Antrenman</button></span></div>`}).join(''):'<p class="note">Harada tay yetiştir, ahıra al ve lige kaydet. İlk üçe girmek puan kazandırır, 9 puan bir üst lig demek.</p>';
+  return h+'</div>'}

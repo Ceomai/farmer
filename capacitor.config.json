@@ -1,0 +1,14 @@
+{
+  "appId": "com.ceomai.ciftlik",
+  "appName": "Çiftlik İmparatorluğu",
+  "webDir": "www",
+  "backgroundColor": "#f3e6c4",
+  "android": { "allowMixedContent": false, "backgroundColor": "#f3e6c4" },
+  "ios": { "contentInset": "never", "backgroundColor": "#f3e6c4" },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 1200, "backgroundColor": "#c4492e", "showSpinner": false, "androidScaleType": "CENTER_CROP" },
+    "StatusBar": { "overlaysWebView": true, "style": "DARK" },
+    "LocalNotifications": { "iconColor": "#2f6b3a" },
+    "AdMob": { "appIdAndroid": "ca-app-pub-3940256099942544~3347511713", "appIdIos": "ca-app-pub-3940256099942544~1458002511" }
+  }
+}

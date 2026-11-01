@@ -1,0 +1,43 @@
+name: Derle ve Android APK
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Oyunu derle (çevrimdışı tek dosya)
+        run: npm run build
+      - name: Duman testi
+        run: |
+          npm i --no-save playwright@1.47.2
+          npx playwright install --with-deps chromium
+          npm test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-oyun
+          path: dist/index.html
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - name: Capacitor eşitle
+        run: npx cap sync android
+      - name: Test APK'sı derle
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ciftlik-imparatorlugu-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
