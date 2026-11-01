@@ -1,9 +1,10 @@
 // ================= YAPILANDIRMA =================
 // Yayından önce doldurulacak değerler. Boş bırakılan özellikler sessizce kapalı kalır.
 const CONFIG={
-  // Supabase (bulut kaydı, sunucu saati, analitik, hata raporu). Şema: supabase/schema.sql
-  cloudUrl:'',            // örn. https://xxxx.supabase.co
-  cloudKey:'',            // Supabase "anon public" anahtarı (herkese açık olması güvenlidir)
+  // Firebase (bulut kaydı, sunucu saati, analitik, hata raporu). Kurallar: firebase/firestore.rules
+  // Firebase konsolu → Proje ayarları → Genel → "Web API Key" ve "Project ID". Bu değerler herkese açıktır, güvenliği kurallar sağlar.
+  firebaseApiKey:'',      // örn. AIzaSy...
+  firebaseProjectId:'',   // örn. ciftlik-imparatorlugu
   // AdMob ödüllü reklam birimleri. Şu anki değerler Google'ın TEST kimlikleri.
   admobRewardedAndroid:'ca-app-pub-3940256099942544/5224354917',
   admobRewardedIos:'ca-app-pub-3940256099942544/1712485313',

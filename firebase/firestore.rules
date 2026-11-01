@@ -1,0 +1,41 @@
+rules_version = '2';
+// Çiftlik İmparatorluğu · Firestore güvenlik kuralları
+// Yükleme: Firebase konsolu → Firestore Database → Kurallar sekmesine yapıştır → Yayınla
+//          ya da Firebase CLI ile: firebase deploy --only firestore:rules
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Oyun kayıtları. Belge adı, oyuncunun kurtarma kodunun SHA-256 özetidir (64 karakter).
+    // Kodu bilmeyen belgeyi bulamaz; listeleme ve silme kapalıdır.
+    match /saves/{docId} {
+      allow get: if request.auth != null;
+      allow create, update: if request.auth != null
+        && docId.size() == 64
+        && request.resource.data.keys().hasOnly(['json', 'level', 'updatedAt'])
+        && request.resource.data.json is string
+        && request.resource.data.json.size() < 900000
+        && request.resource.data.level is int
+        && request.resource.data.updatedAt is timestamp;
+      allow list, delete: if false;
+    }
+
+    // Anonim kullanım olayları: yalnızca eklenebilir, istemciden okunamaz.
+    match /events/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['player', 'name', 'props', 'level', 'platform', 'clientAt', 'at'])
+        && request.resource.data.name is string && request.resource.data.name.size() < 64
+        && request.resource.data.props is string && request.resource.data.props.size() <= 1000;
+      allow read, update, delete: if false;
+    }
+
+    // Hata raporları: yalnızca eklenebilir.
+    match /errors/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['player', 'error', 'at'])
+        && request.resource.data.error is string && request.resource.data.error.size() < 4000;
+      allow read, update, delete: if false;
+    }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}

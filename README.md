@@ -18,7 +18,7 @@ scripts/
   smoke-test.mjs        İnternet kapalıyken telefon ve masaüstü boyutunda otomatik akış testi
   store-screenshots.mjs Uygulama simgesi, açılış görseli, özellik grafiği ve 1080×1920 mağaza ekran görüntüleri
 android/                Capacitor Android projesi
-supabase/schema.sql     Bulut kaydı, analitik ve hata raporu şeması
+firebase/               Firestore güvenlik kuralları ve analiz notları (firebase.json)
 docs/                   Gizlilik politikası, kullanım koşulları, mağaza metinleri ve görselleri
 assets/                 Simge ve açılış görselinin kaynakları
 ```
@@ -52,7 +52,7 @@ iOS için bir Mac'te: `npx cap add ios && npx cap sync ios && npx cap open ios`.
 
 | Ayar | Ne yapılmalı |
 |---|---|
-| `cloudUrl`, `cloudKey` | Supabase projesi aç, `supabase/schema.sql`'i çalıştır, Project URL ve anon key'i yaz. Boşsa bulut kaydı, analitik ve hata raporu kapalıdır. |
+| `firebaseApiKey`, `firebaseProjectId` | Firebase projesi aç; Authentication'da **Anonim** girişi, Firestore'u etkinleştir; `firebase/firestore.rules`'u yayınla; Web API Key ve Project ID'yi yaz. Boşsa bulut kaydı, analitik ve hata raporu kapalıdır. |
 | `admobRewarded…`, `admobTesting` | AdMob'da ödüllü reklam birimi oluştur, kimlikleri yaz, `admobTesting:false` yap. `android/app/src/main/AndroidManifest.xml` ve `capacitor.config.json`'daki AdMob **uygulama kimliğini** de değiştir (şu an Google test kimliği). |
 | `iapProducts` | Play Console / App Store Connect'te aynı kimliklerle tüketilebilir ürünler oluştur. |
 | `privacyUrl`, `termsUrl`, `supportEmail` | `docs/` altındaki taslakları hukuki kontrolden geçirip yayınla, bağlantıları güncelle. |

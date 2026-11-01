@@ -21,7 +21,7 @@ Oyunu sunmak ve kaydını korumak (sözleşmenin ifası), oyunu iyileştirmek ve
 Oyun kaydı hesabın silinene kadar; kullanım verisi ve hata raporları en fazla 24 ay saklanır.
 
 ## 5. Aktarım
-Veriler bulut hizmet sağlayıcımız (Supabase) ve reklam sağlayıcısı (Google) ile, yalnızca yukarıdaki amaçlarla paylaşılır. Sunucular yurt dışında olabilir; aktarım KVKK m.9'a uygun yapılır.
+Veriler bulut hizmet sağlayıcımız (Google Firebase: Authentication ve Cloud Firestore) ve reklam sağlayıcısı (Google) ile, yalnızca yukarıdaki amaçlarla paylaşılır. Sunucular yurt dışında olabilir; aktarım KVKK m.9'a uygun yapılır.
 
 ## 6. Hakların
 KVKK m.11 kapsamında verilerine erişme, düzeltme, silme ve itiraz hakların vardır. Ayarlar'daki kurtarma kodunla birlikte [e-posta] adresine yazarak kaydının silinmesini isteyebilirsin. Anonim veri paylaşımını Ayarlar'dan istediğin zaman kapatabilirsin.
