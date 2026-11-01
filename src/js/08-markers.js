@@ -16,7 +16,7 @@ function locStatus(k){const L=LOC[k];let ready=0,run=0,idle=0,minLeft=Infinity,u
   if(k==='silo')return{c:'',t:'Ambar '+stored()+'/'+cap()};
   return{c:'',t:''}}
 function wantMarks(){const w={};if(mode==='desk'){for(const k in deskObjs)w['D:'+k]=1;return w}
-  if(mode==='hub'){for(const k in LOC)if(owned(LOC[k].reg))w['L:'+k]=1;for(const r in REG)if(REG[r].rect&&!owned(r))w['R:'+r]=1}
+  if(mode==='hub'){}
   else if(mode==='focus'){const L=LOC[focus];if(L.kind==='fields')S.fields.forEach((f,i)=>{if(f.job)w['P:'+i]=1});(L.units||[]).forEach(u=>{const s=S.units[u];if(s&&s.job)w['U:'+u]=1})}
   return w}
 function syncMarks(){const w=wantMarks();for(const k in MK)if(!w[k]){MK[k].el.remove();delete MK[k]}for(const k in w)if(!MK[k]){const el=document.createElement('div');el.className='mk';marks.appendChild(el);MK[k]={el,sig:''}}updateMarks()}

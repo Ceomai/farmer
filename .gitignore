@@ -5,3 +5,4 @@ android/.gradle/
 android/build/
 *.log
 www/
+firebase/functions/node_modules/

@@ -10,6 +10,8 @@ const CONFIG={
   admobRewardedIos:'ca-app-pub-3940256099942544/1712485313',
   admobTesting:true,
   // Uygulama içi satın alma ürünleri (Play Console / App Store Connect'te aynı kimliklerle oluşturulmalı)
+  // Satın alma doğrulama servisi (firebase/functions). Boşsa doğrulama telefonda yapılır: YAYINDA BOŞ BIRAKMA.
+  iapValidatorUrl:'',     // örn. https://europe-west3-ciftlik-empire.cloudfunctions.net/validatePurchase
   iapProducts:[{id:'yonca_30',gems:30},{id:'yonca_90',gems:90},{id:'yonca_250',gems:250}],
   // Yasal metinler
   privacyUrl:'https://github.com/Ceomai/farmer/blob/main/docs/gizlilik-politikasi.md',

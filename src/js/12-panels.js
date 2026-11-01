@@ -24,10 +24,10 @@ function recipeTiles(u){const d=B[u],s=S.units[u];return `<div class="tiles">`+d
 function jobRow(u){const s=S.units[u],r=unitRecipe(u),sc=scaled(r,s.l);
   if(now()>=s.job.e)return `<button class="job ready" data-act="collect" data-u="${u}">${outOf(sc)}<b>Topla!</b></button>`;
   return `<div class="job" title="${r.n}">${outOf(sc)}<span class="pw"><span class="pbar"><i data-s="${s.job.s}" data-e="${s.job.e}"></i></span><small data-left="${s.job.e}" data-pre="⏱"></small></span></div>`}
-function upBtn(u){const s=S.units[u];if(s.l>=3)return'';const need=s.l+1>S.house;return `<button class="up" data-act="upU" data-u="${u}" ${need||S.coins<upCost(u)?'disabled':''} title="${need?'Önce evi büyüt':'+%50 ürün, %15 daha hızlı'}">⬆ Sv ${s.l+1} <span>${need?'🏠 '+HOUSE[s.l].n:'₺'+fmt(upCost(u))}</span></button>`}
+function upBtn(u){const s=S.units[u];if(s.l>=MAXL)return'';const bl=upBlock(s.l+1);return `<button class="up" data-act="upU" data-u="${u}" ${bl||S.coins<upCost(u)?'disabled':''} title="+%50 ürün, daha hızlı üretim">⬆ Sv ${s.l+1} <span>${bl||'₺'+fmt(upCost(u))}</span></button>`}
 function unitHTML(u,multi){const d=B[u],s=S.units[u];
   if(!s){const lock=S.lv<d.lvl;return `<div class="unit"><div class="build ${lock?'off':''}"><span class="thumb sm">${img(u)}</span><span class="t"><b>${d.n}</b><small>${d.d}</small></span><button class="btn gold" data-act="build" data-u="${u}" ${lock||S.coins<d.cost?'disabled':''}>${lock?'🔒 '+d.lvl:'🔨 ₺'+fmt(d.cost)}</button></div></div>`}
-  let h=multi?`<div class="uhead"><span>${d.e} ${d.n}</span>${stars(s.l,3)}</div>`:'';
+  let h=multi?`<div class="uhead"><span>${d.e} ${d.n}</span>${stars(s.l,MAXL)}</div>`:'';
   if(d.storage)h+=`<div class="job"><span class="big">📦</span><span class="pw"><b>+${d.storage*s.l} yer</b><small>Ambar ${stored()} / ${cap()}</small></span></div>`;
   h+=loveRow(u);if(s.job)h+=jobRow(u);else if(d.recipes)h+=recipeTiles(u);
   const ent=INSIDE_UNITS[u]&&mode!=='interior'?`<button class="pill-btn go" data-act="enterIn" data-k="${u}">🚪 İçeri</button>`:'';
@@ -37,19 +37,19 @@ function sheetLoc(){const k=view.loc,L=LOC[k];const th=img(L.kind==='house'?'kul
     case'house':{h=head(th,HOUSE[S.house-1].n,stars(S.house,4));const nx=HOUSE[S.house];
       b+=`<div class="job"><span class="big">📦</span><span class="pw"><b>Kiler</b><span class="pbar"><i style="width:${Math.min(100,stored()/cap()*100)}%;animation:none"></i></span><small>${stored()} / ${cap()}</small></span></div>`;
       b+=`<div class="urow">${mode!=='interior'?`<button class="pill-btn go" data-act="enterIn" data-k="kulube">🚪 Eve gir</button>`:''}${nx?`<button class="up" data-act="upHouse" ${S.lv>=nx.lvl&&S.coins>=nx.cost?'':'disabled'} title="Ambar büyür, binalar daha üst seviyeye çıkabilir">⬆ ${nx.n} <span>${S.lv>=nx.lvl?'₺'+fmt(nx.cost):'🔒 Sv '+nx.lvl}</span></button>`:''}</div>`;break}
-    case'fields':h=head(th,L.n,stars(S.fieldLv,3));b+=fieldsBody();break;
+    case'fields':h=head(th,L.n,stars(S.fieldLv,MAXL));b+=fieldsBody();break;
     case'market':h=head(th,L.n,'');b+=`<button class="btn big gold" data-act="mg" data-k="haggle" ${now()<(S.haggleAt||0)?'disabled':''}>🤝 Tüccarla pazarlık et</button>`+marketBody();break;
     case'orders':{h=head(th,L.n,'★ ×'+repMult().toFixed(2));const tb=view.tab||'o';b+=`<div class="tabs"><button aria-selected="${tb==='o'}" data-act="vtab" data-t="o">📜 Sipariş</button><button aria-selected="${tb==='c'}" data-act="vtab" data-t="c">🤝 Sözleşme</button><button aria-selected="${tb==='f'}" data-act="vtab" data-t="f">❤️ Dostlar</button></div>`+(tb==='o'?ordersBody():tb==='c'?contractsBody():friendsBody());break}
     case'fair':h=head(th,L.n,'Bugünün yarışmaları');b+=fairBody();break;
-    case'race':h=head(th,L.n,S.units.hara?stars(S.units.hara.l,3):'');b+=unitHTML('hara')+raceBody();break;
-    default:{const single=L.units.length===1,s0=S.units[L.units[0]];h=head(th,L.n,single&&s0?stars(s0.l,3):'');L.units.forEach(u=>b+=unitHTML(u,!single))}}
+    case'race':h=head(th,L.n,S.units.hara?stars(S.units.hara.l,MAXL):'');b+=unitHTML('hara')+raceBody();break;
+    default:{const single=L.units.length===1,s0=S.units[L.units[0]];h=head(th,L.n,single&&s0?stars(s0.l,MAXL):'');L.units.forEach(u=>b+=unitHTML(u,!single))}}
   return h+`<div class="sh-body">${b}</div>`}
 function fieldsBody(){const ready=S.fields.filter(f=>f.job&&now()>=f.job.e).length,empty=S.fields.filter(f=>!f.job).length,n=S.fields.length,seedE=ITEMS[S.lastCrop].e;
   let h=`<div class="seeds">${CROPS.filter(c=>!c.col||has1(c.col)).map(c=>{const lock=cropLocked(c);return `<button class="seed ${c.id===S.lastCrop?'on':''}" data-act="seed" data-r="${c.id}" ${lock?'disabled':''} title="${c.n} · ${secs(scaled(c,S.fieldLv).t)}"><em>${ITEMS[c.id].e}</em><small>${lock?'🔒'+c.lvl:'₺'+c.cost}</small></button>`}).join('')}</div>`;
   h+=`<div class="plots">`+S.fields.map((f,i)=>{if(!f.job)return `<button class="plot empty" data-act="plot" data-i="${i}" title="Ek"><em>${seedE}</em>ek</button>`;
       const c=cropOf(f.job.r);return now()>=f.job.e?`<button class="plot ready" data-act="plot" data-i="${i}"><em>${ITEMS[c.id].e}</em>topla!</button>`:`<button class="plot" data-act="plot" data-i="${i}"><em>${['','🌱','🌿',ITEMS[c.id].e][stageOf(f.job)]}</em><span class="pbar"><i data-s="${f.job.s}" data-e="${f.job.e}"></i></span></button>`}).join('')
     +(n<9?`<button class="plot buy" data-act="buyPlot" ${S.lv>=PLOT_LV[n]&&S.coins>=PLOT_COST[n]?'':'disabled'} title="Yeni parsel"><em>➕</em>${S.lv<PLOT_LV[n]?'🔒 Sv '+PLOT_LV[n]:'₺'+fmt(PLOT_COST[n])}</button>`:'')+`</div>`;
-  const fu=S.fieldLv<3?(()=>{const need=S.fieldLv+1>S.house;return `<button class="up" data-act="upFields" ${need||S.coins<FIELD_UP[S.fieldLv]?'disabled':''} title="+%50 hasat, %15 daha hızlı">⬆ Sv ${S.fieldLv+1} <span>${need?'🏠 '+HOUSE[S.fieldLv].n:'₺'+fmt(FIELD_UP[S.fieldLv])}</span></button>`})():'';
+  const fu=S.fieldLv<MAXL?(()=>{const bl=upBlock(S.fieldLv+1);return `<button class="up" data-act="upFields" ${bl||S.coins<FIELD_UP[S.fieldLv]?'disabled':''} title="+%50 hasat, daha hızlı büyüme">⬆ Sv ${S.fieldLv+1} <span>${bl||'₺'+fmt(FIELD_UP[S.fieldLv])}</span></button>`})():'';
   const run=S.fields.filter(f=>f.job&&now()<f.job.e);
   return h+`<div class="urow"><button class="pill-btn go" data-act="plantAll" ${empty?'':'disabled'}>🌱 Ek (${empty})</button><button class="pill-btn gold" data-act="harvestAll" ${ready?'':'disabled'}>🧺 Topla (${ready})</button>${fu}${run.length?speedBtns('F',Math.max(...run.map(f=>f.job.e-now()))):''}${workerBtn('fields')}</div>`}
 function marketBody(){const inv=Object.keys(ITEMS).filter(k=>has(k)>0);

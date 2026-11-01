@@ -57,9 +57,30 @@ iOS için bir Mac'te: `npx cap add ios && npx cap sync ios && npx cap open ios`.
 | `iapProducts` | Play Console / App Store Connect'te aynı kimliklerle tüketilebilir ürünler oluştur. |
 | `privacyUrl`, `termsUrl`, `supportEmail` | `docs/` altındaki taslakları hukuki kontrolden geçirip yayınla, bağlantıları güncelle. |
 
+## Satın alma doğrulama (Cloud Function)
+
+Gerçek parayla satıştan önce zorunludur. Firebase **Blaze** planı gerekir (ücretsiz kotası aylık 2 milyon çağrı).
+
+```bash
+npm i -g firebase-tools
+firebase login
+firebase use ciftlik-empire
+cd firebase/functions && npm install && cd ../..
+firebase deploy --only functions,firestore:rules
+```
+
+Sonra:
+1. Play Console → **Kullanıcılar ve izinler** → **Yeni kullanıcı davet et**: `ciftlik-empire@appspot.gserviceaccount.com` (Functions'ın hizmet hesabı) → bu uygulama için **Finansal verileri görüntüle** ve **Siparişleri yönet** izinleri.
+2. Google Cloud konsolunda **Google Play Android Developer API**'yi etkinleştir.
+3. Dağıtımın verdiği adresi (`https://europe-west3-ciftlik-empire.cloudfunctions.net/validatePurchase`) `src/js/000-config.js` → `iapValidatorUrl` alanına yaz.
+
 ## Özellikler
 
 - **Ana menü:** Çiftçinin masası; penceredeki çiftlik canlı akar. Borsa panosu, bütçe, istatistik, takvim, sipariş defteri, posta, kumbara.
+- **Harita:** alçak, maket gibi diorama kamera açısı (kenarlarda tilt-shift bulanıklığı) ve altta kayan resimli bölüm kartları.
+- **İlk oyun rehberi:** el işaretiyle haritaya çıkma, ekme, toplama ve satma.
+- **Sürükleyerek ekme/toplama:** parmağı parsellerin üzerinde gezdirmek yeter.
+- **Oyun sonu:** binalar ve tarlalar 5. seviyeye kadar, 10–15. seviyelerde yeni ürünler (tereyağı, reçel, sabun, baklava, halı, pastırma), 44 adımlık hedef zinciri.
 - **Çiftlik:** 14 konum, 5 satın alınabilir arazi, 16 bina, 9 tarla parseli, iç mekânlar, gün-gece, 4 mevsim, hava olayları.
 - **Oynanış:** üretim zincirleri, siparişler ve sözleşmeler, kasabalılarla dostluk, işçiler, panayır, at ligi, 12 parçalık koleksiyon, mini oyunlar, hayvan isimleri ve sevgi, ev dekorasyonu, fotoğraf modu.
 - **Geri dönüş:** günlük giriş ödülü ve görevler, "sen yokken" özeti, hazır bildirimleri (uygulamada yerel bildirim).

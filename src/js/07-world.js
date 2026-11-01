@@ -4,9 +4,11 @@ const cam=new THREE.PerspectiveCamera(36,1,.5,600);
 const ctl=new THREE.OrbitControls(cam,R.domElement);ctl.enableDamping=true;ctl.dampingFactor=.09;ctl.screenSpacePanning=false;
 ctl.minPolarAngle=.35;ctl.maxPolarAngle=1.15;ctl.rotateSpeed=.6;ctl.panSpeed=1.2;
 ctl.mouseButtons={LEFT:THREE.MOUSE.PAN,MIDDLE:THREE.MOUSE.DOLLY,RIGHT:THREE.MOUSE.ROTATE};ctl.touches={ONE:THREE.TOUCH.PAN,TWO:THREE.TOUCH.DOLLY_ROTATE};
-const HUB_T=new V3(6,0,2),HUB_DIR=new V3(0,.76,.65).normalize(),HUB_D=78;
+// Diorama haritası: alçak, sinematik maket açısı (kenarlarda tilt-shift bulanıklığı CSS ile)
+const HUB_T=new V3(2,0,3),HUB_DIR=new V3(-.2,.44,.88).normalize();let HUB_D=innerWidth<700?66:50;
 cam.position.copy(HUB_T).addScaledVector(HUB_DIR,HUB_D);ctl.target.copy(HUB_T);
-function hubLimits(){ctl.enablePan=true;ctl.minDistance=28;ctl.maxDistance=105}
+function hubLimits(){ctl.enablePan=true;ctl.minDistance=24;ctl.maxDistance=90;ctl.minPolarAngle=.8;ctl.maxPolarAngle=1.22}
+function focusLimits(){ctl.minPolarAngle=.35;ctl.maxPolarAngle=1.15}
 hubLimits();
 ctl.addEventListener('change',()=>{if(mode!=='hub')return;const t=ctl.target;const cx=Math.max(-32,Math.min(46,t.x)),cz=Math.max(-24,Math.min(24,t.z));if(cx!==t.x||cz!==t.z){cam.position.x+=cx-t.x;cam.position.z+=cz-t.z;t.x=cx;t.z=cz}});
 const hemiL=new THREE.HemisphereLight(0xf3ead2,0x7d6a3a,.75);world.add(hemiL);

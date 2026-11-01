@@ -23,6 +23,7 @@ const PLATFORM={ads:false,iap:false,prices:{},
     (this.adReady?Promise.resolve():this.prepAd()).then(()=>A.showRewardVideoAd()).then(done).catch(()=>{toast('Şu an reklam yok, birazdan tekrar dene');done()});return true},
   // ---- Uygulama içi satın alma (cordova-plugin-purchase) ----
   initIap(){const run=()=>{const C=window.CdvPurchase;if(!C)return;const {store,ProductType,Platform}=C;const plat=PLAT==='ios'?Platform.APPLE_APPSTORE:Platform.GOOGLE_PLAY;
+      if(CONFIG.iapValidatorUrl){store.validator=CONFIG.iapValidatorUrl;store.applicationUsername=()=>PLAYER||account().id.slice(0,16)}
       store.register(CONFIG.iapProducts.map(p=>({id:p.id,type:ProductType.CONSUMABLE,platform:plat})));
       store.when().productUpdated(p=>{if(p.pricing)this.prices[p.id]=p.pricing.price;if(view&&view.k==='shop')renderSheet()})
         .approved(tx=>tx.verify()).verified(rc=>{rc.finish()}).finished(tx=>{for(const pr of tx.products){const c=CONFIG.iapProducts.find(x=>x.id===pr.id);if(c){S.gems+=c.gems;stat('iap');track('iap',{id:c.id});toast(`+${c.gems} 🍀 Teşekkürler!`);sfx('win');commit()}}});

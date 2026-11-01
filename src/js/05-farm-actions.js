@@ -3,10 +3,10 @@ let popLoc=null,popPlot=null;
 function buildUnit(u){const d=B[u];if(S.units[u]||S.lv<d.lvl)return;if(S.coins<d.cost)return toast('Yeterli paran yok');
   pay(d.cost,'İnşaat');S.units[u]={l:1,built:now()};markRecent(locOf(u),B[u].n);sfx('build');puff(unitWorld(u,.4),14,1.3);addXP(Math.round(d.cost/50)+2);stat('built');popLoc=locOf(u);toast(`${d.n} kuruldu!`);commit()}
 const upCost=u=>Math.round(B[u].cost*1.6*S.units[u].l);
-function upgradeUnit(u){const s=S.units[u];if(!s||s.l>=3||s.l+1>S.house)return;const c=upCost(u);if(S.coins<c)return toast('Yeterli paran yok');
+function upgradeUnit(u){const s=S.units[u];if(!s||s.l>=MAXL||upBlock(s.l+1))return;const c=upCost(u);if(S.coins<c)return toast('Yeterli paran yok');
   pay(c,'İnşaat');s.l++;s.built=now();markRecent(locOf(u),B[u].n);sfx('build');if(mode!=='interior')puff(unitWorld(u,.5),12,1.2);addXP(Math.round(c/50));popLoc=locOf(u);toast(`${B[u].n} ${s.l}. seviyeye çıktı`);commit();if(interior&&interior.key===u)buildInterior(u)}
 function upgradeHouse(){const h=HOUSE[S.house];if(!h||S.lv<h.lvl)return;if(S.coins<h.cost)return toast('Yeterli paran yok');pay(h.cost,'İnşaat');S.house++;markRecent('ev',HOUSE[S.house-1].n);sfx('build');addXP(Math.round(h.cost/40));popLoc='ev';toast(`${HOUSE[S.house-1].n} hazır!`);commit();if(interior&&interior.key==='kulube')buildInterior('kulube')}
-function upgradeFields(){const c=FIELD_UP[S.fieldLv];if(c==null||S.fieldLv>=3||S.fieldLv+1>S.house)return;if(S.coins<c)return toast('Yeterli paran yok');pay(c,'İnşaat');S.fieldLv++;addXP(Math.round(c/50));popLoc='tarla';toast(`Tarlalar ${S.fieldLv}. seviyede`);commit()}
+function upgradeFields(){const c=FIELD_UP[S.fieldLv];if(c==null||S.fieldLv>=MAXL||upBlock(S.fieldLv+1))return;if(S.coins<c)return toast('Yeterli paran yok');pay(c,'İnşaat');S.fieldLv++;addXP(Math.round(c/50));popLoc='tarla';toast(`Tarlalar ${S.fieldLv}. seviyede`);commit()}
 function startUnit(u,rid,quiet){const s=S.units[u];if(!s||s.job)return;const r=B[u].recipes.find(x=>x.id===rid);if(!r||r.lvl>S.lv||(r.col&&!has1(r.col)))return;
   if(!canPay(r)){if(!quiet)toast('Malzeme ya da para eksik');return}pay(r.cost||0,'Üretim');for(const k in (r.in||{}))S.items[k]-=r.in[k];
   const sc=scaled(r,s.l),t=sc.t*(u==='mandira'&&has1('bakir_kazan')?.9:1);s.job={r:rid,s:now(),e:now()+t*1000};s.last=rid;stat('plant_'+rid);if(!quiet){sfx('plant');commit()}}

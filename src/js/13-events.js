@@ -12,7 +12,7 @@ document.addEventListener('click',e=>{
     case'start':startUnit(d.u,d.r);break;case'collect':collectUnit(d.u,cx,cy);break;
     case'collectU':collectUnit(d.id,cx,cy-20);break;case'harvestP':harvestPlot(+d.id,cx,cy-20);commit();break;
     case'seed':S.lastCrop=d.r;renderSheet();save();break;case'plantAll':plantAll();break;case'harvestAll':harvestAll();break;
-    case'plot':{const i=+d.i,f=S.fields[i];if(f&&!f.job){if(plantPlot(i,S.lastCrop))commit()}else if(f&&now()>=f.job.e){harvestPlot(i,cx,cy);commit()}break}
+    case'plot':if(panelSwipeUsed){panelSwipeUsed=false;break}{const i=+d.i,f=S.fields[i];if(f&&!f.job){if(plantPlot(i,S.lastCrop))commit()}else if(f&&now()>=f.job.e){harvestPlot(i,cx,cy);commit()}break}
     case'buyPlot':buyPlot();break;case'region':buyRegion(d.r);break;
     case'sell':sell(d.k,+d.n);break;case'feed':buyFeed(+d.n);break;
     case'order':fillOrder(+d.i);break;case'reorder':S.orders.splice(+d.i,1,genOrder());commit();break;case'goal':claimGoal();break;
@@ -46,3 +46,9 @@ function renderHUD(){$('#coins').textContent=fmt(S.coins);if(lastCoins!=null&&S.
   $('#rep').textContent=S.rep;$('#store').textContent=stored()+'/'+cap();$('#pStore').classList.toggle('full',stored()/cap()>=.9);
   $('#gems').textContent=S.gems;const se=SEASONS[season()],wx=WEATHER[S.weather.k];$('#era').textContent=`${se.e} ${se.n} · ${wx.e} ${clockStr()}`;$('#goalDot').hidden=!goalReady()&&!(S.daily&&S.daily.tasks.some(t=>t.p>=t.n&&!t.c))}
 function commit(skipSheet){save();renderHUD();syncWorld();if(!skipSheet)renderSheet();if(interior&&intSig(interior.key)!==interior.sig)interior.refresh()}
+
+// Kart içindeki parsel ızgarasında da sürükleyerek ekme/toplama
+let panelSwipeUsed=false;
+sheet.addEventListener('pointerdown',e=>{const b=e.target.closest('.plot[data-i]');if(!b)return;const i=+b.dataset.i,k=swipeKind(i);if(!k)return;
+  swipe={kind:k,done:new Set(),n:0,panel:1};panelSwipeUsed=true;try{b.releasePointerCapture&&b.releasePointerCapture(e.pointerId)}catch(err){}const r=b.getBoundingClientRect();swipeApply(i,r.left+r.width/2,r.top)});
+sheet.addEventListener('pointermove',e=>{if(!swipe||!swipe.panel)return;const el=document.elementFromPoint(e.clientX,e.clientY),b=el&&el.closest('.plot[data-i]');if(b){const i=+b.dataset.i;if(!swipe.done.has(i)){const r=b.getBoundingClientRect();swipeApply(i,r.left+r.width/2,r.top)}}});

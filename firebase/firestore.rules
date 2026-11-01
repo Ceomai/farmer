@@ -36,6 +36,9 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
+    // Satın alma kayıtları yalnızca sunucu (Cloud Function) tarafından yazılır.
+    match /purchases/{id} { allow read, write: if false; }
+
     match /{document=**} { allow read, write: if false; }
   }
 }

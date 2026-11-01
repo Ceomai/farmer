@@ -13,7 +13,7 @@ function frame(ts){requestAnimationFrame(frame);if(GFX.fpsCap&&ts&&ts-_lastFrame
 function tick(){
   document.querySelectorAll('[data-e]').forEach(el=>{el.style.width=Math.min(100,(now()-el.dataset.s)/(el.dataset.e-el.dataset.s)*100)+'%'});
   document.querySelectorAll('[data-left]').forEach(el=>{el.textContent=el.dataset.pre+' '+secs(Math.max(0,Math.ceil((+el.dataset.left-now())/1000)))});
-  updateWeather();applySeason();if(checkDaily())showLogin();ensureContests();if(ensureContracts()&&view&&view.loc==='han')renderSheet();
+  renderStrip();if(S.consent){tutStart();tutTick()}updateWeather();applySeason();if(checkDaily())showLogin();ensureContests();if(ensureContracts()&&view&&view.loc==='han')renderSheet();
   if(S.weather.k==='rain'||S.weather.k==='storm'){for(const f of S.fields)if(f.job&&now()<f.job.e)f.job.e-=150;const se=S.units.sera;if(se&&se.job&&now()<se.job.e)se.job.e-=150}
   if(++autoTick%4===0&&automate()){save();if(view)view.sig='';}
   notifyReady();if(deskSigNow()!==deskSig)buildDesk();if(!document.body.classList.contains('photo'))farmerSay();else sayB.hidden=true;
@@ -28,7 +28,7 @@ function boot(data){
   ctl.enabled=false;buildDesk();resize();syncWorld(true);renderHUD();setModeUI();frame();setInterval(tick,500);setInterval(save,5000);
   const bt=$('#boot');bt.style.transition='opacity .5s';bt.style.opacity='0';setTimeout(()=>bt.remove(),550);
   booted=true;awaySummary(away);if(S.consent)showLogin();else askConsent();setTimeout(friendGifts,1500);syncCloud(true);track('session_start',{gfx:GFX.mode,pr:GFX.pr});
-  if(!S.stats.welcomed){S.stats.welcomed=1;setTimeout(()=>toast('Masadaki haritaya dokun, çiftliğe çık!'),900)}save()
+  if(!S.stats.welcomed){S.stats.welcomed=1;setTimeout(()=>{if(tutStep()<0&&S.tut)toast('Masadaki haritaya dokun, çiftliğe çık!')},900)}save()
 }
 const startGame=data=>Promise.race([document.fonts?Promise.all([document.fonts.load('20px "Alfa Slab One"'),document.fonts.load('800 14px Nunito')]).then(()=>document.fonts.ready):Promise.resolve(),new Promise(r=>setTimeout(r,2500))]).then(()=>PLATFORM.init()).catch(()=>{}).then(()=>boot(data));
 window.claude?.hot?.snapshot?.(()=>S);

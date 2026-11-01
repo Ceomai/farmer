@@ -13,7 +13,7 @@ function farmerHints(){const H=[],idle=S.fields.filter(f=>!f.job).length,rf=S.fi
   const amb=[['hava',wx==='storm'?'Fırtına var, hayvanları içeride tutalım.':wx==='snow'?'Kar yağıyor, sobayı yakmanın tam zamanı.':dayFactor()<.3?'Gece oldu, çiftlik uyuyor… ama işler beklemez!':'Güzel bir gün, çiftlik seni bekliyor!',null],
     ['mev',`${SEASONS[season()].n} geldi, ${['çiçekler açtı!','güneş yakıyor!','yapraklar sararıyor.','her yer bembeyaz.'][season()]}`,null]];
   return H.length?H:[amb[Math.floor(now()/20000)%2]]}
-function farmerSay(force){if(document.querySelector('.modal')||mode==='interior'||(view&&innerWidth<700)){sayB.hidden=true;return}
+function farmerSay(force){if(tutStep()>=0){sayB.hidden=true;return}if(document.querySelector('.modal')||mode==='interior'||(view&&innerWidth<700)){sayB.hidden=true;return}
   if(!force&&now()-sayT<9000&&!sayB.hidden)return;const H=farmerHints();const h=H[Math.floor(now()/9000)%H.length];sayT=now();sayAct=h[2];
   if(h[0]!==sayKey||sayB.hidden){sayKey=h[0];sayB.innerHTML=`<span class="fs-face">👨‍🌾</span><span class="fs-t">${h[1]}</span>${h[2]?'<span class="fs-go">▸</span>':''}`;sayB.hidden=false;sayB.classList.remove('in');void sayB.offsetWidth;sayB.classList.add('in')}}
 sayB.addEventListener('click',()=>{sfx('click');const a=sayAct;sayB.hidden=true;sayT=now();if(a)a()});
