@@ -2,7 +2,16 @@
 
 50'lerin el çizimi çizgi filmlerinden ilham alan, mobil öncelikli 3D çiftlik simülasyonu. Kulübe, tarla ve kümesle başla; ek, biç, hayvan besle, kasabayla ticaret yap ve çiftliğini konaklı bir tarım imparatorluğuna büyüt.
 
-**Hemen oyna:** `dist/index.html` dosyasını tarayıcıda aç. İnternet gerekmez; 3D motoru, yazı tipleri ve emoji fontu dosyanın içindedir.
+## Hemen oyna
+
+| 🌐 Web'de oyna (her cihaz) | 📱 Android APK (test sürümü) |
+|:---:|:---:|
+| <img src="docs/qr/web-qr.png" width="200" alt="Web QR"> | <img src="docs/qr/apk-qr.png" width="200" alt="APK QR"> |
+| **[ceomai.github.io/farmer](https://ceomai.github.io/farmer/)** | **[ciftlik-imparatorlugu.apk](https://github.com/Ceomai/farmer/releases/download/test-surum/ciftlik-imparatorlugu.apk)** |
+
+Her iki bağlantı da sabittir: `main` dalına yapılan her gönderimde GitHub Actions oyunu yeniden derler, web sürümünü (`gh-pages`) ve APK'yı (`test-surum` sürümü) kendiliğinden günceller. Web sürümü telefonda "Ana ekrana ekle" ile uygulama gibi kurulabilir. APK kurulurken Android "bilinmeyen kaynaklara izin ver" diye sorar.
+
+Çevrimdışı: `dist/index.html` dosyasını tarayıcıda aç. İnternet gerekmez; 3D motoru, yazı tipleri ve emoji fontu dosyanın içindedir.
 
 ## Proje yapısı
 

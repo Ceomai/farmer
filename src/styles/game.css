@@ -359,3 +359,8 @@ body.photo .guidebtn{display:none!important}
 /* Panel içeriği hiçbir zaman ezilmesin: panel kaydırılır, içindeki bölümler küçülmez (tohum satırı 6px'e iniyordu) */
 .sh-body>*{flex-shrink:0}
 button.job.ready{gap:20px}
+/* Çiftçi bildirimi: üst çubuğun altında, sağa yaslı */
+.farmer-say{left:auto;right:12px;top:110px;transform:none!important;max-width:min(330px,calc(100vw - 150px));padding:6px 10px 6px 5px;font-size:12px;border-radius:14px;box-shadow:2px 3px 0 var(--ink)}
+.farmer-say::after{display:none}
+.farmer-say.in{animation:sayDrop .35s cubic-bezier(.2,1.4,.4,1)}@keyframes sayDrop{from{opacity:0;translate:0 -10px}}
+@media (min-width:701px){.farmer-say{max-width:340px}}

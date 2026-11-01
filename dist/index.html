@@ -464,6 +464,11 @@ body.photo .guidebtn{display:none!important}
 /* Panel içeriği hiçbir zaman ezilmesin: panel kaydırılır, içindeki bölümler küçülmez (tohum satırı 6px'e iniyordu) */
 .sh-body>*{flex-shrink:0}
 button.job.ready{gap:20px}
+/* Çiftçi bildirimi: üst çubuğun altında, sağa yaslı */
+.farmer-say{left:auto;right:12px;top:110px;transform:none!important;max-width:min(330px,calc(100vw - 150px));padding:6px 10px 6px 5px;font-size:12px;border-radius:14px;box-shadow:2px 3px 0 var(--ink)}
+.farmer-say::after{display:none}
+.farmer-say.in{animation:sayDrop .35s cubic-bezier(.2,1.4,.4,1)}@keyframes sayDrop{from{opacity:0;translate:0 -10px}}
+@media (min-width:701px){.farmer-say{max-width:340px}}
 
 </style>
 
@@ -3192,9 +3197,13 @@ function farmerSay(force){if(tutStep()>=0){sayB.hidden=true;return}if(document.q
   if(!force&&now()-sayT<9000&&!sayB.hidden)return;const H=farmerHints();const h=H[Math.floor(now()/9000)%H.length];sayT=now();sayAct=h[2];
   if(h[0]!==sayKey||sayB.hidden){sayKey=h[0];sayB.innerHTML=`<span class="fs-face">👨‍🌾</span><span class="fs-t">${h[1]}</span>${h[2]?'<span class="fs-go">▸</span>':''}`;sayB.hidden=false;sayB.classList.remove('in');void sayB.offsetWidth;sayB.classList.add('in')}}
 sayB.addEventListener('click',()=>{sfx('click');const a=sayAct;sayB.hidden=true;sayT=now();if(a)a()});
-function placeBubble(){if(sayB.hidden)return;let x,y;if(mode==='desk'){const v=new V3(-.4,(deskPortrait?3.55-.8:2.65-.98)+.1,-1.6);v.project(dcam);x=(v.x+1)/2*innerWidth;y=(1-v.y)/2*innerHeight}
-  else{const v=farmer.position.clone();v.y+=2.4;v.project(cam);x=(v.x+1)/2*innerWidth;y=(1-v.y)/2*innerHeight;if(v.z>1||Math.abs(v.x)>1||Math.abs(v.y)>1){x=innerWidth/2;y=innerHeight-120}}
-  const w=sayB.offsetWidth||220;x=Math.max(12+w/2,Math.min(innerWidth-12-w/2,x));sayB.style.transform=`translate(${Math.round(x-w/2)}px,${Math.round(y-sayB.offsetHeight)}px)`}
+// Çiftçinin sözü artık haritanın ortasında değil: üst çubuğun hemen altında, sağa yaslı küçük bir bildirim.
+// Masaüstünde panel açıksa panelin soluna kayar. Konum 4 kez/sn hesaplanır (her karede düzen ölçmemek için).
+const hudEl=document.querySelector('.hud');let bubT=0;
+function placeBubble(){if(sayB.hidden)return;const t=performance.now();if(t-bubT<250)return;bubT=t;
+  const hb=hudEl.getBoundingClientRect().bottom;let right=12;
+  if(!sheet.hidden&&innerWidth>=700){const r=sheet.getBoundingClientRect();if(r.top<hb+90)right=Math.max(12,innerWidth-r.left+12)}
+  sayB.style.top=Math.round(hb+8)+'px';sayB.style.right=Math.round(right)+'px'}
 
 // ---- 29-celebrate.js ----
 // ================= HASAT KUTLAMASI =================
