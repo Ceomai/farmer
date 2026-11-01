@@ -20,16 +20,25 @@ const FS=()=>`https://firestore.googleapis.com/v1/projects/${CONFIG.firebaseProj
 async function fs(method,path,body){if(!CLOUD_ON)throw new Error('bulut kapalı');const t0=Date.now();
   const r=await fetch(FS()+path,{method,headers:{'Content-Type':'application/json',Authorization:'Bearer '+await fbToken()},body:body?JSON.stringify(body):undefined});
   const dh=r.headers.get('date');if(dh){const srv=Date.parse(dh)+(Date.now()-t0)/2;if(!isNaN(srv))serverTime(srv)}
-  if(r.status===404)return null;if(!r.ok)throw new Error('firestore '+r.status);return r.json()}
+  if(r.status===404)return null;if(!r.ok){const e=new Error('firestore '+r.status);e.status=r.status;throw e}return r.json()}
 const fsStr=v=>({stringValue:String(v)}),fsInt=v=>({integerValue:String(Math.round(v||0))}),fsTime=t=>({timestampValue:new Date(t).toISOString()});
 const randId=()=>[...crypto.getRandomValues(new Uint8Array(15))].map(b=>'abcdefghijklmnopqrstuvwxyz0123456789'[b%36]).join('');
 // Sunucu saati: telefonun saati 2 dakikadan fazla saparsa oyun sunucu saatini kullanır (saat ileri alma hilesi)
 function serverTime(srv){const off=srv-Date.now();if(Math.abs(off)>120000){if(Math.abs(off-TIME_OFF)>60000)track('clock_skew',{off:Math.round(off/1000)});TIME_OFF=off}else TIME_OFF=0}
 const CLOUD={status:CLOUD_ON?'bekliyor':'kapalı',last:0};
+// Çoklu cihaz: hangi kaydın daha çok oynandığı, hiç azalmayan istatistik sayaçlarının toplamıyla ölçülür
+// (son kaydedilme zamanı her açık cihazda 5 sn'de bir güncellendiği için ilerlemeyi göstermez).
+const progressOf=s=>{let n=0;for(const v of Object.values((s&&s.stats)||{}))if(typeof v==='number'&&isFinite(v))n+=v;return n+((s&&s.gen)||0)*1e9};
+function adoptRemote(remote,msg){S=migrate(remote);try{localStorage.setItem(SAVE,JSON.stringify(S))}catch(e){}regSig='';view=null;if(mode!=='desk'&&typeof toHub==='function')toHub();syncWorld(true);renderHUD();buildDesk();renderSheet();toast(msg)}
 async function loadRemote(a){const d=await fs('GET','/saves/'+await docIdOf(a));if(!d||!d.fields||!d.fields.json)return null;try{return JSON.parse(d.fields.json.stringValue)}catch(e){return null}}
-async function syncCloud(pull){if(!CLOUD_ON||!S)return;const a=account();try{
-    if(pull){const remote=await loadRemote(a);
-      if(remote&&(remote.lastSeen||0)>(S.lastSeen||0)+5000){S=migrate(remote);try{localStorage.setItem(SAVE,JSON.stringify(S))}catch(e){}regSig='';syncWorld(true);renderHUD();buildDesk();toast('☁️ Buluttaki daha yeni kayıt yüklendi')}}
+// Eşitleme: buluta yazmadan önce buluttaki kayıt okunur. Bulutta (başka cihazdan) daha çok oynanmış bir kayıt varsa o alınır,
+// yoksa bu cihazın kaydı yazılır. Böylece eski durumdaki bir cihaz yeni ilerlemenin üzerine asla körlemesine yazmaz.
+// Eşitlemeler sıraya alınır (aynı anda iki istek birbirini ezmesin).
+let syncQ=Promise.resolve();
+function syncCloud(pull){if(!CLOUD_ON||!S)return Promise.resolve();syncQ=syncQ.then(()=>syncOnce(pull)).catch(()=>{});return syncQ}
+async function syncOnce(pull){const a=account();try{
+    const remote=await loadRemote(a);
+    if(remote&&progressOf(remote)>progressOf(S)){adoptRemote(remote,pull?'☁️ Buluttaki daha ileri kayıt yüklendi':'☁️ Diğer cihazdaki ilerleme yüklendi');CLOUD.status='eşitlendi';CLOUD.last=Date.now();return}
     await fs('PATCH','/saves/'+await docIdOf(a),{fields:{json:fsStr(JSON.stringify(S)),level:fsInt(S.lv),updatedAt:fsTime(Date.now())}});CLOUD.status='eşitlendi';CLOUD.last=Date.now()}catch(e){CLOUD.status='bağlantı yok'}}
 async function restoreAccount(code){const m=String(code||'').trim().match(/^([0-9a-f-]{32,36})\.([0-9a-f]{32})$/i);if(!m)return toast('Kod geçersiz');if(!CLOUD_ON)return toast('Bulut kaydı bu sürümde kapalı');
   try{const remote=await loadRemote({id:m[1],secret:m[2]});if(!remote)return toast('Bu koda ait kayıt bulunamadı');
