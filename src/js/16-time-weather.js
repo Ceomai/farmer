@@ -24,9 +24,18 @@ const starPts=new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xfff8e0,
 const WXN=900,wxArr=new Float32Array(WXN*3);for(let i=0;i<WXN;i++){wxArr[i*3]=(Math.random()-.5)*70;wxArr[i*3+1]=Math.random()*30;wxArr[i*3+2]=(Math.random()-.5)*70}
 const wxGeo=new THREE.BufferGeometry();wxGeo.setAttribute('position',new THREE.BufferAttribute(wxArr,3));
 const wxPts=new THREE.Points(wxGeo,new THREE.PointsMaterial({color:0xcfe3f5,size:3,sizeAttenuation:false,transparent:true,opacity:.8,depthWrite:false}));wxPts.frustumCulled=false;world.add(wxPts);
-function stepWeather(dt,t){const k=S.weather.k,on=k!=='sun';wxPts.visible=on;if(!on)return;const snow=k==='snow';wxPts.material.size=snow?4.5:2.4;wxPts.material.color.setHex(snow?0xffffff:0xbcd6f2);
+// Yağmur: 3D parçacık yerine ekranın üstünde, tarayıcının kendi (GPU) katmanında kayan çizgiler → oyun kare hızından bağımsız, takılmaz.
+// 3D parçacık yalnızca kar için (yavaş düştüğü için akıcı görünür).
+const RAIN_SVG=(()=>{const q=rng(42);let l='';for(let i=0;i<34;i++){const x=q()*180,y=q()*180,h=9+q()*9;l+=`<line x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${(x-1.5).toFixed(1)}" y2="${(y+h).toFixed(1)}"/>`}
+  return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><g stroke='#e4f0fb' stroke-width='1.3' stroke-linecap='round' opacity='.85'>${l}</g></svg>`)}")`})();
+document.querySelectorAll('.rainfx i').forEach(i=>i.style.backgroundImage=RAIN_SVG);
+let wxCls='';
+function wxUI(){const k=S.weather.k,show=(mode==='hub'||mode==='focus')&&!document.body.classList.contains('photo');const c=show&&(k==='rain'||k==='storm')?k:'';
+  if(c!==wxCls){document.body.classList.remove('wx-rain','wx-storm');if(c)document.body.classList.add('wx-'+c);wxCls=c}}
+function stepWeather(dt,t){const k=S.weather.k;wxUI();
+  const on=k==='snow';wxPts.visible=on;if(!on)return;const snow=k==='snow';wxPts.material.size=snow?4.5:2.4;wxPts.material.color.setHex(snow?0xffffff:0xbcd6f2);
   wxPts.position.set(ctl.target.x,0,ctl.target.z);const sp=snow?3:k==='storm'?34:26;
-  for(let i=0;i<WXN;i++){let y=wxArr[i*3+1]-sp*dt;if(snow)wxArr[i*3]+=Math.sin(t+i)*dt*.6;if(k==='storm')wxArr[i*3]+=dt*8;if(y<0){y=30;wxArr[i*3]=(Math.random()-.5)*70;wxArr[i*3+2]=(Math.random()-.5)*70}wxArr[i*3+1]=y}wxGeo.attributes.position.needsUpdate=true}
+  const N=GFX.low?WXN/3|0:WXN*2/3|0;wxGeo.setDrawRange(0,N);for(let i=0;i<N;i++){let y=wxArr[i*3+1]-sp*dt;if(snow)wxArr[i*3]+=Math.sin(t+i)*dt*.6;if(k==='storm')wxArr[i*3]+=dt*8;if(y<0){y=30;wxArr[i*3]=(Math.random()-.5)*70;wxArr[i*3+2]=(Math.random()-.5)*70}wxArr[i*3+1]=y}wxGeo.attributes.position.needsUpdate=true}
 function ambience(dt,t){const ph=dayPhase(),a=(ph-.25)*Math.PI*2,d=dayFactor(),wx=S.weather.k,cloudy=wx==='rain'||wx==='storm'?1:wx==='snow'?.5:0,sa=Math.sin(a);
   const dusk=Math.max(0,1-Math.abs(sa)*3)*(sa>-.35?1:0);
   sun.position.set(Math.cos(a)*-55,Math.max(14,Math.abs(sa)*50+8),26);sun.intensity=(.55+.7*d)*(1-cloudy*.35);hemiL.intensity=(.62+.18*d)*(1-cloudy*.15)+flash;

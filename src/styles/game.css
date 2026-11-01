@@ -129,7 +129,7 @@ button.tile:active:not(:disabled){animation:boing .3s}
 button.job.ready{background:var(--honey);width:100%;justify-content:center;animation:bob 1.1s ease-in-out infinite}
 button.job.ready b{font-family:var(--f-display);font-weight:400;font-size:17px;color:#4a2f00}
 .pbar{height:10px;border-radius:9px;background:#e8dcbf;overflow:hidden;border:1.5px solid rgba(42,26,16,.45)}
-.pbar i{display:block;height:100%;background:repeating-linear-gradient(-45deg,rgba(255,255,255,.28) 0 6px,transparent 6px 12px),linear-gradient(90deg,var(--honey),#f6cf6b);animation:stripes 1s linear infinite;background-size:17px 17px,100% 100%}
+.pbar i{display:block;height:100%;background:repeating-linear-gradient(-45deg,rgba(255,255,255,.28) 0 6px,transparent 6px 12px),linear-gradient(90deg,var(--honey),#f6cf6b);animation:stripes 1s linear infinite;background-size:17px 17px,100% 100%;transition:width .5s linear}
 @keyframes stripes{to{background-position:17px 0,0 0}}
 .build{display:flex;align-items:center;gap:10px;border:2px dashed rgba(42,26,16,.7);border-radius:14px;padding:8px 10px}
 .build.off{opacity:.6}
@@ -144,7 +144,7 @@ button.job.ready b{font-family:var(--f-display);font-weight:400;font-size:17px;c
 .btn.ghost{background:transparent;box-shadow:none;border:0;color:var(--brick);padding:4px 0;font-size:12.5px;align-self:flex-start}
 .btn:disabled{background:#ddd1b6;color:#8b7d62;border-color:#8b7d62;box-shadow:2px 3px 0 #8b7d62;cursor:not-allowed}
 .btn:active:not(:disabled){animation:boing .3s}
-.seeds{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.seeds{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 24px)/5);gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;margin:-2px -2px 0;scroll-snap-type:x proximity}.seeds::-webkit-scrollbar{display:none}.seed{scroll-snap-align:start}
 .seed{border:2px solid var(--ink);border-radius:12px;background:var(--card);padding:4px 0 3px;display:flex;flex-direction:column;align-items:center;box-shadow:2px 2px 0 rgba(42,26,16,.9)}
 .seed em{font-style:normal;font-size:21px;line-height:1.15}
 .seed small{font-weight:900;font-size:10.5px}
@@ -321,3 +321,17 @@ body.photo .cam .ph{display:none}
 .sheet.dark .sh-head .nav{background:#3a2a1c;color:#f3e6c4;border-color:#f3e6c4}
 @media (prefers-reduced-motion:reduce){.scard .qa{animation:none}}
 .sh-head{touch-action:pan-y}
+/* Yağmur katmanı: tarayıcının GPU katmanında kayar (3D kare hızından bağımsız, akıcı) */
+.rainfx{position:fixed;left:-15%;right:-15%;top:-200px;bottom:-20px;z-index:1;pointer-events:none;display:none;opacity:.5;overflow:hidden}
+body.wx-rain .rainfx,body.wx-storm .rainfx{display:block}
+body.wx-storm .rainfx{opacity:.65;transform:rotate(12deg)}
+.rainfx i{position:absolute;inset:0;background-size:180px 180px;will-change:transform;animation:rainA .5s linear infinite}
+.rainfx i+i{inset:0 0 0 37px;background-size:180px 180px;opacity:.55;animation-duration:.8s;filter:blur(.4px)}
+body.wx-storm .rainfx i{animation-duration:.36s}body.wx-storm .rainfx i+i{animation-duration:.55s}
+@keyframes rainA{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,180px,0)}}
+@media (prefers-reduced-motion:reduce){.rainfx{display:none!important}}
+/* Yatay tutulan telefon (kısa ekran): şerit ve paneller küçülür */
+@media (max-height:500px) and (orientation:landscape){
+  .scard{width:84px;font-size:10.5px;padding:4px 4px 5px;gap:2px}.scard img,.scard .ph{height:40px}.scard .qa{padding:3px 0;font-size:10.5px}
+  .sheet{max-height:calc(100vh - 70px)!important}
+}

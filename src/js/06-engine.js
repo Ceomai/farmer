@@ -91,7 +91,8 @@ function bush(par,x,z,s=1,c=0x4f8f37){P(par,'ico1',c,[.45*s,.38*s,.45*s],[x,.3*s
 function flowers(par,x,z,r,seed){const q=rng(seed);for(let k=0;k<7;k++){const a=x+(q()-.5)*r,b=z+(q()-.5)*r;P(par,'cyl',0x4f8f37,[.015,.2,.015],[a,.1,b]);P(par,'lsph',[0xf4d03f,0xe8657a,0xffffff,0xb78be0][k%4],[.07,.05,.07],[a,.22,b])}}
 const swayList=[];
 function addFx(g,fn){(g.userData.fx||(g.userData.fx=[])).push(fn)}
-function swayFx(par,top,x){const fn=(dt,t)=>{top.rotation.z=Math.sin(t*1.3+x*.37)*.05;top.rotation.x=Math.cos(t*1.1+x*.21)*.03};if(par===world)swayList.push(fn);else addFx(par,fn)}
+function swayFx(par,top,x){return;// akıcılık için kapalı: sallanan ağaçlar birleştirilemiyor, etkisi de çok küçüktü
+const fn=(dt,t)=>{top.rotation.z=Math.sin(t*1.3+x*.37)*.05;top.rotation.x=Math.cos(t*1.1+x*.21)*.03};if(par===world)swayList.push(fn);else addFx(par,fn)}
 function pine(par,x,z,s=1){P(par,'cyl',0x6b4423,[.12*s,.6*s,.12*s],[x,.3*s,z]);const top=G(par,[x,.5*s,z]);for(let k=0;k<3;k++)P(top,'cone6',[0x2f6b3a,0x3a7d42,0x2a5f33][k],[(1-k*.25)*.9*s,1.1*s,(1-k*.25)*.9*s],[0,(.4+k*.6)*s,0]);swayFx(par,top,x+z)}
 function oak(par,x,z,s=1,apples){P(par,'cyl',0x6e4527,[.16*s,1*s,.16*s],[x,.5*s,z]);const top=G(par,[x,.9*s,z]);const c=[0x5c9a3e,0x4f8a36,0x68a846];P(top,'ico1',c[0],[1*s,.85*s,1*s],[0,.55*s,0]);P(top,'ico1',c[1],[.7*s,.6*s,.7*s],[.5*s,.35*s,.2*s]);P(top,'ico1',c[2],[.6*s,.55*s,.6*s],[-.4*s,.85*s,-.2*s]);
   if(apples){const q=rng(Math.round(x*100+z*7+500));for(let k=0;k<9;k++){const a=q()*6.28,b=q()*1.2;P(top,'lsph',0xd43a2a,[.1*s,.1*s,.1*s],[Math.cos(a)*.85*s,.3*s+b*.5*s,Math.sin(a)*.85*s])}}swayFx(par,top,x*1.7+z)}

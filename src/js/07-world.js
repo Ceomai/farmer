@@ -73,7 +73,7 @@ function road(par,x1,z1,x2,z2,w=1.5){const L0=Math.hypot(x2-x1,z2-z1);if(L0<.1)r
   const pts=[[x1,z1],[mx+nx*bend,mz+nz*bend],[x2,z2]];ribbon(par,pts,w+.5,dirtEdge(),.03);ribbon(par,pts,w,dirtMat(),.045);return}
 function _roadOld(par,x1,z1,x2,z2,w=1.5){const L=Math.hypot(x2-x1,z2-z1);if(L<.1)return;F(par,0xcfb27e,[L+w*.4,.05,w],[(x1+x2)/2,.035,(z1+z2)/2],[0,-Math.atan2(z2-z1,x2-x1),0])}
 function syncRegions(){const sig=Object.keys(S.regions).sort().join();if(sig===regSig)return;regSig=sig;
-  if(regG)world.remove(regG);if(roadG)world.remove(roadG);regG=G(world);roadG=G(world);
+  if(regG){world.remove(regG);disposeBaked(regG)}if(roadG){world.remove(roadG);disposeBaked(roadG)}regG=G(world);roadG=G(world);
   for(const r in REG){const d=REG[r];if(!d.rect||owned(r))continue;const [x1,z1,x2,z2]=d.rect,cx=(x1+x2)/2,cz=(z1+z2)/2,w=x2-x1,dd=z2-z1;const g=G(regG,[cx,0,cz]);g.userData.region=r;
     F(g,0xb9bd88,[w-.4,.06,dd-.4],[0,.04,0]);const q=rng(r.charCodeAt(0)*97+w);
     for(let k=0;k<Math.round(w*dd/22);k++){const a=(q()-.5)*(w-2),b=(q()-.5)*(dd-2);q()<.5?bush(g,a,b,.7+q()*.5,0x7d9a52):P(g,'ico',0xa9a294,[.3+q()*.3,.2,.3+q()*.3],[a,.15,b])}
@@ -84,7 +84,7 @@ function syncRegions(){const sig=Object.keys(S.regions).sort().join();if(sig===r
   for(const k in LOC){const L=LOC[k];if(!owned(L.reg)||k==='ev')continue;const [ex,ez]=entrance(k);
     if(L.reg==='town')road(roadG,ex,ez-2.6,ex,13.8,1.4);else road(roadG,HUBP[0],HUBP[2],ex,ez)}
   road(roadG,HUBP[0],HUBP[2],HUBP[0],13.8,1.8);
-  buildPaths();
+  buildPaths();batchWatch(regG);batchWatch(roadG);
 }
 
 // --- konumlar ---
@@ -125,8 +125,8 @@ function makeLoc(k){const L=LOC[k],g=G(null,L.p);g.userData.loc=k;if(!owned(L.re
   return g}
 function squash(k,u){const g=locGroups[k];if(!g)return;if(u){g.children.forEach(c=>{if(c.userData.unit===u)c.userData.squash=1})}else g.userData.squash=1}
 function syncWorld(force){syncRegions();
-  for(const k in LOC){const s=locSig(k);if(!force&&s===locSigs[k])continue;locSigs[k]=s;if(locGroups[k])world.remove(locGroups[k]);
-    const g=makeLoc(k);const fx=[];g.traverse(o=>{if(o.userData.fx)fx.push(...o.userData.fx)});g.userData.allFx=fx;locGroups[k]=g;world.add(g);if(popLoc===k){g.userData.pop=0;popLoc=null}}
+  for(const k in LOC){const s=locSig(k);if(!force&&s===locSigs[k])continue;locSigs[k]=s;if(locGroups[k]){world.remove(locGroups[k]);disposeBaked(locGroups[k])}
+    const g=makeLoc(k);const fx=[];g.traverse(o=>{if(o.userData.fx)fx.push(...o.userData.fx)});g.userData.allFx=fx;locGroups[k]=g;world.add(g);batchWatch(g);if(popLoc===k){g.userData.pop=0;popLoc=null}}
   lampPost.visible=false;syncMarks()}
 
 // --- çiftçi ve köpeği ---

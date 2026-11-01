@@ -234,7 +234,7 @@ button.tile:active:not(:disabled){animation:boing .3s}
 button.job.ready{background:var(--honey);width:100%;justify-content:center;animation:bob 1.1s ease-in-out infinite}
 button.job.ready b{font-family:var(--f-display);font-weight:400;font-size:17px;color:#4a2f00}
 .pbar{height:10px;border-radius:9px;background:#e8dcbf;overflow:hidden;border:1.5px solid rgba(42,26,16,.45)}
-.pbar i{display:block;height:100%;background:repeating-linear-gradient(-45deg,rgba(255,255,255,.28) 0 6px,transparent 6px 12px),linear-gradient(90deg,var(--honey),#f6cf6b);animation:stripes 1s linear infinite;background-size:17px 17px,100% 100%}
+.pbar i{display:block;height:100%;background:repeating-linear-gradient(-45deg,rgba(255,255,255,.28) 0 6px,transparent 6px 12px),linear-gradient(90deg,var(--honey),#f6cf6b);animation:stripes 1s linear infinite;background-size:17px 17px,100% 100%;transition:width .5s linear}
 @keyframes stripes{to{background-position:17px 0,0 0}}
 .build{display:flex;align-items:center;gap:10px;border:2px dashed rgba(42,26,16,.7);border-radius:14px;padding:8px 10px}
 .build.off{opacity:.6}
@@ -249,7 +249,7 @@ button.job.ready b{font-family:var(--f-display);font-weight:400;font-size:17px;c
 .btn.ghost{background:transparent;box-shadow:none;border:0;color:var(--brick);padding:4px 0;font-size:12.5px;align-self:flex-start}
 .btn:disabled{background:#ddd1b6;color:#8b7d62;border-color:#8b7d62;box-shadow:2px 3px 0 #8b7d62;cursor:not-allowed}
 .btn:active:not(:disabled){animation:boing .3s}
-.seeds{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.seeds{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 24px)/5);gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;margin:-2px -2px 0;scroll-snap-type:x proximity}.seeds::-webkit-scrollbar{display:none}.seed{scroll-snap-align:start}
 .seed{border:2px solid var(--ink);border-radius:12px;background:var(--card);padding:4px 0 3px;display:flex;flex-direction:column;align-items:center;box-shadow:2px 2px 0 rgba(42,26,16,.9)}
 .seed em{font-style:normal;font-size:21px;line-height:1.15}
 .seed small{font-weight:900;font-size:10.5px}
@@ -426,11 +426,26 @@ body.photo .cam .ph{display:none}
 .sheet.dark .sh-head .nav{background:#3a2a1c;color:#f3e6c4;border-color:#f3e6c4}
 @media (prefers-reduced-motion:reduce){.scard .qa{animation:none}}
 .sh-head{touch-action:pan-y}
+/* Yağmur katmanı: tarayıcının GPU katmanında kayar (3D kare hızından bağımsız, akıcı) */
+.rainfx{position:fixed;left:-15%;right:-15%;top:-200px;bottom:-20px;z-index:1;pointer-events:none;display:none;opacity:.5;overflow:hidden}
+body.wx-rain .rainfx,body.wx-storm .rainfx{display:block}
+body.wx-storm .rainfx{opacity:.65;transform:rotate(12deg)}
+.rainfx i{position:absolute;inset:0;background-size:180px 180px;will-change:transform;animation:rainA .5s linear infinite}
+.rainfx i+i{inset:0 0 0 37px;background-size:180px 180px;opacity:.55;animation-duration:.8s;filter:blur(.4px)}
+body.wx-storm .rainfx i{animation-duration:.36s}body.wx-storm .rainfx i+i{animation-duration:.55s}
+@keyframes rainA{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,180px,0)}}
+@media (prefers-reduced-motion:reduce){.rainfx{display:none!important}}
+/* Yatay tutulan telefon (kısa ekran): şerit ve paneller küçülür */
+@media (max-height:500px) and (orientation:landscape){
+  .scard{width:84px;font-size:10.5px;padding:4px 4px 5px;gap:2px}.scard img,.scard .ph{height:40px}.scard .qa{padding:3px 0;font-size:10.5px}
+  .sheet{max-height:calc(100vh - 70px)!important}
+}
 
 </style>
 
 <div id="boot"><div>Çiftlik<br>İmparatorluğu</div></div>
 <div id="stage"></div>
+<div class="rainfx" aria-hidden="true"><i></i><i></i></div>
 <div id="grain"></div><div id="vignette"></div>
 <div id="marks"></div>
 <header class="hud">
@@ -1614,9 +1629,10 @@ const GFX=(()=>{let m='auto';try{m=localStorage.getItem('ci-gfx')||'auto'}catch(
   return{mode:m,low,shadows:!low,maxPR:m==='high'?Math.min(dpr,3):low?Math.min(dpr,1.25):Math.min(dpr,2),pr:0,fpsCap:low?30:0,shadowSize:m==='high'?4096:low?1024:2048,winEvery:low?6:3,rtScale:low?.45:m==='high'?.75:.6}})();
 GFX.pr=GFX.maxPR;
 function setGfx(m){try{localStorage.setItem('ci-gfx',m)}catch(e){}location.reload()}
-let _fpsN=0,_fpsT=0,_lastFrame=0;
+let _fpsN=0,_fpsT=0,_lastFrame=0,_lowN=0,_hiN=0,_lastDrop=0;
 function gfxAdapt(ms){if(GFX.mode!=='auto')return;_fpsN++;_fpsT+=ms;if(_fpsT<3000)return;const fps=_fpsN*1000/_fpsT;_fpsN=0;_fpsT=0;
-  let pr=GFX.pr;if(fps<42&&pr>1)pr=Math.max(1,pr-.25);else if(fps>57&&pr<GFX.maxPR)pr=Math.min(GFX.maxPR,pr+.25);if(pr!==GFX.pr){GFX.pr=pr;R.setPixelRatio(pr);resize()}}
+  // Çözünürlük değişimi kısa bir takılmaya yol açar: art arda iki ölçüm gerekir, düşürdükten sonra 30 sn yükseltmez (gidip gelme olmasın)
+  let pr=GFX.pr;_lowN=fps<44?_lowN+1:0;_hiN=fps>58?_hiN+1:0;const tn=performance.now();if(_lowN>=2&&pr>1){pr=Math.max(1,pr-.25);_lowN=0;_lastDrop=tn}else if(_hiN>=3&&pr<GFX.maxPR&&tn-_lastDrop>30000){pr=Math.min(GFX.maxPR,pr+.25);_hiN=0}if(pr!==GFX.pr){GFX.pr=pr;R.setPixelRatio(pr);resize()}}
 
 // ---- 01-data.js ----
 // ================= OYUN VERİSİ =================
@@ -1942,7 +1958,8 @@ function bush(par,x,z,s=1,c=0x4f8f37){P(par,'ico1',c,[.45*s,.38*s,.45*s],[x,.3*s
 function flowers(par,x,z,r,seed){const q=rng(seed);for(let k=0;k<7;k++){const a=x+(q()-.5)*r,b=z+(q()-.5)*r;P(par,'cyl',0x4f8f37,[.015,.2,.015],[a,.1,b]);P(par,'lsph',[0xf4d03f,0xe8657a,0xffffff,0xb78be0][k%4],[.07,.05,.07],[a,.22,b])}}
 const swayList=[];
 function addFx(g,fn){(g.userData.fx||(g.userData.fx=[])).push(fn)}
-function swayFx(par,top,x){const fn=(dt,t)=>{top.rotation.z=Math.sin(t*1.3+x*.37)*.05;top.rotation.x=Math.cos(t*1.1+x*.21)*.03};if(par===world)swayList.push(fn);else addFx(par,fn)}
+function swayFx(par,top,x){return;// akıcılık için kapalı: sallanan ağaçlar birleştirilemiyor, etkisi de çok küçüktü
+const fn=(dt,t)=>{top.rotation.z=Math.sin(t*1.3+x*.37)*.05;top.rotation.x=Math.cos(t*1.1+x*.21)*.03};if(par===world)swayList.push(fn);else addFx(par,fn)}
 function pine(par,x,z,s=1){P(par,'cyl',0x6b4423,[.12*s,.6*s,.12*s],[x,.3*s,z]);const top=G(par,[x,.5*s,z]);for(let k=0;k<3;k++)P(top,'cone6',[0x2f6b3a,0x3a7d42,0x2a5f33][k],[(1-k*.25)*.9*s,1.1*s,(1-k*.25)*.9*s],[0,(.4+k*.6)*s,0]);swayFx(par,top,x+z)}
 function oak(par,x,z,s=1,apples){P(par,'cyl',0x6e4527,[.16*s,1*s,.16*s],[x,.5*s,z]);const top=G(par,[x,.9*s,z]);const c=[0x5c9a3e,0x4f8a36,0x68a846];P(top,'ico1',c[0],[1*s,.85*s,1*s],[0,.55*s,0]);P(top,'ico1',c[1],[.7*s,.6*s,.7*s],[.5*s,.35*s,.2*s]);P(top,'ico1',c[2],[.6*s,.55*s,.6*s],[-.4*s,.85*s,-.2*s]);
   if(apples){const q=rng(Math.round(x*100+z*7+500));for(let k=0;k<9;k++){const a=q()*6.28,b=q()*1.2;P(top,'lsph',0xd43a2a,[.1*s,.1*s,.1*s],[Math.cos(a)*.85*s,.3*s+b*.5*s,Math.sin(a)*.85*s])}}swayFx(par,top,x*1.7+z)}
@@ -2267,7 +2284,7 @@ function road(par,x1,z1,x2,z2,w=1.5){const L0=Math.hypot(x2-x1,z2-z1);if(L0<.1)r
   const pts=[[x1,z1],[mx+nx*bend,mz+nz*bend],[x2,z2]];ribbon(par,pts,w+.5,dirtEdge(),.03);ribbon(par,pts,w,dirtMat(),.045);return}
 function _roadOld(par,x1,z1,x2,z2,w=1.5){const L=Math.hypot(x2-x1,z2-z1);if(L<.1)return;F(par,0xcfb27e,[L+w*.4,.05,w],[(x1+x2)/2,.035,(z1+z2)/2],[0,-Math.atan2(z2-z1,x2-x1),0])}
 function syncRegions(){const sig=Object.keys(S.regions).sort().join();if(sig===regSig)return;regSig=sig;
-  if(regG)world.remove(regG);if(roadG)world.remove(roadG);regG=G(world);roadG=G(world);
+  if(regG){world.remove(regG);disposeBaked(regG)}if(roadG){world.remove(roadG);disposeBaked(roadG)}regG=G(world);roadG=G(world);
   for(const r in REG){const d=REG[r];if(!d.rect||owned(r))continue;const [x1,z1,x2,z2]=d.rect,cx=(x1+x2)/2,cz=(z1+z2)/2,w=x2-x1,dd=z2-z1;const g=G(regG,[cx,0,cz]);g.userData.region=r;
     F(g,0xb9bd88,[w-.4,.06,dd-.4],[0,.04,0]);const q=rng(r.charCodeAt(0)*97+w);
     for(let k=0;k<Math.round(w*dd/22);k++){const a=(q()-.5)*(w-2),b=(q()-.5)*(dd-2);q()<.5?bush(g,a,b,.7+q()*.5,0x7d9a52):P(g,'ico',0xa9a294,[.3+q()*.3,.2,.3+q()*.3],[a,.15,b])}
@@ -2278,7 +2295,7 @@ function syncRegions(){const sig=Object.keys(S.regions).sort().join();if(sig===r
   for(const k in LOC){const L=LOC[k];if(!owned(L.reg)||k==='ev')continue;const [ex,ez]=entrance(k);
     if(L.reg==='town')road(roadG,ex,ez-2.6,ex,13.8,1.4);else road(roadG,HUBP[0],HUBP[2],ex,ez)}
   road(roadG,HUBP[0],HUBP[2],HUBP[0],13.8,1.8);
-  buildPaths();
+  buildPaths();batchWatch(regG);batchWatch(roadG);
 }
 
 // --- konumlar ---
@@ -2319,8 +2336,8 @@ function makeLoc(k){const L=LOC[k],g=G(null,L.p);g.userData.loc=k;if(!owned(L.re
   return g}
 function squash(k,u){const g=locGroups[k];if(!g)return;if(u){g.children.forEach(c=>{if(c.userData.unit===u)c.userData.squash=1})}else g.userData.squash=1}
 function syncWorld(force){syncRegions();
-  for(const k in LOC){const s=locSig(k);if(!force&&s===locSigs[k])continue;locSigs[k]=s;if(locGroups[k])world.remove(locGroups[k]);
-    const g=makeLoc(k);const fx=[];g.traverse(o=>{if(o.userData.fx)fx.push(...o.userData.fx)});g.userData.allFx=fx;locGroups[k]=g;world.add(g);if(popLoc===k){g.userData.pop=0;popLoc=null}}
+  for(const k in LOC){const s=locSig(k);if(!force&&s===locSigs[k])continue;locSigs[k]=s;if(locGroups[k]){world.remove(locGroups[k]);disposeBaked(locGroups[k])}
+    const g=makeLoc(k);const fx=[];g.traverse(o=>{if(o.userData.fx)fx.push(...o.userData.fx)});g.userData.allFx=fx;locGroups[k]=g;world.add(g);batchWatch(g);if(popLoc===k){g.userData.pop=0;popLoc=null}}
   lampPost.visible=false;syncMarks()}
 
 // --- çiftçi ve köpeği ---
@@ -2491,7 +2508,7 @@ function buildInterior(key){const t=intT(key),def=INT[key];const sc=new THREE.Sc
   ic.refresh();interior=ic}
 function intSig(key){const t=intT(key);return (t.job?(prog(t.job)>=1?'r':'g'):'i')+t.l+(key==='kulube'?Math.round(stored()/cap()*24):'')}
 function fade(fn){const ir=$('#iris');document.body.classList.toggle('fastnav',!!(S&&S.fastNav));ir.classList.add('close');setTimeout(()=>{fn();requestAnimationFrame(()=>requestAnimationFrame(()=>ir.classList.remove('close')))},S&&S.fastNav?160:290)}
-function setModeUI(){document.body.classList.toggle('hub',mode==='hub');document.body.classList.toggle('lowgfx',GFX.low);if(mode==='hub')hubLimits();else if(mode==='focus')focusLimits();renderStrip(true);if(mode!=='hub'&&document.body.classList.contains('photo'))photoMode(false);document.body.classList.toggle('focus',mode==='focus');document.body.classList.toggle('inside',mode==='interior');
+function setModeUI(){if(typeof wxUI==='function'&&S)wxUI();document.body.classList.toggle('hub',mode==='hub');document.body.classList.toggle('lowgfx',GFX.low);if(mode==='hub')hubLimits();else if(mode==='focus')focusLimits();renderStrip(true);if(mode!=='hub'&&document.body.classList.contains('photo'))photoMode(false);document.body.classList.toggle('focus',mode==='focus');document.body.classList.toggle('inside',mode==='interior');
   document.body.classList.toggle('desk',mode==='desk');const b=$('#backBtn');b.hidden=mode==='desk';b.textContent=mode==='interior'?'← Dışarı':mode==='focus'?'← Harita':'← Masa'}
 function enterInterior(key){if(key!=='kulube'&&!S.units[key])return;fade(()=>{buildInterior(key);mode='interior';ctl.enabled=false;ictl.enabled=true;
   icam.position.set(0,6.4,14.5);ictl.target.set(0,1.4,-.6);ictl.update();if(view)view.mini=false;setModeUI();renderSheet();syncMarks();stat('enter_'+key)})}
@@ -2775,9 +2792,18 @@ const starPts=new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xfff8e0,
 const WXN=900,wxArr=new Float32Array(WXN*3);for(let i=0;i<WXN;i++){wxArr[i*3]=(Math.random()-.5)*70;wxArr[i*3+1]=Math.random()*30;wxArr[i*3+2]=(Math.random()-.5)*70}
 const wxGeo=new THREE.BufferGeometry();wxGeo.setAttribute('position',new THREE.BufferAttribute(wxArr,3));
 const wxPts=new THREE.Points(wxGeo,new THREE.PointsMaterial({color:0xcfe3f5,size:3,sizeAttenuation:false,transparent:true,opacity:.8,depthWrite:false}));wxPts.frustumCulled=false;world.add(wxPts);
-function stepWeather(dt,t){const k=S.weather.k,on=k!=='sun';wxPts.visible=on;if(!on)return;const snow=k==='snow';wxPts.material.size=snow?4.5:2.4;wxPts.material.color.setHex(snow?0xffffff:0xbcd6f2);
+// Yağmur: 3D parçacık yerine ekranın üstünde, tarayıcının kendi (GPU) katmanında kayan çizgiler → oyun kare hızından bağımsız, takılmaz.
+// 3D parçacık yalnızca kar için (yavaş düştüğü için akıcı görünür).
+const RAIN_SVG=(()=>{const q=rng(42);let l='';for(let i=0;i<34;i++){const x=q()*180,y=q()*180,h=9+q()*9;l+=`<line x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${(x-1.5).toFixed(1)}" y2="${(y+h).toFixed(1)}"/>`}
+  return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><g stroke='#e4f0fb' stroke-width='1.3' stroke-linecap='round' opacity='.85'>${l}</g></svg>`)}")`})();
+document.querySelectorAll('.rainfx i').forEach(i=>i.style.backgroundImage=RAIN_SVG);
+let wxCls='';
+function wxUI(){const k=S.weather.k,show=(mode==='hub'||mode==='focus')&&!document.body.classList.contains('photo');const c=show&&(k==='rain'||k==='storm')?k:'';
+  if(c!==wxCls){document.body.classList.remove('wx-rain','wx-storm');if(c)document.body.classList.add('wx-'+c);wxCls=c}}
+function stepWeather(dt,t){const k=S.weather.k;wxUI();
+  const on=k==='snow';wxPts.visible=on;if(!on)return;const snow=k==='snow';wxPts.material.size=snow?4.5:2.4;wxPts.material.color.setHex(snow?0xffffff:0xbcd6f2);
   wxPts.position.set(ctl.target.x,0,ctl.target.z);const sp=snow?3:k==='storm'?34:26;
-  for(let i=0;i<WXN;i++){let y=wxArr[i*3+1]-sp*dt;if(snow)wxArr[i*3]+=Math.sin(t+i)*dt*.6;if(k==='storm')wxArr[i*3]+=dt*8;if(y<0){y=30;wxArr[i*3]=(Math.random()-.5)*70;wxArr[i*3+2]=(Math.random()-.5)*70}wxArr[i*3+1]=y}wxGeo.attributes.position.needsUpdate=true}
+  const N=GFX.low?WXN/3|0:WXN*2/3|0;wxGeo.setDrawRange(0,N);for(let i=0;i<N;i++){let y=wxArr[i*3+1]-sp*dt;if(snow)wxArr[i*3]+=Math.sin(t+i)*dt*.6;if(k==='storm')wxArr[i*3]+=dt*8;if(y<0){y=30;wxArr[i*3]=(Math.random()-.5)*70;wxArr[i*3+2]=(Math.random()-.5)*70}wxArr[i*3+1]=y}wxGeo.attributes.position.needsUpdate=true}
 function ambience(dt,t){const ph=dayPhase(),a=(ph-.25)*Math.PI*2,d=dayFactor(),wx=S.weather.k,cloudy=wx==='rain'||wx==='storm'?1:wx==='snow'?.5:0,sa=Math.sin(a);
   const dusk=Math.max(0,1-Math.abs(sa)*3)*(sa>-.35?1:0);
   sun.position.set(Math.cos(a)*-55,Math.max(14,Math.abs(sa)*50+8),26);sun.intensity=(.55+.7*d)*(1-cloudy*.35);hemiL.intensity=(.62+.18*d)*(1-cloudy*.15)+flash;
@@ -3374,6 +3400,56 @@ function tutTick(){const i=tutStep();if(i<0||document.querySelector('.modal')){t
   if(el&&el.offsetParent!==null){const r=el.getBoundingClientRect();tutHand.hidden=false;const up=r.top>innerHeight*.55;tutHand.classList.toggle('up',up);
     tutHand.style.left=Math.round(r.left+r.width/2-22)+'px';tutHand.style.top=Math.round(up?r.top-56:r.bottom+4)+'px';tutEl.classList.toggle('top',r.top>innerHeight*.5)}else{tutHand.hidden=true;tutEl.classList.add('top')}}
 
+// ---- 38-batch.js ----
+// ================= STATİK BİRLEŞTİRME (draw call azaltma) =================
+// Haritadaki binlerce küçük parça (çit, taş, çatı, çalı...) her karede ayrı ayrı çiziliyordu (~1800 çizim çağrısı).
+// Bir kök kaydedilir; birkaç saniye boyunca hiç kıpırdamayan parçalar aynı malzemeye göre tek bir ağ (mesh) olarak birleştirilir.
+// Hareket eden her şey (hayvanlar, bulutlar, yel değirmeni, duman...) olduğu gibi kalır. Tıklama için gereken etiketli
+// gruplar (loc/unit/plot/region...) korunur: birleşen ağ o grubun içine eklenir.
+const BATCH_TAGS=['plot','plotBuy','unit','loc','region','farmer','open','act','noBatch'];
+const _bq=[],_bm=new THREE.Matrix4(),_bn=new THREE.Matrix3(),_bv=new THREE.Vector3();
+const isTagged=o=>{const u=o.userData;for(const k of BATCH_TAGS)if(u[k]!=null)return true;return false};
+function batchCandidates(root,skip){const out=[];
+  (function walk(o,anchor){for(const c of o.children){if(skip&&skip(c))continue;if(c.material===OUT)continue;
+      if(c.isMesh&&!c.isInstancedMesh&&!c.isSkinnedMesh&&!Array.isArray(c.material)&&!c.material.transparent&&c.material.isMaterial&&c.material!==OUT&&!isTagged(c)
+        &&c.geometry&&c.geometry.attributes.position&&c.children.every(x=>x.material===OUT)&&c.visible){out.push({m:c,anchor});continue}
+      if(c.visible&&!c.isPoints&&!c.isLine)walk(c,isTagged(c)?c:anchor)}})(root,root);
+  return out}
+function relMat(m,anchor,target){anchor.updateWorldMatrix(true,false);m.updateWorldMatrix(true,false);return target.copy(anchor.matrixWorld).invert().multiply(m.matrixWorld)}
+// Kökü izlemeye al: belirtilen süre sonra kıpırdamamış olanları birleştir
+// Her parça için, etiketli gruba kadar tüm üst gruplara göre konumu kaydedilir; birleştirirken parçanın hiç kıpırdamadığı EN ÜST grup seçilir
+// (ör. süzülen bir bulut kümesinin parçaları kümenin içinde sabittir → küme başına tek ağ).
+function batchWatch(root,skip,delay=2600){const list=batchCandidates(root,skip).map(e=>{const ch=[];for(let o=e.m.parent;o;o=o.parent){ch.push(o);if(o===e.anchor)break}
+    return{m:e.m,chain:ch.map(o=>({o,s:relMat(e.m,o,new THREE.Matrix4()).elements.slice()}))}});
+  _bq.push({root,list,at:performance.now()+delay})}
+function batchCheck(){const t=performance.now();for(let i=_bq.length-1;i>=0;i--){const q=_bq[i];if(t<q.at)continue;_bq.splice(i,1);
+    if(q.root!==world&&!q.root.parent)continue;bakeStatic(q)}}
+function inTree(o,root){while(o){if(o===root)return true;o=o.parent}return false}
+function bakeStatic(q){const by=new Map();
+  for(const e of q.list){const m=e.m;if(!inTree(m,q.root))continue;let anchor=null;
+    for(let i=e.chain.length-1;i>=0;i--){const c=e.chain[i];if(!inTree(m,c.o))continue;const r=relMat(m,c.o,_bm).elements;let moved=false;for(let k=0;k<16;k++)if(Math.abs(r[k]-c.s[k])>1e-5){moved=true;break}if(!moved){anchor=c.o;break}}
+    if(!anchor)continue;let vis=true;for(let o=m;o&&o!==anchor;o=o.parent)if(!o.visible)vis=false;if(!vis)continue;relMat(m,anchor,_bm);e.anchor=anchor;
+    let a=by.get(e.anchor);if(!a)by.set(e.anchor,a=new Map());const key=m.material.uuid+(m.castShadow?'s':'')+(m.receiveShadow?'r':'');
+    let g=a.get(key);if(!g)a.set(key,g={mat:m.material,cs:m.castShadow,rs:m.receiveShadow,items:[]});g.items.push({m,rel:_bm.clone(),ol:m.children.length>0})}
+  let saved=0;
+  for(const [anchor,groups] of by){const olItems=[];
+    for(const g of groups.values()){if(g.items.length<2&&!g.items[0].ol)continue;
+      const mesh=new THREE.Mesh(bakeGeo(g.items,!!g.mat.map,false),g.mat);mesh.castShadow=g.cs;mesh.receiveShadow=g.rs;mesh.userData.baked=1;mesh.matrixAutoUpdate=false;anchor.add(mesh);
+      for(const it of g.items){if(it.ol)olItems.push(it);it.m.parent.remove(it.m)}saved+=g.items.length-1}
+    if(olItems.length){const o=new THREE.Mesh(bakeGeo(olItems,false,true),OUT);o.userData.baked=1;o.matrixAutoUpdate=false;anchor.add(o);saved+=olItems.length-1}}
+  return saved}
+function bakeGeo(items,uv,ol){let n=0;for(const it of items){const g=it.m.geometry;n+=g.index?g.index.count:g.attributes.position.count}
+  const P3=new Float32Array(n*3),N3=new Float32Array(n*3),U2=uv&&!ol?new Float32Array(n*2):null;let w=0;
+  for(const it of items){const g=it.m.geometry,pos=g.attributes.position,nor=ol?(g.attributes.onormal||g.attributes.normal):g.attributes.normal,tuv=g.attributes.uv,idx=g.index,cnt=idx?idx.count:pos.count;
+    _bn.getNormalMatrix(it.rel);const flip=it.rel.determinant()<0;
+    for(let j=0;j<cnt;j++){const jj=flip?(j-j%3)+[0,2,1][j%3]:j,v=idx?idx.getX(jj):jj;
+      _bv.fromBufferAttribute(pos,v).applyMatrix4(it.rel);P3[w*3]=_bv.x;P3[w*3+1]=_bv.y;P3[w*3+2]=_bv.z;
+      if(nor){_bv.fromBufferAttribute(nor,v).applyMatrix3(_bn).normalize();N3[w*3]=_bv.x;N3[w*3+1]=_bv.y;N3[w*3+2]=_bv.z}
+      if(U2&&tuv){U2[w*2]=tuv.getX(v);U2[w*2+1]=tuv.getY(v)}w++}}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(P3,3));geo.setAttribute(ol?'onormal':'normal',new THREE.BufferAttribute(N3,3));if(U2)geo.setAttribute('uv',new THREE.BufferAttribute(U2,2));
+  geo.computeBoundingSphere();geo.computeBoundingBox();return geo}
+function disposeBaked(root){root.traverse(o=>{if(o.userData.baked&&o.geometry)o.geometry.dispose()})}
+
 // ---- 33-loop.js ----
 // ================= DÖNGÜ =================
 const clock=new THREE.Clock();
@@ -3382,7 +3458,7 @@ function viewOffset(c){const W=innerWidth,H=innerHeight;let tx=0,ty=0;if(!sheet.
   vo.x+=(tx-vo.x)*.12;vo.y+=(ty-vo.y)*.12;if(!tx&&!ty&&Math.abs(vo.x)<.5&&Math.abs(vo.y)<.5){vo.x=vo.y=0;if(c.view&&c.view.enabled)c.clearViewOffset();return}c.setViewOffset(W,H,vo.x,vo.y,W,H)}
 function resize(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);dcam.aspect=w/h;dcam.fov=w<700?50:42;dcam.updateProjectionMatrix();if(typeof S!=='undefined'&&S&&(dcam.aspect<.85)!==deskPortrait&&DESKP.length)buildDesk();cam.aspect=w/h;cam.fov=w<700?50:36;cam.updateProjectionMatrix();icam.aspect=w/h;icam.fov=w<700?60:42;icam.updateProjectionMatrix()}
 addEventListener('resize',resize);
-function frame(ts){requestAnimationFrame(frame);if(GFX.fpsCap&&ts&&ts-_lastFrame<1000/GFX.fpsCap-2)return;if(ts){gfxAdapt(ts-(_lastFrame||ts));_lastFrame=ts}const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;OUT.uniforms.jit.value=mode==='desk'?0:Math.floor(t*8)*1.37;
+function frame(ts){requestAnimationFrame(frame);if(GFX.fpsCap&&ts&&ts-_lastFrame<1000/GFX.fpsCap-2)return;if(ts){gfxAdapt(ts-(_lastFrame||ts));_lastFrame=ts}const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;
   if(mode==='desk'){worldTick(dt,t);renderWindow(dt);viewOffset(dcam);deskFrame(dt,t);placeMarks();R.render(deskScene,dcam)}
   else if(mode!=='interior'){viewOffset(cam);stepFly();ctl.update();worldTick(dt,t);placeMarks();R.render(world,cam)}
   if(!sayB.hidden)placeBubble();
@@ -3398,11 +3474,11 @@ function tick(){
   if(view&&sheetSig()!==view.sig&&!(race&&race.running))renderSheet();
   if(view&&view.k==='loc'&&view.loc==='pazar'&&now()-S.market.at>=180000){refreshMarket();renderSheet()}
   if(interior&&intSig(interior.key)!==interior.sig)interior.refresh();
-  renderHUD()}
+  batchCheck();renderHUD()}
 function boot(data){
   S=migrate((data&&data.house!=null)?data:(load()||fresh()));const away=S.lastSeen?Date.now()-S.lastSeen:0;refreshMarket();ensureOrders();updateWeather();applySeason();checkDaily();ensureContests();ensureContracts();automate();
   try{makeThumbs()}catch(e){console.warn(e)}
-  ctl.enabled=false;buildDesk();resize();syncWorld(true);renderHUD();setModeUI();frame();setInterval(tick,500);setInterval(save,5000);
+  ctl.enabled=false;buildDesk();resize();syncWorld(true);batchWatch(world,c=>c===farmer||c===dog||c===lampPost||c===regG||c===roadG||c.userData.loc!=null,3000);renderHUD();setModeUI();frame();setInterval(tick,500);setInterval(save,5000);
   const bt=$('#boot');bt.style.transition='opacity .5s';bt.style.opacity='0';setTimeout(()=>bt.remove(),550);
   booted=true;awaySummary(away);if(S.consent)showLogin();else askConsent();setTimeout(friendGifts,1500);syncCloud(true);track('session_start',{gfx:GFX.mode,pr:GFX.pr});
   if(!S.stats.welcomed){S.stats.welcomed=1;setTimeout(()=>{if(tutStep()<0&&S.tut)toast('Masadaki haritaya dokun, çiftliğe çık!')},900)}save()

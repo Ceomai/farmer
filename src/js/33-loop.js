@@ -5,7 +5,7 @@ function viewOffset(c){const W=innerWidth,H=innerHeight;let tx=0,ty=0;if(!sheet.
   vo.x+=(tx-vo.x)*.12;vo.y+=(ty-vo.y)*.12;if(!tx&&!ty&&Math.abs(vo.x)<.5&&Math.abs(vo.y)<.5){vo.x=vo.y=0;if(c.view&&c.view.enabled)c.clearViewOffset();return}c.setViewOffset(W,H,vo.x,vo.y,W,H)}
 function resize(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);dcam.aspect=w/h;dcam.fov=w<700?50:42;dcam.updateProjectionMatrix();if(typeof S!=='undefined'&&S&&(dcam.aspect<.85)!==deskPortrait&&DESKP.length)buildDesk();cam.aspect=w/h;cam.fov=w<700?50:36;cam.updateProjectionMatrix();icam.aspect=w/h;icam.fov=w<700?60:42;icam.updateProjectionMatrix()}
 addEventListener('resize',resize);
-function frame(ts){requestAnimationFrame(frame);if(GFX.fpsCap&&ts&&ts-_lastFrame<1000/GFX.fpsCap-2)return;if(ts){gfxAdapt(ts-(_lastFrame||ts));_lastFrame=ts}const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;OUT.uniforms.jit.value=mode==='desk'?0:Math.floor(t*8)*1.37;
+function frame(ts){requestAnimationFrame(frame);if(GFX.fpsCap&&ts&&ts-_lastFrame<1000/GFX.fpsCap-2)return;if(ts){gfxAdapt(ts-(_lastFrame||ts));_lastFrame=ts}const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;
   if(mode==='desk'){worldTick(dt,t);renderWindow(dt);viewOffset(dcam);deskFrame(dt,t);placeMarks();R.render(deskScene,dcam)}
   else if(mode!=='interior'){viewOffset(cam);stepFly();ctl.update();worldTick(dt,t);placeMarks();R.render(world,cam)}
   if(!sayB.hidden)placeBubble();
@@ -21,11 +21,11 @@ function tick(){
   if(view&&sheetSig()!==view.sig&&!(race&&race.running))renderSheet();
   if(view&&view.k==='loc'&&view.loc==='pazar'&&now()-S.market.at>=180000){refreshMarket();renderSheet()}
   if(interior&&intSig(interior.key)!==interior.sig)interior.refresh();
-  renderHUD()}
+  batchCheck();renderHUD()}
 function boot(data){
   S=migrate((data&&data.house!=null)?data:(load()||fresh()));const away=S.lastSeen?Date.now()-S.lastSeen:0;refreshMarket();ensureOrders();updateWeather();applySeason();checkDaily();ensureContests();ensureContracts();automate();
   try{makeThumbs()}catch(e){console.warn(e)}
-  ctl.enabled=false;buildDesk();resize();syncWorld(true);renderHUD();setModeUI();frame();setInterval(tick,500);setInterval(save,5000);
+  ctl.enabled=false;buildDesk();resize();syncWorld(true);batchWatch(world,c=>c===farmer||c===dog||c===lampPost||c===regG||c===roadG||c.userData.loc!=null,3000);renderHUD();setModeUI();frame();setInterval(tick,500);setInterval(save,5000);
   const bt=$('#boot');bt.style.transition='opacity .5s';bt.style.opacity='0';setTimeout(()=>bt.remove(),550);
   booted=true;awaySummary(away);if(S.consent)showLogin();else askConsent();setTimeout(friendGifts,1500);syncCloud(true);track('session_start',{gfx:GFX.mode,pr:GFX.pr});
   if(!S.stats.welcomed){S.stats.welcomed=1;setTimeout(()=>{if(tutStep()<0&&S.tut)toast('Masadaki haritaya dokun, çiftliğe çık!')},900)}save()
