@@ -15,21 +15,23 @@ function renderSheet(){
   sheet.classList.toggle('mini',mode!=='hub'&&!!view.mini);
   if(mode!=='hub')sheet.querySelectorAll('[data-act="close"]').forEach(b=>{b.textContent=view.mini?'▴':'▾';b.setAttribute('aria-label',view.mini?'Kartı aç':'Kartı küçült')});
   view.sig=sheetSig();setDock()}
-function sheetSig(){if(!view)return'';let s='';if(view.k==='loc'){const L=LOC[view.loc];if(L.kind==='fields')s+=S.fields.map(f=>f.job?(now()>=f.job.e?'r':'g'):'i').join('');(L.units||[]).forEach(u=>{const x=S.units[u];s+=x?(x.job?(now()>=x.job.e?'r':'g'):'i'):'-'});if(L.kind==='orders')s+=readyOrders()}
+function sheetSig(){if(!view)return'';let s='';if(view.k==='loc'){const L=LOC[view.loc];if(L.kind==='fields')s+=S.fields.map(f=>f.job?(now()>=f.job.e?'r':'g'):'i').join('');(L.units||[]).forEach(u=>{const x=S.units[u];s+=x?(x.job?(now()>=x.job.e?'r':'g'):'i')+((x.q||[]).length)+(S.workers[u]?(workOn(u)?'w':'b'):''):'-'});if(L.kind==='orders')s+=readyOrders()}
   if(view.k==='loc'&&view.loc==='hipo')s+=S.horses.map(h=>(now()<h.rest?'r':'')+(now()<h.train?'t':'')).join()+has('at');return s}
 const outOf=sc=>{const k=Object.keys(sc.out)[0];return `<span class="big">${ITEMS[k].e}<i>×${sc.out[k]}</i></span>`};
-function recipeTiles(u){const d=B[u],s=S.units[u];return `<div class="tiles">`+d.recipes.map(r=>{const lock=r.lvl>S.lv||(r.col&&!has1(r.col)),sc=scaled(r,s.l),ok=!lock&&canPay(r);
+function recipeTiles(u,queue){const d=B[u],s=S.units[u];return `<div class="tiles${queue?' qtiles':''}">`+d.recipes.map(r=>{const lock=r.lvl>S.lv||(r.col&&!has1(r.col)),sc=scaled(r,s.l),ok=!lock&&(queue?(s.q||[]).length<QMAX:canPay(r));
   const ins=lock?`<b>${r.col&&r.lvl<=S.lv?'📖 Koleksiyon':'🔒 Sv '+r.lvl}</b>`:(r.cost?`<b class="${S.coins<r.cost?'miss':''}">₺${r.cost}</b>`:'')+Object.entries(r.in||{}).map(([k,n])=>`<b class="${has(k)<n?'miss':''}">${ITEMS[k].e}${n}</b>`).join('');
-  return `<button class="tile" data-act="start" data-u="${u}" data-r="${r.id}" ${ok?'':'disabled'} title="${r.n}">${outOf(sc)}<span class="ins">${ins||'<b>Bedava</b>'}</span><span class="tm">${lock?'':'⏱ '+secs(sc.t)}</span></button>`}).join('')+'</div>'}
+  return `<button class="tile" data-act="${queue?'queue':'start'}" data-u="${u}" data-r="${r.id}" ${ok?'':'disabled'} title="${queue?'Sıraya ekle: ':''}${r.n}">${outOf(sc)}<span class="ins">${ins||'<b>Bedava</b>'}</span><span class="tm">${lock?'':'⏱ '+secs(sc.t)}</span></button>`}).join('')+'</div>'}
 function jobRow(u){const s=S.units[u],r=unitRecipe(u),sc=scaled(r,s.l);
   if(now()>=s.job.e)return `<button class="job ready" data-act="collect" data-u="${u}">${outOf(sc)}<b>Topla!</b></button>`;
   return `<div class="job" title="${r.n}">${outOf(sc)}<span class="pw"><span class="pbar"><i data-s="${s.job.s}" data-e="${s.job.e}"></i></span><small data-left="${s.job.e}" data-pre="⏱"></small></span></div>`}
 function upBtn(u){const s=S.units[u];if(s.l>=MAXL)return'';const bl=upBlock(s.l+1);return `<button class="up" data-act="upU" data-u="${u}" ${bl||S.coins<upCost(u)?'disabled':''} title="+%30 ürün, %10 daha kısa süre">⬆ Sv ${s.l+1} <span>${bl||'₺'+fmt(upCost(u))}</span></button>`}
+function queueHTML(u){const s=S.units[u],q=s.q||[];const R=id=>B[u].recipes.find(r=>r.id===id);
+  return `<div class="queue"><span class="ql">Sırada ${q.length}/${QMAX}</span>${q.map((id,i)=>{const r=R(id);return r?`<button class="qchip" data-act="qdel" data-u="${u}" data-i="${i}" title="Sıradan çıkar: ${r.n}">${ITEMS[Object.keys(r.out)[0]].e}<i>✕</i></button>`:''}).join('')}${q.length<QMAX?'<span class="qh">↓ eklemek için tarife dokun</span>':''}</div>`+(q.length<QMAX?recipeTiles(u,true):'')}
 function unitHTML(u,multi){const d=B[u],s=S.units[u];
   if(!s){const lock=S.lv<d.lvl;return `<div class="unit"><div class="build ${lock?'off':''}"><span class="thumb sm">${img(u)}</span><span class="t"><b>${d.n}</b><small>${d.d}</small></span><button class="btn gold" data-act="build" data-u="${u}" ${lock||S.coins<d.cost?'disabled':''}>${lock?'🔒 '+d.lvl:'🔨 ₺'+fmt(d.cost)}</button></div></div>`}
   let h=multi?`<div class="uhead"><span>${d.e} ${d.n}</span>${stars(s.l,MAXL)}</div>`:'';
   if(d.storage)h+=`<div class="job"><span class="big">📦</span><span class="pw"><b>+${d.storage*s.l} yer</b><small>Ambar ${stored()} / ${cap()}</small></span></div>`;
-  h+=loveRow(u);if(s.job)h+=jobRow(u);else if(d.recipes)h+=recipeTiles(u);
+  h+=loveRow(u);if(s.job){h+=jobRow(u);if(d.recipes)h+=queueHTML(u)}else if(d.recipes)h+=recipeTiles(u);
   const ent=INSIDE_UNITS[u]&&mode!=='interior'?`<button class="pill-btn go" data-act="enterIn" data-k="${u}">🚪 İçeri</button>`:'';
   return `<div class="unit">${h}<div class="urow">${ent}${upBtn(u)}${extraRow(u)}</div></div>`}
 function sheetLoc(){const k=view.loc,L=LOC[k];const th=img(L.kind==='house'?'kulube'+S.house:L.units?L.units[0]:k);let h,b='';
@@ -68,7 +70,12 @@ function sheetPlaces(){return head('📍','Konumlar','')+`<div class="sh-body"><
 function sheetBarn(){const inv=Object.keys(ITEMS).filter(k=>has(k)>0);
   return head('📦','Ambar',`${stored()} / ${cap()}`)+`<div class="sh-body"><div class="pbar"><i style="width:${Math.min(100,stored()/cap()*100)}%;animation:none"></i></div>
   ${inv.length?`<div class="inv">${inv.map(k=>`<div class="slot" title="${ITEMS[k].n}"><em>${ITEMS[k].e}</em><b>${has(k)}</b></div>`).join('')}</div>`:'<p class="note">Ambar boş.</p>'}
-  <div class="urow"><button class="pill-btn gold" data-go="pazar">🏪 Pazara git</button></div></div>`}
+  ${sellBox()}<div class="urow"><button class="pill-btn gold" data-go="pazar">🏪 Pazara git</button></div></div>`}
+// Fazlayı sat kutusu: her üründen kaç tane tutulacağı seçilir; isteğe bağlı otomatik satış
+function sellBox(){const kn=S.keepN??10;return `<div class="unit"><div class="uhead"><span>💰 Fazlayı sat</span><span class="tm">yem ve taylar hariç</span></div>
+  <div class="tabs">${[0,5,10,20].map(n=>`<button aria-selected="${kn===n}" data-act="keepN" data-n="${n}">${n?n+' tut':'Hepsi'}</button>`).join('')}</div>
+  <button class="btn big gold" data-act="sellEx">Her üründen ${kn} tut, gerisini sat</button>
+  <label class="switch"><input type="checkbox" id="optAutoSell" ${S.autoSell?'checked':''}><span><b>Ambar dolunca otomatik sat</b><br><span class="note">Ambar %95 dolunca fazlası kendiliğinden satılır, üretim durmaz</span></span></label></div>`}
 function sheetGoals(){const g=GOALS[S.goal];
   return head('🎯','Hedefler',`${S.goal} / ${GOALS.length}`)+`<div class="sh-body">${dailyHTML()}<div class="uhead"><span>🎯 Ana hedef</span></div>
   ${g?`<div class="job"><span class="big">${g.ok()?'✅':'🎯'}</span><span class="pw"><b style="font-size:14px">${g.d}</b><small>Ödül ₺${fmt(g.r)}</small></span><button class="pill-btn gold" data-act="goal" ${g.ok()?'':'disabled'}>Al</button></div>`:'<p class="note">Bütün hedefler bitti!</p>'}
@@ -77,6 +84,8 @@ function sheetSettings(){return head('⚙️','Ayarlar','')+`<div class="sh-body
   <div class="uhead"><span>🖥️ Grafik</span><span class="tm">${GFX.low?'Pil tasarrufu açık':''}</span></div><div class="tabs">${[['auto','Otomatik'],['high','Yüksek'],['low','Pil tasarrufu']].map(([k,n])=>`<button aria-selected="${GFX.mode===k}" data-act="gfx" data-k="${k}">${n}</button>`).join('')}</div>
   <p class="note">Otomatik: cihaza göre ayarlanır, takılırsa çözünürlüğü düşürür. Pil tasarrufu: gölgeler kapanır, 30 FPS. Değişiklik oyunu yeniden yükler.</p>
   <label class="switch"><input type="checkbox" id="optMusic" ${S.sound.music?'checked':''}><span><b>Müzik</b><br><span class="note">50'ler tarzı çiftlik ezgisi</span></span></label>
+  <div class="uhead"><span>🔠 Yazı boyutu</span></div><div class="tabs">${[['n','Normal'],['b','Büyük'],['xb','Çok büyük']].map(([k,n])=>`<button aria-selected="${(S.ui&&S.ui.fs||'n')===k}" data-act="fs" data-k="${k}">${n}</button>`).join('')}</div>
+  <label class="switch"><input type="checkbox" id="optLeft" ${S.ui&&S.ui.left?'checked':''}><span><b>Sol el modu</b><br><span class="note">Kamera düğmeleri ve menüler sol başparmağa yakın olur</span></span></label>
   <label class="switch"><input type="checkbox" id="optSfx" ${S.sound.sfx?'checked':''}><span><b>Ses efektleri</b><br><span class="note">Hayvanlar, hasat, para sesi</span></span></label>
   <label class="switch"><input type="checkbox" id="optFast" ${S.fastNav?'checked':''}><span><b>Hızlı gezinme</b><br><span class="note">Kamera uçmadan bölümler arasında anında geçer</span></span></label>
   <label class="switch"><input type="checkbox" id="optNotif" ${S.sound.notif?'checked':''}><span><b>Hazır bildirimleri</b><br><span class="note">Sekme arka plandayken ürün hazır olunca haber verir. Tarayıcı izin vermezse çalışmaz.</span></span></label>

@@ -16,6 +16,9 @@ function canPay(r){if((r.cost||0)>S.coins)return false;for(const k in (r.in||{})
 const prog=j=>Math.min(1,(now()-j.s)/(j.e-j.s));
 const stageOf=j=>{const p=prog(j);return p<.34?1:p<.67?2:3};
 const unitRecipe=u=>B[u].recipes.find(x=>x.id===S.units[u].job.r);
+const secShort=s=>s<=0?'hazır':s<60?s+'sn':s<3600?Math.ceil(s/60)+'dk':s<86400?Math.floor(s/3600)+'sa'+(s%3600>=60?' '+Math.floor(s%3600/60)+'dk':''):Math.floor(s/86400)+'g';
+// Mevsim ürünleri yalnızca kendi mevsiminde ekilir
+const cropSeasonOk=c=>!c.season||c.season.includes(season());
 const cropOf=id=>CROPS.find(c=>c.id===id);
 function chips(obj,check,cls=''){return Object.entries(obj).map(([k,n])=>`<span class="chip ${cls} ${check&&has(k)<n?'miss':''}"><em>${ITEMS[k].e}</em>${n}${check?`<span style="opacity:.55;font-weight:800">/${has(k)}</span>`:''}</span>`).join('')}
 function toast(msg){document.querySelectorAll('.toast').forEach(t=>t.remove());const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2400)}

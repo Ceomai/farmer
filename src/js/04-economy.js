@@ -9,6 +9,11 @@ const basePrice=k=>ITEMS[k].p*(S.market.m[k]||1);
 const sellPrice=(k,n=1)=>Math.max(1,Math.round(basePrice(k)*satF(k,ITEMS[k].p*n/2)));
 function addSat(k,n){if(!S.market.sat)S.market.sat={};S.market.sat[k]={v:satNow(k)+ITEMS[k].p*n,t:now()}}
 function sell(k,n){n=Math.min(n,has(k));if(n<=0)return;const pr=sellPrice(k,n);S.items[k]-=n;addSat(k,n);gain(pr*n,'Pazar');stat('sold',n);sfx('coin');flyCoins(Math.min(6,2+n));toast(`${n} ${ITEMS[k].n} satıldı · +₺${fmt(pr*n)}${satF(k)<.8?' · pazar bu üründen doydu, fiyat düşük':''}`);commit()}
+// Fazlayı sat: her üründen "keep" kadar bırakıp gerisini satar (yem ve taylar hariç). Tek bir özet bildirim gösterir.
+function sellExcess(keep,quiet){let tot=0,n=0;for(const k in S.items){if(k==='yem'||k==='at')continue;const x=has(k)-keep;if(x<=0)continue;const pr=sellPrice(k,x);S.items[k]-=x;addSat(k,x);tot+=pr*x;n+=x}
+  if(!n){if(!quiet)toast('Satılacak fazla ürün yok');return 0}gain(tot,'Pazar');stat('sold',n);sfx('coin');flyCoins(6);toast(`${quiet?'📦 Ambar dolmak üzereydi: ':''}${n} ürün satıldı · +₺${fmt(tot)}`);commit();return tot}
+// Ambar %95 dolunca (ayar açıksa) fazlası kendiliğinden satılır
+function autoSellTick(){if(!S.autoSell||stored()<cap()*.95)return;sellExcess(S.keepN??10,true)}
 function buyFeed(n){const c=ITEMS.yem.buy*n;if(S.coins<c)return toast('Yeterli paran yok');if(stored()+n>cap())return toast('Ambar dolu');pay(c,'Yem');S.items.yem=has('yem')+n;toast(`${n} yem alındı`);commit()}
 function producible(){const set=new Set(CROPS.filter(c=>c.lvl<=S.lv).map(c=>c.id));for(const u in S.units){const d=B[u];if(d.recipes)d.recipes.filter(r=>r.lvl<=S.lv).forEach(r=>Object.keys(r.out).forEach(k=>{if(k!=='at')set.add(k)}))}return [...set]}
 const NAMES=['Kasap Rıza','Fırıncı Nuri','Lokantacı Sevim','Manav Hilmi','Otelci Gülten','Kooperatif','Bakkal Ahmet','Konakçı Halit Bey','Pazarcı Zehra'];

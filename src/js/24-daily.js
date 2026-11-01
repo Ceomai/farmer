@@ -30,7 +30,7 @@ function migrate(s){const d=fresh();if(!s||typeof s!=='object'||Array.isArray(s)
   const rg={baba:1,town:1};for(const k in s.regions)if(REG[k]&&s.regions[k])rg[k]=1;s.regions=rg;
   const T=now(),fixJob=(j,sec)=>{if(!obj(j))return null;j.s=num(j.s,T);j.e=num(j.e,T);if(j.e>T+sec*1000*2){j.s=T;j.e=T+sec*1000}return j};
   const un={};for(const u in s.units){if(!B[u]||!obj(s.units[u]))continue;const x=s.units[u],o={l:num(x.l,1,1,MAXL,true)};const rs=B[u].recipes||[];
-    if(x.job&&obj(x.job)){const r=rs.find(r=>r.id===x.job.r);if(r){o.job=fixJob(x.job,r.t)}}if(rs.find(r=>r.id===x.last))o.last=x.last;un[u]=o}s.units=un;
+    if(x.job&&obj(x.job)){const r=rs.find(r=>r.id===x.job.r);if(r){o.job=fixJob(x.job,r.t)}}if(rs.find(r=>r.id===x.last))o.last=x.last;if(Array.isArray(x.q)){const q=x.q.filter(id=>rs.find(r=>r.id===id)).slice(0,3);if(q.length)o.q=q}if(x.built)o.built=num(x.built,0);un[u]=o}s.units=un;
   s.fields=s.fields.slice(0,9).map(f=>{if(!obj(f))return{};if(f.job){const c=obj(f.job)&&cropOf(f.job.r);return c?{job:fixJob(f.job,c.t)}:{}}return{}});while(s.fields.length<2)s.fields.push({});
   if(!cropOf(s.lastCrop))s.lastCrop='bugday';if(!WEATHER[s.weather.k])s.weather={k:'sun',until:0};
   const wk={};for(const k in s.workers)if(k==='fields'||B[k]){const v=Number(s.workers[k]);wk[k]=v>1e12&&v<T+SHIFT*2?v:T+SHIFT}s.workers=wk;
@@ -45,6 +45,6 @@ function migrate(s){const d=fresh();if(!s||typeof s!=='object'||Array.isArray(s)
   for(const k of['inc','exp'])if(!obj(s.fin[k]))s.fin[k]={};if(!Array.isArray(s.fin.hist))s.fin.hist=[];
   if(!obj(s.contests)||!Array.isArray(s.contests.list)||!obj(s.contests.done))s.contests=d.contests;
   for(const k of['love','friends'])if(s[k]!=null&&!obj(s[k]))delete s[k];
-  if(s.tut!=null&&!obj(s.tut))s.tut={done:1};
+  if(s.tut!=null&&!obj(s.tut))s.tut={done:1};if(s.tut2!=null&&!obj(s.tut2))s.tut2={done:1};if(s.ui!=null&&!obj(s.ui))delete s.ui;s.keepN=[0,5,10,20].includes(s.keepN)?s.keepN:10;s.autoSell=!!s.autoSell;s.fastNav=!!s.fastNav;
   s.lastSeen=Math.min(num(s.lastSeen,Date.now()),Date.now());
   delete s.dark;delete s.rooster;return s}

@@ -11,13 +11,21 @@ function upgradeFields(){const c=FIELD_UP[S.fieldLv];if(c==null||S.fieldLv>=MAXL
 function startUnit(u,rid,quiet){const s=S.units[u];if(!s||s.job||!B[u].recipes)return;const r=B[u].recipes.find(x=>x.id===rid);if(!r||r.lvl>S.lv||(r.col&&!has1(r.col)))return;
   if(!canPay(r)){if(!quiet)toast('Malzeme ya da para eksik');return}pay(r.cost||0,'Üretim');for(const k in (r.in||{}))S.items[k]-=r.in[k];
   const sc=scaled(r,s.l),t=sc.t*(u==='mandira'&&has1('bakir_kazan')?.9:1);s.job={r:rid,s:now(),e:now()+t*1000};s.last=rid;stat('plant_'+rid);if(!quiet){sfx('plant');commit()}}
+// Üretim kuyruğu: bina çalışırken en fazla 3 iş sıraya alınır; biri bitip toplanınca sıradaki kendiliğinden başlar.
+// Malzeme ve para işin başladığı anda alınır; o an eksikse iş sırada bekler.
+const QMAX=3;
+function queueAdd(u,rid){const s=S.units[u];if(!s||!B[u].recipes)return;const r=B[u].recipes.find(x=>x.id===rid);if(!r||r.lvl>S.lv||(r.col&&!has1(r.col)))return;
+  if(!s.job){startUnit(u,rid);return}if(!s.q)s.q=[];if(s.q.length>=QMAX)return toast(`Sırada en fazla ${QMAX} iş olabilir`);s.q.push(rid);sfx('click');commit()}
+function queueDel(u,i){const s=S.units[u];if(!s||!s.q)return;s.q.splice(i,1);commit()}
+function queueNext(u,quiet=true){const s=S.units[u];if(!s||s.job||!s.q||!s.q.length)return false;startUnit(u,s.q[0],true);if(s.job){s.q.shift();return true}return false}
+function queueAll(){let n=0;for(const u in S.units)if(queueNext(u))n++;return n}
 function giveOut(out,x,y,xp,quiet){const n=Object.values(out).reduce((a,b)=>a+b,0);if(stored()+n>cap()){if(!quiet)toast('Ambar dolu! Pazarda sat ya da siloyu büyüt.');return false}
   for(const k in out)S.items[k]=has(k)+out[k];addXP(xp);if(quiet){autoGain+=n;return true}sfx('pop');PLATFORM.hap();if(n>=6)celebrate();if(x!=null){floatXY(x,y,Object.entries(out).map(([k,v])=>`+${v} ${ITEMS[k].e}`).join('  ')+`  +${xp} xp`);flyItems(x,y,out)}return true}
 // Ahırda en fazla 6 tay bekler; fazlası pazar fiyatından kendiliğinden satılır (ambar dolmasın, üretim durmasın)
 const HORSE_KEEP=6;function extraHorses(quiet){const n=has('at')-HORSE_KEEP;if(n<=0)return;const pr=sellPrice('at',n);S.items.at-=n;addSat('at',n);gain(pr*n,'Pazar');stat('sold',n);if(!quiet)toast(`🐎 Ahır dolu: ${n} tay satıldı · +₺${fmt(pr*n)}`)}
 function collectUnit(u,x,y,quiet){const s=S.units[u];if(!s||!s.job||now()<s.job.e)return false;const r=unitRecipe(u),sc=scaled(r,s.l),out={...sc.out};const cb=COL_BONUS[u];if(cb&&has1(cb)){const k0=Object.keys(out)[0];out[k0]+=1}if(loveBonus(u)){const k0=Object.keys(out)[0];out[k0]+=1}
   if(!quiet&&x==null){const p=screenOfW(unitWorld(u,markH(u)));x=p.x;y=p.y}
-  if(!giveOut(out,x,y,Math.ceil(r.t/12)+1,quiet))return !quiet;stat('harvest_'+u);stat('make_'+r.id);s.job=null;tryDrop(u);if(u==='hara')extraHorses(quiet);if(quiet)return true;
+  if(!giveOut(out,x,y,Math.ceil(r.t/12)+1,quiet))return !quiet;stat('harvest_'+u);stat('make_'+r.id);s.job=null;tryDrop(u);if(u==='hara')extraHorses(quiet);queueNext(u);if(quiet)return true;
   sfx(UNIT_SFX[u]);if(mode!=='interior')puff(unitWorld(u,1),8);if(locGroups[locOf(u)])squash(locOf(u),u);commit();return true}
 function plantPlot(i,rid,quiet){const f=S.fields[i];if(!f||f.job)return false;const r=cropOf(rid);if(!r||cropLocked(r))return false;if(S.coins<r.cost){if(!quiet)toast('Tohum için paran yetmiyor');return false}
   pay(r.cost,'Tohum');const sc=scaled(r,S.fieldLv);f.job={r:rid,s:now(),e:now()+sc.t*1000};S.lastCrop=rid;stat('plant_'+rid);if(!quiet)sfx('plant');return true}

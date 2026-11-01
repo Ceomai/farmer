@@ -9,12 +9,12 @@ document.addEventListener('click',e=>{
   const op=e.target.closest('[data-open]');if(op){openView(op.dataset.open);return}
   const a=e.target.closest('[data-act]');if(!a||a.tagName==='INPUT')return;const d=a.dataset,rc=a.getBoundingClientRect(),cx=rc.left+rc.width/2,cy=rc.top;sfx('click');
   switch(d.act){
-    case'close':closeSheet();break;case'back':mode==='interior'?leaveInterior():mode==='focus'?toHub():toDesk();break;case'home':toDesk();break;case'renew':renewWorker(d.k);break;case'guide':openView('guide');break;
+    case'close':closeSheet();break;case'back':mode==='interior'?leaveInterior():mode==='focus'?toHub():toDesk();break;case'home':toDesk();break;case'fs':S.ui=Object.assign(S.ui||{},{fs:d.k});applyUI();renderSheet();save();break;case'qpclose':closeQpop();break;case'qpplant':plantAll();refreshQpop();break;case'keepN':S.keepN=+d.n;renderSheet();save();break;case'sellEx':sellExcess(S.keepN??10);break;case'renew':renewWorker(d.k);break;case'guide':openView('guide');break;
     case'enterIn':enterInterior(d.k);break;
     case'build':buildUnit(d.u);break;case'upU':upgradeUnit(d.u);break;case'upHouse':upgradeHouse();break;case'upFields':upgradeFields();break;
-    case'start':startUnit(d.u,d.r);break;case'collect':collectUnit(d.u,cx,cy);break;
+    case'start':startUnit(d.u,d.r);break;case'queue':queueAdd(d.u,d.r);break;case'qdel':queueDel(d.u,+d.i);break;case'collect':collectUnit(d.u,cx,cy);break;
     case'collectU':collectUnit(d.id,cx,cy-20);break;case'harvestP':harvestPlot(+d.id,cx,cy-20);commit();break;
-    case'seed':S.lastCrop=d.r;renderSheet();save();break;case'plantAll':plantAll();break;case'harvestAll':harvestAll();break;
+    case'seed':S.lastCrop=d.r;renderSheet();refreshQpop();save();break;case'plantAll':plantAll();break;case'harvestAll':harvestAll();break;
     case'plot':if(panelSwipeUsed){panelSwipeUsed=false;break}{const i=+d.i,f=S.fields[i];if(f&&!f.job){if(plantPlot(i,S.lastCrop))commit()}else if(f&&now()>=f.job.e){harvestPlot(i,cx,cy);commit()}break}
     case'buyPlot':buyPlot();break;case'region':buyRegion(d.r);break;
     case'sell':sell(d.k,+d.n);break;case'feed':buyFeed(+d.n);break;
@@ -36,7 +36,7 @@ document.addEventListener('click',e=>{
     case'dbonus':if(S.daily&&S.daily.tasks.every(t=>t.c)&&!S.daily.bonus){S.daily.bonus=true;S.gems+=2;sfx('win');commit()}break;
     case'albumDone':if(!S.stats.albumDone){S.stats.albumDone=1;S.gems+=50;sfx('win');commit()}break;
   }});
-document.addEventListener('change',e=>{const id=e.target.id;if(id==='optMusic'){S.sound.music=e.target.checked;audioInit();applySound();save()}if(id==='optSfx'){S.sound.sfx=e.target.checked;save()}if(id==='optFast'){S.fastNav=e.target.checked;save()}
+document.addEventListener('change',e=>{const id=e.target.id;if(id==='optMusic'){S.sound.music=e.target.checked;audioInit();applySound();save()}if(id==='optSfx'){S.sound.sfx=e.target.checked;save()}if(id==='optFast'){S.fastNav=e.target.checked;save()}if(id==='optLeft'){S.ui=Object.assign(S.ui||{},{left:e.target.checked});applyUI();save()}if(id==='optAutoSell'){S.autoSell=e.target.checked;save();if(S.autoSell)autoSellTick()}
   if(id==='optAn'){S.consent={analytics:e.target.checked,at:Date.now()};save();toast(e.target.checked?'Anonim veri paylaşımı açık':'Anonim veri paylaşımı kapalı')}
   if(id==='optNotif'&&NATIVE){if(e.target.checked)PLATFORM.askNotif().then(g=>{S.sound.notif=!!g;if(!g)toast('Bildirim izni verilmedi');save();renderSheet()});else{S.sound.notif=false;save()}return}
   if(id==='optNotif'){if(e.target.checked){try{Notification.requestPermission().then(pm=>{S.sound.notif=pm==='granted';if(!S.sound.notif)toast('Tarayıcı bildirim izni vermedi');save();renderSheet()}).catch(()=>{toast('Bildirimler bu ortamda desteklenmiyor');renderSheet()})}catch(err){toast('Bildirimler bu ortamda desteklenmiyor');e.target.checked=false}}else{S.sound.notif=false;save()}}});
@@ -48,7 +48,7 @@ function renderHUD(){$('#coins').textContent=fmt(S.coins);if(lastCoins!=null&&S.
   $('#lv').textContent=S.lv;$('#lvring').style.setProperty('--p',Math.min(100,S.xp/xpNeed(S.lv)*100)+'%');$('#pLv').title=`Seviye ${S.lv} · ${fmt(S.xp)}/${fmt(xpNeed(S.lv))} xp`;
   $('#rep').textContent=S.rep;$('#store').textContent=stored()+'/'+cap();$('#pStore').classList.toggle('full',stored()/cap()>=.9);
   $('#gems').textContent=S.gems;const se=SEASONS[season()],wx=WEATHER[S.weather.k];$('#era').textContent=`${se.e} ${se.n} · ${wx.e} ${clockStr()}`;$('#goalDot').hidden=!goalReady()&&!(S.daily&&S.daily.tasks.some(t=>t.p>=t.n&&!t.c))}
-function commit(skipSheet){save();renderHUD();syncWorld();if(!skipSheet)renderSheet();if(interior&&intSig(interior.key)!==interior.sig)interior.refresh()}
+function commit(skipSheet){save();renderHUD();syncWorld();if(!skipSheet)renderSheet();refreshQpop();if(interior&&intSig(interior.key)!==interior.sig)interior.refresh()}
 
 // Kart içindeki parsel ızgarasında da sürükleyerek ekme/toplama
 let panelSwipeUsed=false;

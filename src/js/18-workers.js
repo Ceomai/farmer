@@ -20,6 +20,6 @@ function rescue(){if(!S||S.coins>=5)return;const sellable=Object.keys(S.items).s
   if(sellable||running||Object.keys(S.workers).some(workOn)||now()-(S.rescueAt||0)<3600000)return;S.rescueAt=now();gain(30,'Yardım');toast('🧑‍🌾 Komşu Ali tohum parası bıraktı: +₺30. Hadi ekelim!');commit()}
 function automate(){let ch=false;
   if(workOn('fields'))S.fields.forEach((f,i)=>{if(f.job&&now()>=f.job.e&&harvestPlot(i,null,null,true))ch=true;if(!f.job&&plantPlot(i,S.lastCrop,true))ch=true});
-  for(const u in S.workers){if(u==='fields'||!workOn(u))continue;const s=S.units[u];if(!s||!B[u].recipes)continue;if(s.job&&now()>=s.job.e&&collectUnit(u,null,null,true))ch=true;
+  for(const u in S.workers){if(u==='fields'||!workOn(u))continue;const s=S.units[u];if(!s||!B[u].recipes)continue;if(s.job&&now()>=s.job.e&&collectUnit(u,null,null,true))ch=true;if(queueNext(u))ch=true;
     if(!s.job&&s.last){const r=B[u].recipes.find(x=>x.id===s.last);if(r&&r.lvl<=S.lv&&canPay(r)&&!(r.col&&!has1(r.col))){startUnit(u,s.last,true);ch=true}}}
   return ch}

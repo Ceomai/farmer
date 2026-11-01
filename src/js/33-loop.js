@@ -15,7 +15,7 @@ function frame(ts){requestAnimationFrame(frame);if(glLost||R.getContext().isCont
   if(!sayB.hidden)placeBubble()}
 function tick(){
   document.querySelectorAll('[data-e]').forEach(el=>{el.style.width=Math.min(100,(now()-el.dataset.s)/(el.dataset.e-el.dataset.s)*100)+'%'});
-  document.querySelectorAll('[data-left]').forEach(el=>{el.textContent=el.dataset.pre+' '+secs(Math.max(0,Math.ceil((+el.dataset.left-now())/1000)))});
+  document.querySelectorAll('[data-left]').forEach(el=>{const sec=Math.max(0,Math.ceil((+el.dataset.left-now())/1000));el.textContent=el.dataset.pre+' '+(el.dataset.short?secShort(sec):secs(sec))});
   renderStrip();if(S.consent){tutStart();tutTick()}updateWeather();applySeason();if(checkDaily())showLogin();ensureContests();if(ensureContracts()&&view&&view.loc==='han')renderSheet();
   if(S.weather.k==='rain'||S.weather.k==='storm'){for(const f of S.fields)if(f.job&&now()<f.job.e)f.job.e-=150;const se=S.units.sera;if(se&&se.job&&now()<se.job.e)se.job.e-=150}
   if(++autoTick%4===0&&automate()){save();if(view)view.sig='';}
@@ -24,7 +24,7 @@ function tick(){
   if(view&&sheetSig()!==view.sig&&!(race&&race.running))renderSheet();
   if(view&&view.k==='loc'&&view.loc==='pazar'&&now()-S.market.at>=180000){refreshMarket();renderSheet()}
   if(interior&&intSig(interior.key)!==interior.sig)interior.refresh();
-  rescue();batchCheck();renderHUD()}
+  if(queueAll())commit();rescue();autoSellTick();batchCheck();renderHUD()}
 function boot(data){
   S=migrate((data&&data.house!=null)?data:(load()||fresh()));const away=S.lastSeen?Date.now()-S.lastSeen:0;refreshMarket();ensureOrders();updateWeather();applySeason();checkDaily();ensureContests();ensureContracts();automate();
   try{makeThumbs()}catch(e){console.warn(e)}
