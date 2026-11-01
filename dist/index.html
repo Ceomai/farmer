@@ -1857,11 +1857,11 @@ function levelUp(){if(typeof track==='function')track('level_up',{lv:S.lv});
 function refreshMarket(force){if(!force&&now()-S.market.at<180000)return;S.market.at=now();if(!S.market.h)S.market.h={};for(const k in ITEMS){S.market.m[k]=+(0.8+Math.random()*0.45).toFixed(2);const h=S.market.h[k]||(S.market.h[k]=[]);h.push(S.market.m[k]);if(h.length>8)h.shift()}}
 // Pazar doygunluğu: aynı üründen çok satınca fiyat düşer (en fazla %60), 15 dakikada yarıya iner.
 // Satılan değer (₺) üzerinden ölçülür; oyuncu büyüdükçe pazar da büyür.
-const satNow=k=>{const s=S.market.sat&&S.market.sat[k];return s?s.v*Math.pow(.5,(now()-s.t)/900000):0};
+const satNow=k=>{const s=S.market.sat&&S.market.sat[k];if(!s||!isFinite(s.v)||!isFinite(s.t))return 0;return Math.max(0,s.v)*Math.pow(.5,Math.max(0,now()-s.t)/900000)}; // saat geri alınsa da büyümez
 const satCap=()=>(1500+400*S.lv)*(typeof projOn==='function'&&projOn('pazaryeri')?2:1);
 const satF=(k,add=0)=>Math.max(.4,1/(1+(satNow(k)+add)/satCap()));
-const basePrice=k=>ITEMS[k].p*(S.market.m[k]||1);
-const sellPrice=(k,n=1)=>Math.max(1,Math.round(basePrice(k)*satF(k,ITEMS[k].p*n/2)));
+const basePrice=k=>ITEMS[k].p*((isFinite(S.market.m[k])&&S.market.m[k]>0)?S.market.m[k]:1);
+const sellPrice=(k,n=1)=>Math.max(1,Math.round(basePrice(k)*satF(k,ITEMS[k].p*n/2))||1);
 function addSat(k,n){if(!S.market.sat)S.market.sat={};S.market.sat[k]={v:satNow(k)+ITEMS[k].p*n,t:now()}}
 function sell(k,n){n=Math.min(n,has(k));if(n<=0)return;const pr=sellPrice(k,n);S.items[k]-=n;addSat(k,n);gain(pr*n,'Pazar');stat('sold',n);sfx('coin');flyCoins(Math.min(6,2+n));toast(`${n} ${ITEMS[k].n} satıldı · +₺${fmt(pr*n)}${satF(k)<.8?' · pazar bu üründen doydu, fiyat düşük':''}`);commit()}
 // Fazlayı sat: her üründen "keep" kadar bırakıp gerisini satar (yem ve taylar hariç). Tek bir özet bildirim gösterir.
@@ -1954,7 +1954,7 @@ function queueAdd(u,rid){const s=S.units[u];if(!s||!B[u].recipes)return;const r=
 function queueDel(u,i){const s=S.units[u];if(!s||!s.q)return;s.q.splice(i,1);commit()}
 function queueNext(u,quiet=true){const s=S.units[u];if(!s||s.job||!s.q||!s.q.length)return false;startUnit(u,s.q[0],true);if(s.job){s.q.shift();return true}return false}
 function queueAll(){let n=0;for(const u in S.units)if(queueNext(u))n++;return n}
-function giveOut(out,x,y,xp,quiet){const n=Object.values(out).reduce((a,b)=>a+b,0);if(stored()+n>cap()){if(!quiet)toast('Ambar dolu! Pazarda sat ya da siloyu büyüt.');return false}
+function giveOut(out,x,y,xp,quiet){const n=Object.values(out).reduce((a,b)=>a+b,0),ns=Object.entries(out).reduce((a,[k,v])=>k==='at'?a:a+v,0);if(ns>0&&stored()+ns>cap()){if(!quiet)toast('Ambar dolu! Pazarda sat ya da siloyu büyüt.');return false}
   for(const k in out)S.items[k]=has(k)+out[k];addXP(xp);if(quiet){autoGain+=n;return true}sfx('pop');PLATFORM.hap();if(n>=6)celebrate();if(x!=null){floatXY(x,y,Object.entries(out).map(([k,v])=>`+${v} ${ITEMS[k].e}`).join('  ')+`  +${xp} xp`);flyItems(x,y,out)}return true}
 // Ahırda en fazla 6 tay bekler; fazlası pazar fiyatından kendiliğinden satılır (ambar dolmasın, üretim durmasın)
 const HORSE_KEEP=6;function extraHorses(quiet){const n=has('at')-HORSE_KEEP;if(n<=0)return;const pr=sellPrice('at',n);S.items.at-=n;addSat('at',n);gain(pr*n,'Pazar');stat('sold',n);if(!quiet)toast(`🐎 Ahır dolu: ${n} tay satıldı · +₺${fmt(pr*n)}`)}
@@ -2992,7 +2992,7 @@ function rescue(){if(!S||S.coins>=5)return;const sellable=Object.keys(S.items).s
 function automate(){let ch=false;
   if(workOn('fields'))S.fields.forEach((f,i)=>{if(f.job&&now()>=f.job.e&&harvestPlot(i,null,null,true))ch=true;if(!f.job&&plantPlot(i,S.lastCrop,true))ch=true});
   for(const u in S.workers){if(u==='fields'||!workOn(u))continue;const s=S.units[u];if(!s||!B[u].recipes)continue;if(s.job&&now()>=s.job.e&&collectUnit(u,null,null,true))ch=true;if(queueNext(u))ch=true;
-    if(!s.job&&s.last){const r=B[u].recipes.find(x=>x.id===s.last);if(r&&r.lvl<=S.lv&&canPay(r)&&!(r.col&&!has1(r.col))){startUnit(u,s.last,true);ch=true}}}
+    if(!s.job&&s.last&&!(s.q&&s.q.length)){const r=B[u].recipes.find(x=>x.id===s.last);if(r&&r.lvl<=S.lv&&canPay(r)&&!(r.col&&!has1(r.col))){startUnit(u,s.last,true);ch=true}}}
   return ch}
 
 // ---- 19-contracts.js ----
@@ -3134,7 +3134,7 @@ function checkDaily(){const t=todayStr();if(S.daily&&S.daily.day===t)return fals
   S.daily={day:t,streak,login:false,bonus:false,tasks:pool.map(x=>{const n=x.a+Math.floor(Math.random()*(x.b-x.a+1));return{k:x.k,e:x.e,d:x.d.replace('{n}',n),n,p:0,r:x.r,c:false}})};save();return true}
 function showLogin(){const D=S.daily;if(!D||D.login||document.querySelector('.modal.login'))return;const d=document.createElement('div');d.className='modal login';
   d.innerHTML=`<div><h2 style="font-size:26px">Günlük ödül</h2><p class="note">Her gün uğra, ödül büyüsün! ${D.streak}. gün</p><div class="cal">${LOGIN.map((r,i)=>`<span class="${i+1<D.streak?'got':i+1===D.streak?'now':''}"><small>${i+1}. gün</small>${rewardTxt(r)}</span>`).join('')}</div><button class="btn big gold">Ödülü al</button></div>`;
-  d.querySelector('button').onclick=()=>{const r=LOGIN[D.streak-1];if(r.c)gain(r.c,'Ödül');if(r.yem)S.items.yem=has('yem')+r.yem;if(r.g)S.gems+=r.g;D.login=true;sfx('win');flyCoins(6);d.remove();commit()};document.body.appendChild(d)}
+  d.querySelector('button').onclick=()=>{const r=LOGIN[D.streak-1];if(r.c)gain(r.c,'Ödül');if(r.yem)giveItems({yem:r.yem});if(r.g)S.gems+=r.g;D.login=true;sfx('win');flyCoins(6);d.remove();commit()};document.body.appendChild(d)}
 function dailyHTML(){const D=S.daily;if(!D)return'';return `<div class="unit"><div class="uhead"><span>📅 Günlük görevler</span><span class="tm">🔥 ${D.streak}. gün</span></div>`+D.tasks.map((t,i)=>`<div class="job"><span class="big">${t.e}</span><span class="pw"><b style="font-size:13px">${t.d}</b><span class="pbar"><i style="width:${Math.min(100,t.p/t.n*100)}%;animation:none"></i></span><small>${Math.min(t.p,t.n)}/${t.n} · ₺${t.r}</small></span><button class="pill-btn gold" data-act="dclaim" data-i="${i}" ${t.p>=t.n&&!t.c?'':'disabled'}>${t.c?'✓':'Al'}</button></div>`).join('')
   +(D.tasks.every(t=>t.c)&&!D.bonus?`<button class="btn big gold" data-act="dbonus">Hepsi tamam! +🍀2</button>`:'')+'</div>'}
 function countReady(){let n=S.fields.filter(f=>f.job&&now()>=f.job.e).length;for(const u in S.units){const s=S.units[u];if(s.job&&now()>=s.job.e)n++}return n}
@@ -3157,12 +3157,16 @@ function migrate(s){const d=fresh();if(!s||typeof s!=='object'||Array.isArray(s)
     if(x.job&&obj(x.job)){const r=rs.find(r=>r.id===x.job.r);if(r){o.job=fixJob(x.job,r.t)}}if(rs.find(r=>r.id===x.last))o.last=x.last;if(Array.isArray(x.q)){const q=x.q.filter(id=>rs.find(r=>r.id===id)).slice(0,3);if(q.length)o.q=q}if(x.built)o.built=num(x.built,0);un[u]=o}s.units=un;
   s.fields=s.fields.slice(0,9).map(f=>{if(!obj(f))return{};if(f.job){const c=obj(f.job)&&cropOf(f.job.r);return c?{job:fixJob(f.job,c.t)}:{}}return{}});while(s.fields.length<2)s.fields.push({});
   if(!cropOf(s.lastCrop))s.lastCrop='bugday';if(!WEATHER[s.weather.k])s.weather={k:'sun',until:0};
-  const wk={};for(const k in s.workers)if(k==='fields'||B[k]){const v=Number(s.workers[k]);wk[k]=v>1e12&&v<T+SHIFT*2?v:T+SHIFT}s.workers=wk;
+  const wk={};for(const k in s.workers)if(k==='fields'||(B[k]&&B[k].recipes&&un[k])){const v=Number(s.workers[k]);wk[k]=v>1e12&&v<T+SHIFT*2?v:T+SHIFT}s.workers=wk;
   s.horses=s.horses.filter(obj).slice(0,4).map(h=>({n:typeof h.n==='string'&&h.n?h.n:'Rüzgar',spd:num(h.spd,5,1,20,true),sta:num(h.sta,5,1,20,true),w:num(h.w,0,0,1e6,true),rest:num(h.rest,0),train:num(h.train,0)}));
   s.league=obj(s.league)?s.league:d.league;s.league.tier=num(s.league.tier,0,0,TIERS.length-1,true);s.league.pts=num(s.league.pts,0,0,1e6,true);
   const okItems=o=>obj(o)&&Object.keys(o).length&&Object.keys(o).every(k=>ITEMS[k]&&num(o[k],0)>0);
   s.orders=s.orders.filter(o=>obj(o)&&okItems(o.items));s.contracts=s.contracts.filter(c=>obj(c)&&ITEMS[c.k]&&num(c.total,0)>0);
   if(s.daily!=null&&!(obj(s.daily)&&Array.isArray(s.daily.tasks)))s.daily=null;
+  if(s.daily){s.daily.streak=num(s.daily.streak,1,1,7,true);s.daily.tasks=s.daily.tasks.filter(t=>obj(t)&&isFinite(t.n)&&t.n>0&&typeof t.d==='string').map(t=>({...t,p:num(t.p,0,0,1e9),r:num(t.r,0,0,1e7)}))}
+  {const m={},sat={};for(const k in s.market.m){const v=Number(s.market.m[k]);if(ITEMS[k]&&isFinite(v)&&v>0&&v<5)m[k]=v}for(const k in (obj(s.market.sat)?s.market.sat:{})){const x=s.market.sat[k];if(ITEMS[k]&&obj(x)&&isFinite(x.v)&&x.v>=0&&isFinite(x.t)&&x.t<=T)sat[k]={v:x.v,t:x.t}}s.market.m=m;s.market.sat=sat}
+  s.contests.list=s.contests.list.filter(id=>CONTESTS.find(c=>c.id===id));if(!obj(s.contests.done))s.contests.done={};
+  if(obj(s.proj))for(const k in s.proj)if(!PROJ.find(p=>p.id===k))delete s.proj[k];
   for(const k of['house','farm','owned'])if(!obj(s.decor[k]))s.decor[k]={};
   for(const k of['music','sfx','notif'])s.sound[k]=typeof s.sound[k]==='boolean'?s.sound[k]:d.sound[k];
   if(!obj(s.market.m))s.market.m={};if(!obj(s.market.h))s.market.h={};s.market.at=num(s.market.at,0);
@@ -3316,7 +3320,7 @@ const hearts=n=>{const l=frLv(n);return '❤️'.repeat(l)+'🤍'.repeat(3-l)};
 function befriend(n,amt){const before=frLv(n);frOf(n).d+=amt;const after=frLv(n);if(after>before){S.gems+=after;setTimeout(()=>{const d=document.createElement('div');d.className='modal login';
   d.innerHTML=`<div><div class="badge">${face(n)}</div><h2 style="font-size:26px">${n}</h2><p>Artık <b>${FR_N[after]}</b>sunuz! ${hearts(n)}<br>Siparişleri %${after*6} daha fazla ödüyor.${after>=2?'<br>Her gün sana küçük bir hediye bırakacak.':''}<br>+${after} 🍀</p><button class="btn big gold">Sağ ol!</button></div>`;
   d.querySelector('button').onclick=()=>d.remove();document.body.appendChild(d);sfx('win')},600)}}
-function friendGifts(){const t=todayStr();const out=[];for(const n of NAMES){const f=frOf(n);if(frLv(n)>=2&&f.gift!==t){f.gift=t;const pool=producible();const k=pool[Math.floor(Math.random()*pool.length)]||'yem',q=2+frLv(n);S.items[k]=has(k)+q;out.push(`${face(n)} ${n}: ${q} ${ITEMS[k].e}`)}}
+function friendGifts(){const t=todayStr();const out=[];for(const n of NAMES){const f=frOf(n);if(frLv(n)>=2&&f.gift!==t){f.gift=t;const pool=producible();const k=pool[Math.floor(Math.random()*pool.length)]||'yem',q=2+frLv(n);out.push(`${face(n)} ${n}: ${giveItems({[k]:q})}`)}}
   if(out.length){const d=document.createElement('div');d.className='modal login';d.innerHTML=`<div><div class="badge">🎁</div><h2 style="font-size:26px">Kasabadan hediye!</h2><p>${out.join('<br>')}</p><button class="btn big gold">Teşekkürler</button></div>`;d.querySelector('button').onclick=()=>d.remove();document.body.appendChild(d)}}
 function friendsBody(){return `<p class="note">Bir kişinin siparişini teslim ettikçe dostluğunuz büyür. Dostlar daha çok öder, can dostlar her gün hediye bırakır. Tanıdık olduğun kasabalıların küçük hikâyeleri burada açılır.</p>`+NAMES.map(n=>{const f=frOf(n),l=frLv(n),nx=FR_LV[l+1];
   return `<div class="job" style="padding:7px 12px"><span class="big" style="font-size:26px">${face(n)}</span><span class="pw"><b>${n}</b><small>${FR_N[l]} · ${hearts(n)} · ödül +%${l*6}</small>${nx?`<span class="pbar"><i style="width:${Math.min(100,(f.d-FR_LV[l])/(nx-FR_LV[l])*100)}%;animation:none;background:#e8657a"></i></span><small>${f.d}/${nx} teslimat · ${FR_PERK[n]||''}</small>`:'<small>En yüksek dostluk!</small>'}</span></div>${typeof questHTML==='function'?questHTML(n):''}`}).join('')}
@@ -3529,7 +3533,7 @@ function quickLoc(k){const L=LOC[k],before={...S.items},g0=autoGain;let got=0,st
   if(L.kind==='fields')S.fields.forEach((f,i)=>{if(f.job&&now()>=f.job.e){if(harvestPlot(i,null,null,true))got++;else full=true}});
   (L.units||[]).forEach(u=>{const s=S.units[u];if(s&&s.job&&now()>=s.job.e){if(collectUnit(u,null,null,true))got++;else full=true}});
   if(L.kind==='fields'){const c=cropOf(S.lastCrop);S.fields.forEach((f,i)=>{if(!f.job&&c&&plantPlot(i,S.lastCrop,true))started++})}
-  (L.units||[]).forEach(u=>{const s=S.units[u];if(s&&!s.job&&B[u].recipes){if(!queueNext(u))startUnit(u,s.last||B[u].recipes[0].id,true);if(s.job)started++}});
+  (L.units||[]).forEach(u=>{const s=S.units[u];if(s&&!s.job&&B[u].recipes){if(!queueNext(u)&&!(s.q&&s.q.length))startUnit(u,s.last||B[u].recipes[0].id,true);if(s.job)started++}});
   autoGain=g0;const out={};for(const i in S.items){const d=S.items[i]-(before[i]||0);if(d>0)out[i]=d}
   return{got,started,out,full,renewed}}
 function quickFeedback(res,el){const r=el?el.getBoundingClientRect():{left:innerWidth/2,width:0,top:innerHeight-140},x=r.left+r.width/2,y=r.top;
@@ -3903,7 +3907,8 @@ function askGen(){if(!genReady())return;const d=document.createElement('div');d.
   d.innerHTML=`<div><div class="badge">🌳</div><h2 style="font-size:24px">Yeni nesle devret?</h2><p style="font-size:13px;text-align:left"><b>Sıfırlanır:</b> para, ürünler, binalar, araziler, ev, tarlalar, seviye.<br><b>Kalır:</b> 🍀 yonca, koleksiyon, başarımlar, süsler, dostluklar, hikâyeler, kasaba projeleri.<br><b>Kazanılır:</b> kalıcı +%10 üretim ve +🍀10.</p>
     <button class="btn big gold" data-g="1">Evet, devret</button><button class="btn ghost" data-g="0">Vazgeç</button></div>`;
   document.body.appendChild(d);d.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{d.remove();if(b.dataset.g==='1')doGen()})}
-function doGen(){if(!genReady())return;const keep={};for(const k of['gems','album','ach','decor','friends','quests','proj','sound','consent','ui','stats','keepN','autoSell','fastNav','created'])if(S[k]!=null)keep[k]=S[k];
+// Ana hedefler, günlük ödül/görevler, reklam hakkı ve günün panayırı da korunur (yeni nesilde tekrar alınamasın)
+function doGen(){if(!genReady())return;if(typeof race!=='undefined'&&race&&race.running)return toast('Önce süren yarışın bitmesini bekle');const keep={};for(const k of['gems','album','ach','decor','friends','quests','proj','sound','consent','ui','stats','keepN','autoSell','fastNav','created','goal','daily','ads','contests','colDone'])if(S[k]!=null)keep[k]=S[k];
   const g=(S.gen||0)+1;S=Object.assign(fresh(),keep,{gen:g,tut:{done:1},tut2:{done:1}});S.gems=(S.gems||0)+10;S.stats.gens=(S.stats.gens||0)+1;
   refreshMarket(true);ensureOrders();save();regSig='';view=null;toHub();syncWorld(true);renderHUD();celebrate(g+'. nesil!');toast(`🌳 ${g}. nesil başladı: bütün üretim +%${g*10}`);track('prestige',{gen:g})}
 

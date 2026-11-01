@@ -2,11 +2,11 @@
 function refreshMarket(force){if(!force&&now()-S.market.at<180000)return;S.market.at=now();if(!S.market.h)S.market.h={};for(const k in ITEMS){S.market.m[k]=+(0.8+Math.random()*0.45).toFixed(2);const h=S.market.h[k]||(S.market.h[k]=[]);h.push(S.market.m[k]);if(h.length>8)h.shift()}}
 // Pazar doygunluğu: aynı üründen çok satınca fiyat düşer (en fazla %60), 15 dakikada yarıya iner.
 // Satılan değer (₺) üzerinden ölçülür; oyuncu büyüdükçe pazar da büyür.
-const satNow=k=>{const s=S.market.sat&&S.market.sat[k];return s?s.v*Math.pow(.5,(now()-s.t)/900000):0};
+const satNow=k=>{const s=S.market.sat&&S.market.sat[k];if(!s||!isFinite(s.v)||!isFinite(s.t))return 0;return Math.max(0,s.v)*Math.pow(.5,Math.max(0,now()-s.t)/900000)}; // saat geri alınsa da büyümez
 const satCap=()=>(1500+400*S.lv)*(typeof projOn==='function'&&projOn('pazaryeri')?2:1);
 const satF=(k,add=0)=>Math.max(.4,1/(1+(satNow(k)+add)/satCap()));
-const basePrice=k=>ITEMS[k].p*(S.market.m[k]||1);
-const sellPrice=(k,n=1)=>Math.max(1,Math.round(basePrice(k)*satF(k,ITEMS[k].p*n/2)));
+const basePrice=k=>ITEMS[k].p*((isFinite(S.market.m[k])&&S.market.m[k]>0)?S.market.m[k]:1);
+const sellPrice=(k,n=1)=>Math.max(1,Math.round(basePrice(k)*satF(k,ITEMS[k].p*n/2))||1);
 function addSat(k,n){if(!S.market.sat)S.market.sat={};S.market.sat[k]={v:satNow(k)+ITEMS[k].p*n,t:now()}}
 function sell(k,n){n=Math.min(n,has(k));if(n<=0)return;const pr=sellPrice(k,n);S.items[k]-=n;addSat(k,n);gain(pr*n,'Pazar');stat('sold',n);sfx('coin');flyCoins(Math.min(6,2+n));toast(`${n} ${ITEMS[k].n} satıldı · +₺${fmt(pr*n)}${satF(k)<.8?' · pazar bu üründen doydu, fiyat düşük':''}`);commit()}
 // Fazlayı sat: her üründen "keep" kadar bırakıp gerisini satar (yem ve taylar hariç). Tek bir özet bildirim gösterir.

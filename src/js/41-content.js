@@ -31,6 +31,7 @@ function askGen(){if(!genReady())return;const d=document.createElement('div');d.
   d.innerHTML=`<div><div class="badge">🌳</div><h2 style="font-size:24px">Yeni nesle devret?</h2><p style="font-size:13px;text-align:left"><b>Sıfırlanır:</b> para, ürünler, binalar, araziler, ev, tarlalar, seviye.<br><b>Kalır:</b> 🍀 yonca, koleksiyon, başarımlar, süsler, dostluklar, hikâyeler, kasaba projeleri.<br><b>Kazanılır:</b> kalıcı +%10 üretim ve +🍀10.</p>
     <button class="btn big gold" data-g="1">Evet, devret</button><button class="btn ghost" data-g="0">Vazgeç</button></div>`;
   document.body.appendChild(d);d.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{d.remove();if(b.dataset.g==='1')doGen()})}
-function doGen(){if(!genReady())return;const keep={};for(const k of['gems','album','ach','decor','friends','quests','proj','sound','consent','ui','stats','keepN','autoSell','fastNav','created'])if(S[k]!=null)keep[k]=S[k];
+// Ana hedefler, günlük ödül/görevler, reklam hakkı ve günün panayırı da korunur (yeni nesilde tekrar alınamasın)
+function doGen(){if(!genReady())return;if(typeof race!=='undefined'&&race&&race.running)return toast('Önce süren yarışın bitmesini bekle');const keep={};for(const k of['gems','album','ach','decor','friends','quests','proj','sound','consent','ui','stats','keepN','autoSell','fastNav','created','goal','daily','ads','contests','colDone'])if(S[k]!=null)keep[k]=S[k];
   const g=(S.gen||0)+1;S=Object.assign(fresh(),keep,{gen:g,tut:{done:1},tut2:{done:1}});S.gems=(S.gems||0)+10;S.stats.gens=(S.stats.gens||0)+1;
   refreshMarket(true);ensureOrders();save();regSig='';view=null;toHub();syncWorld(true);renderHUD();celebrate(g+'. nesil!');toast(`🌳 ${g}. nesil başladı: bütün üretim +%${g*10}`);track('prestige',{gen:g})}

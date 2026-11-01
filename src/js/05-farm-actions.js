@@ -19,7 +19,7 @@ function queueAdd(u,rid){const s=S.units[u];if(!s||!B[u].recipes)return;const r=
 function queueDel(u,i){const s=S.units[u];if(!s||!s.q)return;s.q.splice(i,1);commit()}
 function queueNext(u,quiet=true){const s=S.units[u];if(!s||s.job||!s.q||!s.q.length)return false;startUnit(u,s.q[0],true);if(s.job){s.q.shift();return true}return false}
 function queueAll(){let n=0;for(const u in S.units)if(queueNext(u))n++;return n}
-function giveOut(out,x,y,xp,quiet){const n=Object.values(out).reduce((a,b)=>a+b,0);if(stored()+n>cap()){if(!quiet)toast('Ambar dolu! Pazarda sat ya da siloyu büyüt.');return false}
+function giveOut(out,x,y,xp,quiet){const n=Object.values(out).reduce((a,b)=>a+b,0),ns=Object.entries(out).reduce((a,[k,v])=>k==='at'?a:a+v,0);if(ns>0&&stored()+ns>cap()){if(!quiet)toast('Ambar dolu! Pazarda sat ya da siloyu büyüt.');return false}
   for(const k in out)S.items[k]=has(k)+out[k];addXP(xp);if(quiet){autoGain+=n;return true}sfx('pop');PLATFORM.hap();if(n>=6)celebrate();if(x!=null){floatXY(x,y,Object.entries(out).map(([k,v])=>`+${v} ${ITEMS[k].e}`).join('  ')+`  +${xp} xp`);flyItems(x,y,out)}return true}
 // Ahırda en fazla 6 tay bekler; fazlası pazar fiyatından kendiliğinden satılır (ambar dolmasın, üretim durmasın)
 const HORSE_KEEP=6;function extraHorses(quiet){const n=has('at')-HORSE_KEEP;if(n<=0)return;const pr=sellPrice('at',n);S.items.at-=n;addSat('at',n);gain(pr*n,'Pazar');stat('sold',n);if(!quiet)toast(`🐎 Ahır dolu: ${n} tay satıldı · +₺${fmt(pr*n)}`)}

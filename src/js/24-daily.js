@@ -10,7 +10,7 @@ function checkDaily(){const t=todayStr();if(S.daily&&S.daily.day===t)return fals
   S.daily={day:t,streak,login:false,bonus:false,tasks:pool.map(x=>{const n=x.a+Math.floor(Math.random()*(x.b-x.a+1));return{k:x.k,e:x.e,d:x.d.replace('{n}',n),n,p:0,r:x.r,c:false}})};save();return true}
 function showLogin(){const D=S.daily;if(!D||D.login||document.querySelector('.modal.login'))return;const d=document.createElement('div');d.className='modal login';
   d.innerHTML=`<div><h2 style="font-size:26px">Günlük ödül</h2><p class="note">Her gün uğra, ödül büyüsün! ${D.streak}. gün</p><div class="cal">${LOGIN.map((r,i)=>`<span class="${i+1<D.streak?'got':i+1===D.streak?'now':''}"><small>${i+1}. gün</small>${rewardTxt(r)}</span>`).join('')}</div><button class="btn big gold">Ödülü al</button></div>`;
-  d.querySelector('button').onclick=()=>{const r=LOGIN[D.streak-1];if(r.c)gain(r.c,'Ödül');if(r.yem)S.items.yem=has('yem')+r.yem;if(r.g)S.gems+=r.g;D.login=true;sfx('win');flyCoins(6);d.remove();commit()};document.body.appendChild(d)}
+  d.querySelector('button').onclick=()=>{const r=LOGIN[D.streak-1];if(r.c)gain(r.c,'Ödül');if(r.yem)giveItems({yem:r.yem});if(r.g)S.gems+=r.g;D.login=true;sfx('win');flyCoins(6);d.remove();commit()};document.body.appendChild(d)}
 function dailyHTML(){const D=S.daily;if(!D)return'';return `<div class="unit"><div class="uhead"><span>📅 Günlük görevler</span><span class="tm">🔥 ${D.streak}. gün</span></div>`+D.tasks.map((t,i)=>`<div class="job"><span class="big">${t.e}</span><span class="pw"><b style="font-size:13px">${t.d}</b><span class="pbar"><i style="width:${Math.min(100,t.p/t.n*100)}%;animation:none"></i></span><small>${Math.min(t.p,t.n)}/${t.n} · ₺${t.r}</small></span><button class="pill-btn gold" data-act="dclaim" data-i="${i}" ${t.p>=t.n&&!t.c?'':'disabled'}>${t.c?'✓':'Al'}</button></div>`).join('')
   +(D.tasks.every(t=>t.c)&&!D.bonus?`<button class="btn big gold" data-act="dbonus">Hepsi tamam! +🍀2</button>`:'')+'</div>'}
 function countReady(){let n=S.fields.filter(f=>f.job&&now()>=f.job.e).length;for(const u in S.units){const s=S.units[u];if(s.job&&now()>=s.job.e)n++}return n}
@@ -33,12 +33,16 @@ function migrate(s){const d=fresh();if(!s||typeof s!=='object'||Array.isArray(s)
     if(x.job&&obj(x.job)){const r=rs.find(r=>r.id===x.job.r);if(r){o.job=fixJob(x.job,r.t)}}if(rs.find(r=>r.id===x.last))o.last=x.last;if(Array.isArray(x.q)){const q=x.q.filter(id=>rs.find(r=>r.id===id)).slice(0,3);if(q.length)o.q=q}if(x.built)o.built=num(x.built,0);un[u]=o}s.units=un;
   s.fields=s.fields.slice(0,9).map(f=>{if(!obj(f))return{};if(f.job){const c=obj(f.job)&&cropOf(f.job.r);return c?{job:fixJob(f.job,c.t)}:{}}return{}});while(s.fields.length<2)s.fields.push({});
   if(!cropOf(s.lastCrop))s.lastCrop='bugday';if(!WEATHER[s.weather.k])s.weather={k:'sun',until:0};
-  const wk={};for(const k in s.workers)if(k==='fields'||B[k]){const v=Number(s.workers[k]);wk[k]=v>1e12&&v<T+SHIFT*2?v:T+SHIFT}s.workers=wk;
+  const wk={};for(const k in s.workers)if(k==='fields'||(B[k]&&B[k].recipes&&un[k])){const v=Number(s.workers[k]);wk[k]=v>1e12&&v<T+SHIFT*2?v:T+SHIFT}s.workers=wk;
   s.horses=s.horses.filter(obj).slice(0,4).map(h=>({n:typeof h.n==='string'&&h.n?h.n:'Rüzgar',spd:num(h.spd,5,1,20,true),sta:num(h.sta,5,1,20,true),w:num(h.w,0,0,1e6,true),rest:num(h.rest,0),train:num(h.train,0)}));
   s.league=obj(s.league)?s.league:d.league;s.league.tier=num(s.league.tier,0,0,TIERS.length-1,true);s.league.pts=num(s.league.pts,0,0,1e6,true);
   const okItems=o=>obj(o)&&Object.keys(o).length&&Object.keys(o).every(k=>ITEMS[k]&&num(o[k],0)>0);
   s.orders=s.orders.filter(o=>obj(o)&&okItems(o.items));s.contracts=s.contracts.filter(c=>obj(c)&&ITEMS[c.k]&&num(c.total,0)>0);
   if(s.daily!=null&&!(obj(s.daily)&&Array.isArray(s.daily.tasks)))s.daily=null;
+  if(s.daily){s.daily.streak=num(s.daily.streak,1,1,7,true);s.daily.tasks=s.daily.tasks.filter(t=>obj(t)&&isFinite(t.n)&&t.n>0&&typeof t.d==='string').map(t=>({...t,p:num(t.p,0,0,1e9),r:num(t.r,0,0,1e7)}))}
+  {const m={},sat={};for(const k in s.market.m){const v=Number(s.market.m[k]);if(ITEMS[k]&&isFinite(v)&&v>0&&v<5)m[k]=v}for(const k in (obj(s.market.sat)?s.market.sat:{})){const x=s.market.sat[k];if(ITEMS[k]&&obj(x)&&isFinite(x.v)&&x.v>=0&&isFinite(x.t)&&x.t<=T)sat[k]={v:x.v,t:x.t}}s.market.m=m;s.market.sat=sat}
+  s.contests.list=s.contests.list.filter(id=>CONTESTS.find(c=>c.id===id));if(!obj(s.contests.done))s.contests.done={};
+  if(obj(s.proj))for(const k in s.proj)if(!PROJ.find(p=>p.id===k))delete s.proj[k];
   for(const k of['house','farm','owned'])if(!obj(s.decor[k]))s.decor[k]={};
   for(const k of['music','sfx','notif'])s.sound[k]=typeof s.sound[k]==='boolean'?s.sound[k]:d.sound[k];
   if(!obj(s.market.m))s.market.m={};if(!obj(s.market.h))s.market.h={};s.market.at=num(s.market.at,0);

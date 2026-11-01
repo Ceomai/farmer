@@ -16,7 +16,7 @@ function quickLoc(k){const L=LOC[k],before={...S.items},g0=autoGain;let got=0,st
   if(L.kind==='fields')S.fields.forEach((f,i)=>{if(f.job&&now()>=f.job.e){if(harvestPlot(i,null,null,true))got++;else full=true}});
   (L.units||[]).forEach(u=>{const s=S.units[u];if(s&&s.job&&now()>=s.job.e){if(collectUnit(u,null,null,true))got++;else full=true}});
   if(L.kind==='fields'){const c=cropOf(S.lastCrop);S.fields.forEach((f,i)=>{if(!f.job&&c&&plantPlot(i,S.lastCrop,true))started++})}
-  (L.units||[]).forEach(u=>{const s=S.units[u];if(s&&!s.job&&B[u].recipes){if(!queueNext(u))startUnit(u,s.last||B[u].recipes[0].id,true);if(s.job)started++}});
+  (L.units||[]).forEach(u=>{const s=S.units[u];if(s&&!s.job&&B[u].recipes){if(!queueNext(u)&&!(s.q&&s.q.length))startUnit(u,s.last||B[u].recipes[0].id,true);if(s.job)started++}});
   autoGain=g0;const out={};for(const i in S.items){const d=S.items[i]-(before[i]||0);if(d>0)out[i]=d}
   return{got,started,out,full,renewed}}
 function quickFeedback(res,el){const r=el?el.getBoundingClientRect():{left:innerWidth/2,width:0,top:innerHeight-140},x=r.left+r.width/2,y=r.top;
