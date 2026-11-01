@@ -124,11 +124,11 @@ async function run(b,seed){const r=mulberry(seed),R=n=>Math.floor(r()*n);const [
   await p.close();return res}
 
 const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
-const seeds=Array.from({length:RUNS},(_,i)=>SEED0+i);let fails=0;const t0=Date.now();const sig=new Map();
+const seeds=process.env.SEEDS?process.env.SEEDS.split(',').map(Number):Array.from({length:RUNS},(_,i)=>SEED0+i);let fails=0;const t0=Date.now();const sig=new Map();
 const queue=[...seeds];await Promise.all(Array.from({length:PAR},async()=>{while(queue.length){const s=queue.shift();const r=await run(b,s);
   const ok=!r.errs.length&&!r.bad.length;if(!ok){fails++;for(const e of[...r.errs,...r.bad.flatMap(x=>x.bad)]){const k=e.replace(/\d+/g,'#').slice(0,120);if(!sig.has(k))sig.set(k,{e,seed:r.seed,kind:r.kind,vp:r.vp,log:r.log.slice(-6)})}}
   console.log(`${ok?'✓':'✗'} tohum ${r.seed} · ${r.kind} · ${r.vp} · ${r.steps} adım${ok?'':' → '+[...r.errs,...r.bad.map(x=>'['+x.step+'] '+x.bad.join(', '))].slice(0,3).join(' | ')}`)}}));
 await b.close();
-console.log(`\n${RUNS} koşu, ${fails} sorunlu · ${Math.round((Date.now()-t0)/1000)} sn`);
+console.log(`\n${seeds.length} koşu, ${fails} sorunlu · ${Math.round((Date.now()-t0)/1000)} sn`);
 if(sig.size){console.log('\nFarklı sorunlar:');for(const [,v] of sig)console.log(`- ${v.e}\n    tohum ${v.seed} (${v.kind}, ${v.vp}) · son hamleler: ${v.log.join(' › ')}`)}
 process.exit(fails?1:0);
