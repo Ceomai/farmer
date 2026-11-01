@@ -8,7 +8,8 @@ const ITEMS={
   kumas:{n:'Kumaş',e:'🧵',p:160}, at:{n:'Yarış Tayı',e:'🐎',p:1800},
   kabak:{n:'Kabak',e:'🎃',p:240}, kasar:{n:'Eski Kaşar',e:'🟨',p:950}, kestane:{n:'Kestane Balı',e:'🏺',p:330}, tereyag:{n:'Tereyağı',e:'🧈',p:150}, recel:{n:'Reçel',e:'🥫',p:140}, baklava:{n:'Baklava',e:'🥮',p:520}, hali:{n:'El Dokuma Halı',e:'🟥',p:1400}, sabun:{n:'Bal Sabunu',e:'🧼',p:170}, pastirma:{n:'Pastırma',e:'🥓',p:430},
   altinbugday:{n:'Altın Buğday',e:'🌟',p:35}, morhavuc:{n:'Mor Havuç',e:'🥕',p:28},
-  lale:{n:'Lale',e:'🌷',p:26}, karpuz:{n:'Karpuz',e:'🍉',p:70}, patates:{n:'Patates',e:'🥔',p:21}, lahana:{n:'Lahana',e:'🥬',p:40}
+  lale:{n:'Lale',e:'🌷',p:26}, uzum:{n:'Üzüm',e:'🍇',p:14}, pekmez:{n:'Pekmez',e:'🍶',p:160}, pestil:{n:'Pestil',e:'🍫',p:260}, sirke:{n:'Üzüm Sirkesi',e:'🍾',p:230},
+  simit:{n:'Simit',e:'🥯',p:190}, kaymak:{n:'Kaymak',e:'🍦',p:240}, yorgan:{n:'Yün Yorgan',e:'🛏️',p:950}, polen:{n:'Polen',e:'🌼',p:300}, karpuz:{n:'Karpuz',e:'🍉',p:70}, patates:{n:'Patates',e:'🥔',p:21}, lahana:{n:'Lahana',e:'🥬',p:40}
 };
 const CROPS=[
   {id:'bugday',n:'Buğday',cost:5,t:20,out:{bugday:3},lvl:1},
@@ -34,14 +35,16 @@ const B={
   firin:{n:'Taş Fırın',e:'🧱',cost:2000,lvl:4,d:'Ekmek ve kek pişirir.',recipes:[
     {id:'ekmek',n:'Ekmek',in:{un:2},t:60,out:{ekmek:1},lvl:4},
     {id:'kek',n:'Kek',in:{un:2,yumurta:2,sut:1},t:120,out:{kek:1},lvl:6},
-    {id:'baklava',n:'Baklava',in:{un:3,bal:2,tereyag:1},t:600,out:{baklava:1},lvl:13}]},
+    {id:'baklava',n:'Baklava',in:{un:3,bal:2,tereyag:1},t:600,out:{baklava:1},lvl:13},
+    {id:'simit',n:'Pekmezli simit',in:{un:2,pekmez:1},t:240,out:{simit:2},lvl:21}]},
   agil:{n:'Ağıl',e:'🐑',cost:2500,lvl:5,d:'Koyunları besle, yün kırp.',recipes:[{id:'kirp',n:'Koyunları besle',in:{yem:2},t:120,out:{yun:2},lvl:5}]},
   mandira:{n:'Mandıra',e:'🧀',cost:3000,lvl:5,d:'Sütü peynire ve yoğurda işler.',recipes:[
     {id:'yogurt',n:'Yoğurt',in:{sut:2},t:60,out:{yogurt:1},lvl:5},
     {id:'peynir',n:'Peynir',in:{sut:3},t:120,out:{peynir:1},lvl:5},
     {id:'kasar',n:'Eski Kaşar (8 saat)',in:{sut:6},t:28800,out:{kasar:1},lvl:7},
-    {id:'tereyag',n:'Tereyağı',in:{sut:4},t:180,out:{tereyag:1},lvl:10}]},
-  kovan:{n:'Arılık',e:'🐝',cost:1800,lvl:5,d:'Yem istemez, yavaş ama bedava bal.',recipes:[{id:'bal',n:'Bal hasadı',in:{},t:180,out:{bal:2},lvl:5},{id:'kestane',n:'Kestane balı (6 saat)',in:{},t:21600,out:{kestane:2},lvl:6}]},
+    {id:'tereyag',n:'Tereyağı',in:{sut:4},t:180,out:{tereyag:1},lvl:10},
+    {id:'kaymak',n:'Kaymak',in:{sut:6},t:400,out:{kaymak:1},lvl:17}]},
+  kovan:{n:'Arılık',e:'🐝',cost:1800,lvl:5,d:'Yem istemez, yavaş ama bedava bal.',recipes:[{id:'bal',n:'Bal hasadı',in:{},t:180,out:{bal:2},lvl:5},{id:'kestane',n:'Kestane balı (6 saat)',in:{},t:21600,out:{kestane:2},lvl:6},{id:'polen',n:'Polen (1 saat)',in:{},t:3600,out:{polen:2},lvl:25}]},
   bahce:{n:'Elma Bahçesi',e:'🌳',cost:2500,lvl:6,d:'Elma ağaçları. Tohum gerekmez.',recipes:[{id:'elma',n:'Elma topla',in:{},t:300,out:{elma:6},lvl:6},{id:'buyukhasat',n:'Büyük hasat (4 saat)',in:{},t:14400,out:{elma:40},lvl:6}]},
   konserve:{n:'Salça Atölyesi',e:'🥫',cost:4000,lvl:6,d:'Domatesi salçaya çevirir.',recipes:[{id:'salca',n:'Salça',in:{domates:4},t:90,out:{salca:1},lvl:6},{id:'recel',n:'Elma reçeli',in:{elma:6},t:240,out:{recel:1},lvl:11},{id:'recel2',n:'Çilek reçeli',in:{cilek:3},t:240,out:{recel:1},lvl:11}]},
   besi:{n:'Besi Ahırı',e:'🐂',cost:5000,lvl:7,d:'Dana al, besle, et olarak sat. Yüksek kâr, uzun süre.',recipes:[{id:'besi',n:'Dana besle',cost:150,in:{yem:4},t:300,out:{et:3},lvl:7},{id:'pastirma',n:'Pastırma (2 saat)',in:{et:3},t:7200,out:{pastirma:2},lvl:15}]},
@@ -49,9 +52,12 @@ const B={
   dokuma:{n:'Dokuma Atölyesi',e:'🪡',cost:6500,lvl:8,d:'Yün ve pamuktan kumaş dokur.',recipes:[
     {id:'kumas1',n:'Yün kumaş',in:{yun:3},t:150,out:{kumas:1},lvl:8},
     {id:'kumas2',n:'Pamuklu kumaş',in:{pamuk:4},t:150,out:{kumas:1},lvl:8},
-    {id:'hali',n:'El dokuma halı (3 saat)',in:{kumas:3,yun:2},t:10800,out:{hali:1},lvl:14}]},
+    {id:'hali',n:'El dokuma halı (3 saat)',in:{kumas:3,yun:2},t:10800,out:{hali:1},lvl:14},
+    {id:'yorgan',n:'Yün yorgan (2 saat)',in:{yun:6,kumas:2},t:7200,out:{yorgan:1},lvl:23}]},
   sera:{n:'Sera',e:'🏕️',cost:7000,lvl:9,field:true,d:'Ürünler iki kat hızlı büyür, çilek yetişir.',recipes:[
     ...CROPS.map(c=>({...c,t:Math.round(c.t/2)})),{id:'cilek',n:'Çilek',cost:60,t:180,out:{cilek:4},lvl:9}]},
+  bag:{n:'Üzüm Bağı',e:'🍇',cost:20000,lvl:18,d:'Asma sıraları. Tohum gerekmez; üzüm verir, bağ bozumunda bolca.',recipes:[{id:'uzum',n:'Üzüm topla',in:{},t:600,out:{uzum:6},lvl:18},{id:'bagbozumu',n:'Bağ bozumu (6 saat)',in:{},t:21600,out:{uzum:60},lvl:19}]},
+  pekmezhane:{n:'Pekmezhane',e:'🍶',cost:26000,lvl:20,d:'Üzümü kazanlarda kaynatır: pekmez, pestil ve sirke.',recipes:[{id:'pekmez',n:'Pekmez',in:{uzum:6},t:300,out:{pekmez:1},lvl:20},{id:'pestil',n:'Pestil',in:{uzum:4,un:2},t:600,out:{pestil:1},lvl:22},{id:'sirke',n:'Sirke (1 saat)',in:{uzum:8},t:3600,out:{sirke:2},lvl:24}]},
   hara:{n:'Hara',e:'🐴',cost:10000,lvl:9,d:'Safkan tay yetiştir. Tayını yarışa sokabilir ya da pazarda satabilirsin.',recipes:[{id:'tay',n:'Tay yetiştir',cost:300,in:{yem:6},t:600,out:{at:1},lvl:9}]},
 };
 const HOUSE=[{n:'Kulübe',e:'🛖'},{n:'Taş Ev',e:'🏠',cost:800,lvl:3},{n:'Çiftlik Evi',e:'🏡',cost:4000,lvl:6},{n:'Konak',e:'🏰',cost:15000,lvl:10}];
@@ -63,6 +69,7 @@ const REG={
   kavak:{n:'Kavaklık',cost:1800,lvl:4,rect:[11,-9,26,11]},
   yamac:{n:'Çam Yamacı',cost:4500,lvl:6,rect:[-31,-21,-6,-9]},
   ova:{n:'Doğu Ovası',cost:9000,lvl:8,rect:[26,-15,46,11]},
+  bagyolu:{n:'Bağ Yolu',cost:30000,lvl:18,rect:[-42,-9,-22,11]},
 };
 // Haritadaki konumlar
 const LOC={
@@ -79,9 +86,10 @@ const LOC={
   besi:{n:'Besi Ahırı',reg:'yamac',p:[-13,0,-15],r:4,units:['besi'],h:3.4,e:'🐂'},
   sera:{n:'Seralar',reg:'yamac',p:[-24,0,-15],r:4,units:['sera'],h:4,e:'🏕️'},
   panayir:{n:'Panayır',reg:'town',p:[24,0,18.5],r:5.5,kind:'fair',h:4,e:'🎪'},
+  baglar:{n:'Bağlar',reg:'bagyolu',p:[-32,0,1],r:5.5,units:['bag','pekmezhane'],slots:[[-2.7,0],[2.7,0]],h:3.6,e:'🍇'},
   hipo:{n:'Yarış Alanı',reg:'ova',p:[36,0,-1],r:9.5,units:['hara'],kind:'race',slots:[[0,-9.4]],h:4.5,e:'🏇'},
 };
-const SIGN={ev:[0,3.4],tarla:[0,7.2],kumes:[0,2.6],silo:[0,2.6],pazar:[0,3.6],han:[0,2.6],atolye:[0,5],ahir:[0,2.6],agil:[0,2.6],bahce:[0,2.8],besi:[0,2.6],sera:[0,2.6],hipo:[0,6.8],panayir:[0,4.2]};
+const SIGN={baglar:[0,3.4],ev:[0,3.4],tarla:[0,7.2],kumes:[0,2.6],silo:[0,2.6],pazar:[0,3.6],han:[0,2.6],atolye:[0,5],ahir:[0,2.6],agil:[0,2.6],bahce:[0,2.8],besi:[0,2.6],sera:[0,2.6],hipo:[0,6.8],panayir:[0,4.2]};
 for(const k in SIGN)LOC[k].s=SIGN[k];
 const INSIDE_UNITS={kumes:1,ahir:1,agil:1,besi:1,hara:1};
 const PLOT_COST=[0,0,150,300,500,800,1200,1800,2600],PLOT_LV=[1,1,1,2,3,4,5,6,7];

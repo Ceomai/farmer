@@ -3,7 +3,7 @@ function refreshMarket(force){if(!force&&now()-S.market.at<180000)return;S.marke
 // Pazar doygunluğu: aynı üründen çok satınca fiyat düşer (en fazla %60), 15 dakikada yarıya iner.
 // Satılan değer (₺) üzerinden ölçülür; oyuncu büyüdükçe pazar da büyür.
 const satNow=k=>{const s=S.market.sat&&S.market.sat[k];return s?s.v*Math.pow(.5,(now()-s.t)/900000):0};
-const satCap=()=>1500+400*S.lv;
+const satCap=()=>(1500+400*S.lv)*(typeof projOn==='function'&&projOn('pazaryeri')?2:1);
 const satF=(k,add=0)=>Math.max(.4,1/(1+(satNow(k)+add)/satCap()));
 const basePrice=k=>ITEMS[k].p*(S.market.m[k]||1);
 const sellPrice=(k,n=1)=>Math.max(1,Math.round(basePrice(k)*satF(k,ITEMS[k].p*n/2)));
@@ -22,7 +22,7 @@ function genOrder(){const pool=producible();
   const n=Math.min(pool.length,1+Math.floor(Math.random()*Math.min(3,1+S.lv/3)));const items={};let val=0;
   pool.sort(()=>Math.random()-.5).slice(0,n).forEach(k=>{const q=Math.max(1,Math.round((3+Math.random()*6)*(20/Math.max(ITEMS[k].p,6))**0.5));items[k]=q;val+=ITEMS[k].p*q});
   return {who:NAMES[Math.floor(Math.random()*NAMES.length)],items,base:Math.round(val*1.5),xp:Math.round(5+val/12)}}
-const repMult=()=>(0.7+0.6*S.rep/100)*(has1('kangal')?1.05:1);
+const repMult=()=>(0.7+0.6*S.rep/100)*(has1('kangal')?1.05:1)*(typeof projOn==='function'&&projOn('okul')?1.1:1);
 function ensureOrders(){while(S.orders.length<3)S.orders.push(genOrder())}
 function fillOrder(i){const o=S.orders[i];for(const k in o.items)if(has(k)<o.items[k])return toast('Eksik ürün var');
   for(const k in o.items)S.items[k]-=o.items[k];const r=Math.round(o.base*repMult()*frMult(o.who));gain(r,'Sipariş');addXP(o.xp);befriend(o.who,1);S.rep=Math.min(100,S.rep+1);stat('orders');

@@ -11,7 +11,7 @@ const TRACKED=new Set(['built','orders','contracts','contest','race','mg','photo
 const stat=(k,n=1)=>{S.stats[k]=(S.stats[k]||0)+n;if(TRACKED.has(k)&&typeof track==='function')track(k,{n});if(S.daily)for(const t of S.daily.tasks){if(t.k===k||(t.k==='plant'&&k.startsWith('plant_')&&CROPS.some(c=>'plant_'+c.id===k)))t.p+=n}};
 const secs=s=>s>=3600?Math.floor(s/3600)+' sa'+(Math.floor(s%3600/60)?' '+Math.floor(s%3600/60)+' dk':''):s>=60?Math.floor(s/60)+' dk'+(s%60?' '+String(s%60).padStart(2,'0')+' sn':''):s+' sn';
 // Seviye başına +%30 ürün ve %10 kısa süre (Sv5: 2,2 kat ürün, %60 süre). Yeni nesil bonusu (S.gen) tüm üretime eklenir.
-function scaled(r,l){const g=1+0.1*((S&&S.gen)||0),out={};for(const k in r.out)out[k]=Math.max(1,Math.round(r.out[k]*(1+0.3*(l-1))*g));return {out,t:Math.round(r.t*Math.max(.6,1-0.1*(l-1)))}}
+function scaled(r,l){const g=1+0.1*((S&&S.gen)||0),out={};for(const k in r.out)out[k]=Math.max(1,Math.round(r.out[k]*(1+0.3*(l-1))*g));return {out,t:Math.round(r.t*Math.max(.6,1-0.1*(l-1))*(typeof projOn==='function'&&projOn('saat')?.95:1))}}
 function canPay(r){if((r.cost||0)>S.coins)return false;for(const k in (r.in||{}))if(has(k)<r.in[k])return false;return true}
 const prog=j=>Math.min(1,(now()-j.s)/(j.e-j.s));
 const stageOf=j=>{const p=prog(j);return p<.34?1:p<.67?2:3};

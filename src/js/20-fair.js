@@ -3,7 +3,7 @@ const lvOf=u=>S.units[u]?S.units[u].l:0;
 const CONTESTS=[{id:'kabak',n:'En Büyük Kabak',e:'🎃',need:{kabak:1},sk:()=>S.fieldLv*12},{id:'peynir',n:'Peynir Yarışması',e:'🧀',need:{peynir:2},sk:()=>lvOf('mandira')*12},
   {id:'ekmek',n:'Ekmek Yarışması',e:'🍞',need:{ekmek:2},sk:()=>lvOf('firin')*12},{id:'inek',n:'En Güzel İnek',e:'🐄',need:{sut:5},sk:()=>lvOf('ahir')*13},{id:'bal',n:'Bal Tadımı',e:'🍯',need:{bal:3},sk:()=>lvOf('kovan')*12},
   {id:'yun',n:'Yün Eğirme',e:'🧶',need:{yun:4},sk:()=>lvOf('agil')*12},{id:'domates',n:'Domates Güzeli',e:'🍅',need:{domates:6},sk:()=>S.fieldLv*12},{id:'yumurta',n:'Yumurta Sepeti',e:'🥚',need:{yumurta:8},sk:()=>lvOf('kumes')*12},
-  {id:'bugday',n:'Başak Demeti',e:'🌾',need:{bugday:10},sk:()=>S.fieldLv*12}];
+  {id:'bugday',n:'Başak Demeti',e:'🌾',need:{bugday:10},sk:()=>S.fieldLv*12},{id:'uzum',n:'Üzüm Salkımı',e:'🍇',need:{uzum:12},sk:()=>lvOf('bag')*13},{id:'pekmez',n:'Pekmez Tadımı',e:'🍶',need:{pekmez:2},sk:()=>lvOf('pekmezhane')*13}];
 function ensureContests(){const t=todayStr();if(S.contests.day===t&&S.contests.list.length)return;const pool=producible();const ok=CONTESTS.filter(c=>Object.keys(c.need).every(k=>pool.includes(k)));
   const list=ok.sort(()=>Math.random()-.5).slice(0,3).map(c=>c.id);const wk=typeof weeklyContest==='function'&&weeklyContest();if(wk&&!list.includes(wk)){list.pop();list.unshift(wk)}
   S.contests={day:t,list,done:{}}}

@@ -1,7 +1,7 @@
 // ================= HAYVAN İSİMLERİ VE SEVGİ =================
 const ANAMES={kumes:['Pamuk','Gıdık','Kınalı','Benekli','Ponçik','Tüylü','Sarı','Minnoş','Cücük'],ahir:['Sarıkız','Menekşe','Karakız','Benekli'],agil:['Kıvırcık','Bulut','Yumak','Topak','Dolly','Pofuduk','Kar','Lokum'],besi:['Tosun','Karaoğlan','Paşa','Boncuk'],hara:['Yıldız','Rüzgar','Asil']};
 const LOVE_U=['kumes','ahir','agil','besi','hara'];
-function loveOf(u){if(!S.love)S.love={};const L=S.love[u]||(S.love[u]={v:50,t:now(),pet:{}});const decay=Math.floor((now()-L.t)/600000);if(decay>0){L.v=Math.max(20,L.v-decay);L.t+=decay*600000}return L}
+function loveOf(u){if(!S.love)S.love={};const L=S.love[u]||(S.love[u]={v:50,t:now(),pet:{}});const DM=projOn('cesme')?1200000:600000,decay=Math.floor((now()-L.t)/DM);if(decay>0){L.v=Math.max(20,L.v-decay);L.t+=decay*DM}return L}
 const loveBonus=u=>LOVE_U.includes(u)&&S.units[u]&&loveOf(u).v>=70;
 function petAnimal(u,idx,x,y){const L=loveOf(u),nm=(ANAMES[u]||[])[idx%((ANAMES[u]||['']).length)]||'';const last=L.pet[idx]||0;
   if(now()-last<60000){floatXY(x,y,`${nm} ♥`);return}L.pet[idx]=now();const was=L.v;L.v=Math.min(100,L.v+6);stat('pet');

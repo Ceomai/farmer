@@ -237,6 +237,10 @@ const MODELS={
     {const r=P(sh,'box',0x4d5a6b,[3.7,.1,2.1],[0,1.62,0]);r.rotation.x=.12}P(sh,'box',0x9a7247,[3.2,.35,.3],[0,.18,.75]);P(sh,'box',0xd9b45e,[3,.1,.22],[0,.37,.75]);
     fenceRun(g,-1.8,.3,-1.8,1.85);fenceRun(g,1.8,.3,1.8,1.85);fenceRun(g,-1.8,1.85,1.8,1.85);
     const n=1+(t?t.l:1);for(let k=0;k<n;k++){const c=cow(0x7a4a2a,0x5a3420,true);c.scale.setScalar(.6);g.add(c);addFx(g,wanderFx(c,-.8+k*.6,1.1,.6,.4,.2,.5))}},
+  bag:(g,t)=>{const ready=t&&t.job&&prog(t.job)>.6;for(let r=0;r<3;r++){const z=-1.2+r*1.2;for(const x of[-1.6,1.6])P(g,'cyl',0x6e4a2a,[.05,1,.05],[x,.5,z]);P(g,'box',0x5a4a3a,[3.2,.02,.02],[0,.85,z]);
+      for(let k=0;k<5;k++){const x=-1.3+k*.65;P(g,'ico1',[0x5c9a3e,0x4f8a36][k%2],[.32,.3,.22],[x,.72,z]);if(ready)P(g,'ico1',0x6b3a8a,[.1,.15,.1],[x+.08,.55,z+.12])}}crate(g,1.4,1.4,.32,0x7a4a8a)},
+  pekmezhane:(g,t)=>{workshop(g,0xe2d0a8,0x7a3b2a,2.4,1.5,1.7,-.6);P(g,'cyl',0x3a2a20,[.55,.45,.55],[.95,.23,.9]);P(g,'cyl',0x5a1a2a,[.46,.05,.46],[.95,.47,.9],null,{emissive:0x3a0a12,emissiveIntensity:.3});
+    for(const x of[-1.1,-.6])P(g,'cyl',0x8a5a32,[.24,.42,.24],[x,.21,1])},
   yaghane:(g,t)=>{workshop(g,0xe9c45a,0x5d4b3a,2.4,1.5,1.7,-.6);for(const x of[.9,1.5])P(g,'cyl',0xd7a82b,[.32,1.3,.32],[x,.65,.85]);
     P(g,'box',0x6e6e6e,[.9,.06,.06],[1.2,1.25,.85]);for(let k=0;k<4;k++)P(g,'cyl',0xf2c94c,[.06,.2,.06],[-1.2+k*.16,.1,1.1])},
   dokuma:(g,t)=>{workshop(g,0x8e6aa8,0x4a3a5a,2.5,1.5,1.8,-.6);for(let k=0;k<3;k++){P(g,'cyl',[0xd8435a,0x3f6fa0,0xf2c94c][k],[.17,.4,.17],[-1.2+k*.42,.2,1.05]);P(g,'cyl',0x8a6038,[.06,.48,.06],[-1.2+k*.42,.24,1.05])}

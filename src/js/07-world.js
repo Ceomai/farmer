@@ -82,7 +82,7 @@ function syncRegions(){const sig=Object.keys(S.regions).sort().join();if(sig===r
       const ph=q()*6,y0=c.position.y,x0=c.position.x;addFx(g,(dt,t)=>{c.position.y=y0+Math.sin(t*.55+ph)*.18;c.position.x=x0+Math.sin(t*.25+ph)*.35})}}
   regFx=[];regG.traverse(o=>{if(o.userData.fx)regFx.push(...o.userData.fx)});
   for(const k in LOC){const L=LOC[k];if(!owned(L.reg)||k==='ev')continue;const [ex,ez]=entrance(k);
-    if(L.reg==='town')road(roadG,ex,ez-2.6,ex,13.8,1.4);else road(roadG,HUBP[0],HUBP[2],ex,ez)}
+    if(L.reg==='town'||L.reg==='bagyolu')road(roadG,ex,ez-2.6,ex,13.8,1.4);else road(roadG,HUBP[0],HUBP[2],ex,ez)}
   road(roadG,HUBP[0],HUBP[2],HUBP[0],13.8,1.8);
   buildPaths();batchWatch(regG);batchWatch(roadG);
 }
