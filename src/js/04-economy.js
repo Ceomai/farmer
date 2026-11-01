@@ -15,7 +15,8 @@ function sellExcess(keep,quiet){let tot=0,n=0;for(const k in S.items){if(k==='ye
 // Ambar %95 dolunca (ayar açıksa) fazlası kendiliğinden satılır
 function autoSellTick(){if(!S.autoSell||stored()<cap()*.95)return;sellExcess(S.keepN??10,true)}
 function buyFeed(n){const c=ITEMS.yem.buy*n;if(S.coins<c)return toast('Yeterli paran yok');if(stored()+n>cap())return toast('Ambar dolu');pay(c,'Yem');S.items.yem=has('yem')+n;toast(`${n} yem alındı`);commit()}
-function producible(){const set=new Set(CROPS.filter(c=>c.lvl<=S.lv).map(c=>c.id));for(const u in S.units){const d=B[u];if(d.recipes)d.recipes.filter(r=>r.lvl<=S.lv).forEach(r=>Object.keys(r.out).forEach(k=>{if(k!=='at')set.add(k)}))}return [...set]}
+// Oyuncunun şu an üretebileceği ürünler (sipariş/sözleşme/yarışma bunlardan seçilir): koleksiyon tohumu bulunmamış ve mevsimi olmayan ürünler hariç
+function producible(){const set=new Set(CROPS.filter(c=>!cropLocked(c)).map(c=>c.id));for(const u in S.units){const d=B[u];if(d.recipes)d.recipes.filter(r=>r.lvl<=S.lv&&(!r.col||has1(r.col))).forEach(r=>Object.keys(r.out).forEach(k=>{if(k!=='at')set.add(k)}))}return [...set]}
 const NAMES=['Kasap Rıza','Fırıncı Nuri','Lokantacı Sevim','Manav Hilmi','Otelci Gülten','Kooperatif','Bakkal Ahmet','Konakçı Halit Bey','Pazarcı Zehra'];
 function genOrder(){const pool=producible();
   const n=Math.min(pool.length,1+Math.floor(Math.random()*Math.min(3,1+S.lv/3)));const items={};let val=0;

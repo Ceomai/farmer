@@ -12,7 +12,7 @@ const FOL={oak:[0x5c9a3e,0x4f8a36,0x68a846],pine:[0x2f6b3a,0x3a7d42,0x2a5f33],bu
 const SEAS_COL=[{oak:[0x8fcf6a,0xf2b8c6,0x7cc04a],grass:0xffffff,em:0},{grass:0xf6f0cc,em:0},{oak:[0xd9822b,0xc4562a,0xe8b13a],bush:[0xb98a3a,0xa8722e],grass:0xe6d29a,em:0},
   {oak:[0xe9eef2,0xdfe7ea,0xf4f7f8],pine:[0x6f9a8a,0x86ab9c,0x5e8a7a],bush:[0xdfe7ea,0xd0dbe0],grass:0xd8e2e8,em:0x6d7d8a}];
 let seasonNow=-1;
-function applySeason(){const se=season();if(se===seasonNow)return;const first=seasonNow<0;seasonNow=se;const sc=SEAS_COL[se];
+function applySeason(){const se=season();if(se===seasonNow)return;const first=seasonNow<0;seasonNow=se;if(S.lastCrop&&cropOf(S.lastCrop)&&!cropSeasonOk(cropOf(S.lastCrop)))S.lastCrop='bugday';const sc=SEAS_COL[se];
   for(const g of['oak','pine','bush'])FOL[g].forEach((c,i)=>{const m=MC[c+'|'];if(m)m.color.copy(grade(sc[g]?sc[g][i%sc[g].length]:c))});
   GROUND.material.color.copy(grade(sc.grass));GROUND.material.emissive.setHex(sc.em||0);if(!first){toast(`${SEASONS[se].e} ${SEASONS[se].n} geldi!`);sfx('chime')}}
 const SKY={day:[0xa3c4c0,0xefe0b6],dusk:[0xd98a5a,0xf3c58a],night:[0x2e3d66,0x6a74a0]};

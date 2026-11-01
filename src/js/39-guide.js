@@ -10,7 +10,7 @@ const gLv=l=>`<span class="gtag${S.lv>=l?' ok':''}">Sv ${l}</span>`;
 function gEntry(title,body,open){const q=(title+' '+body).replace(/<[^>]+>/g,' ').toLocaleLowerCase('tr');
   return `<details class="gd" data-q="${gEsc(q)}"${open?' open':''}><summary>${title}</summary><div class="gd-b">${body}</div></details>`}
 function gSources(k){const out=[];
-  CROPS.forEach(c=>{if(c.out[k])out.push(`🌾 <b>Tarlada ek</b>: tohum ₺${c.cost}, ${secs(c.t)} sürer, ${c.out[k]} adet çıkar ${gLv(c.lvl)}${c.col?` · koleksiyondan <b>${COL.find(x=>x.id===c.col).n}</b> bulunmalı`:''}`)});
+  CROPS.forEach(c=>{if(c.out[k])out.push(`🌾 <b>Tarlada ek</b>${c.season?' (yalnızca '+c.season.map(i=>SEASONS[i].n).join(', ')+'; serada her mevsim)':''}: tohum ₺${c.cost}, ${secs(c.t)} sürer, ${c.out[k]} adet çıkar ${gLv(c.lvl)}${c.col?` · koleksiyondan <b>${COL.find(x=>x.id===c.col).n}</b> bulunmalı`:''}`)});
   for(const u in B){const d=B[u];if(!d.recipes)continue;d.recipes.forEach(r=>{if(!r.out[k])return;if(u==='sera'&&CROPS.some(c=>c.id===r.id))return;
     out.push(`${d.e} <b>${d.n}</b> → ${r.n}: ${gIn(r)}${r.cost?` + ₺${r.cost}`:''}, ${secs(r.t)} ${gLv(r.lvl)}`)})}
   if(B.sera&&CROPS.some(c=>c.out[k]))out.push(`🏕️ <b>Serada</b> iki kat hızlı yetişir ${gLv(B.sera.lvl)}`);

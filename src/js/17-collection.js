@@ -14,7 +14,7 @@ const COL=[
   {id:'kupa',n:'Panayır Kupası',e:'🏆',src:'fair',p:0,bonus:'İtibar +5',hint:'Panayırda birinci ol'}];
 const COL_BONUS={kumes:'altin_yumurta',ahir:'simental',agil:'ankara',kovan:'kralice_ari'};
 const has1=id=>!!(S.album&&S.album[id]);
-const cropLocked=c=>c.lvl>S.lv||(c.col&&!has1(c.col));
+const cropLocked=c=>c.lvl>S.lv||(c.col&&!has1(c.col))||!cropSeasonOk(c);
 const regCost=r=>Math.round(REG[r].cost*(has1('eski_tapu')?.9:1));
 function showFind(c){sfx('win');const d=document.createElement('div');d.className='modal login';d.innerHTML=`<div><div class="badge">${c.e}</div><h2>Nadir buluntu!</h2><p><b>${c.n}</b><br>${c.bonus}<br>+1 🍀</p><button class="btn big gold">Koleksiyona ekle</button></div>`;d.querySelector('button').onclick=()=>d.remove();document.body.appendChild(d)}
 function tryDrop(src){for(const c of COL){if(c.src!==src&&c.src!=='any')continue;if(Math.random()<c.p*(c.src==='any'?.3:1)){const first=!S.album[c.id];S.album[c.id]=(S.album[c.id]||0)+1;if(first){S.gems+=1;setTimeout(()=>showFind(c),500)}return c}}return null}

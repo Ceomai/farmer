@@ -7,7 +7,8 @@ const ITEMS={
   peynir:{n:'Peynir',e:'🧀',p:95}, yogurt:{n:'Yoğurt',e:'🥣',p:58}, salca:{n:'Salça',e:'🫙',p:85}, yag:{n:'Ayçiçek Yağı',e:'🧴',p:110},
   kumas:{n:'Kumaş',e:'🧵',p:160}, at:{n:'Yarış Tayı',e:'🐎',p:1800},
   kabak:{n:'Kabak',e:'🎃',p:240}, kasar:{n:'Eski Kaşar',e:'🟨',p:950}, kestane:{n:'Kestane Balı',e:'🏺',p:330}, tereyag:{n:'Tereyağı',e:'🧈',p:150}, recel:{n:'Reçel',e:'🥫',p:140}, baklava:{n:'Baklava',e:'🥮',p:520}, hali:{n:'El Dokuma Halı',e:'🟥',p:1400}, sabun:{n:'Bal Sabunu',e:'🧼',p:170}, pastirma:{n:'Pastırma',e:'🥓',p:430},
-  altinbugday:{n:'Altın Buğday',e:'🌟',p:35}, morhavuc:{n:'Mor Havuç',e:'🥕',p:28}
+  altinbugday:{n:'Altın Buğday',e:'🌟',p:35}, morhavuc:{n:'Mor Havuç',e:'🥕',p:28},
+  lale:{n:'Lale',e:'🌷',p:26}, karpuz:{n:'Karpuz',e:'🍉',p:70}, patates:{n:'Patates',e:'🥔',p:21}, lahana:{n:'Lahana',e:'🥬',p:40}
 };
 const CROPS=[
   {id:'bugday',n:'Buğday',cost:5,t:20,out:{bugday:3},lvl:1},
@@ -18,6 +19,11 @@ const CROPS=[
   {id:'kabak',n:'Kabak (1 saat)',cost:80,t:3600,out:{kabak:2},lvl:3},
   {id:'altinbugday',n:'Altın Buğday',cost:20,t:120,out:{altinbugday:3},lvl:1,col:'altin_bugday'},
   {id:'morhavuc',n:'Mor Havuç',cost:15,t:300,out:{morhavuc:4},lvl:1,col:'mor_havuc'},
+  // Mevsim ürünleri: yalnızca kendi mevsiminde tarlaya ekilir (serada her mevsim yetişir); daha değerlidir
+  {id:'lale',n:'Lale',cost:25,t:120,out:{lale:3},lvl:3,season:[0]},
+  {id:'karpuz',n:'Karpuz',cost:40,t:240,out:{karpuz:2},lvl:5,season:[1]},
+  {id:'patates',n:'Patates',cost:20,t:150,out:{patates:4},lvl:4,season:[2]},
+  {id:'lahana',n:'Lahana',cost:35,t:200,out:{lahana:3},lvl:6,season:[3]},
 ];
 const B={
   kumes:{n:'Kümes',e:'🐔',cost:250,lvl:1,d:'Tavukları besle, folluklardan yumurta topla.',recipes:[{id:'besle',n:'Tavukları besle',in:{yem:1},t:40,out:{yumurta:2},lvl:1}]},

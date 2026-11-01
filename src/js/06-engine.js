@@ -145,6 +145,10 @@ function plant(par,type,stage,x,z,q){
     case'kabak':P(par,'ico1',0x4f9636,[.25,.12,.25],[x+j,.1,z]);P(par,'sph',0xf08a24,[.2,.16,.2],[x+j+.1,.16,z]);break;
     case'altinbugday':for(let k=0;k<3;k++){const a=x+j+(k-1)*.07;P(par,'cyl',0xe8c25a,[.012,.5,.012],[a,.25,z]);P(par,'cyl',0xffd23f,[.04,.17,.04],[a,.56,z],null,{emissive:0xf2b330,emissiveIntensity:.5})}break;
     case'morhavuc':for(let k=0;k<3;k++)P(par,'cone',0x5fae3d,[.04,.25,.04],[x+j+(k-1)*.05,.18,z],[0,0,(k-1)*.3]);P(par,'cone',0x7a2f8a,[.07,.14,.07],[x+j,.05,z],[Math.PI,0,0]);break;
+    case'lale':for(let k=0;k<2;k++){const a=x+j+(k-.5)*.12;P(par,'cyl',0x4f9a35,[.015,.42,.015],[a,.21,z]);P(par,'cone',0x5fae3d,[.05,.2,.05],[a+.04,.1,z],[0,0,.4]);P(par,'cyl',[0xe03c2c,0xf2b330][k],[.07,.12,.07],[a,.45,z])}break;
+    case'karpuz':P(par,'ico1',0x4f9636,[.22,.06,.22],[x+j,.05,z]);P(par,'sph',0x2f7a35,[.2,.17,.24],[x+j+.06,.15,z]);break;
+    case'patates':P(par,'ico1',0x5a8f3a,[.2,.16,.2],[x+j,.16,z]);for(let k=0;k<3;k++)P(par,'ico1',0xf0f0e0,[.03,.03,.03],[x+j+Math.cos(k*2.1)*.12,.3,z+Math.sin(k*2.1)*.12]);break;
+    case'lahana':P(par,'ico1',0x7cb85a,[.2,.14,.2],[x+j,.12,z]);P(par,'ico1',0xa8d98a,[.13,.12,.13],[x+j,.2,z]);break;
     case'cilek':P(par,'ico1',0x4f9636,[.18,.1,.18],[x+j,.1,z]);for(let k=0;k<3;k++)P(par,'cone',0xe0303c,[.05,.09,.05],[x+j+Math.cos(k*2)*.14,.07,z+Math.sin(k*2)*.14],[Math.PI,0,0]);break;
   }
 }

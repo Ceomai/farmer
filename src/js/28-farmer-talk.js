@@ -1,6 +1,7 @@
 // ================= ÇİFTÇİ BALONCUĞU =================
 const sayB=document.createElement('button');sayB.className='farmer-say';sayB.hidden=true;document.body.appendChild(sayB);let sayT=0,sayAct=null,sayKey='';
 function farmerHints(){const H=[],idle=S.fields.filter(f=>!f.job).length,rf=S.fields.filter(f=>f.job&&now()>=f.job.e).length,ro=readyOrders(),wx=S.weather.k;
+  {const eh=typeof evtHint==='function'&&evtHint();if(eh)H.push(eh)}
   if(rf)H.push(['tarla',`Tarlada ${rf} parsel hasada hazır, haydi toplayalım!`,()=>goLocation('tarla')]);
   for(const u in S.units){const s=S.units[u];if(s.job&&now()>=s.job.e&&B[u].recipes){H.push([u,`${B[u].n} hazır! ${UNIT_SFX[u]==='cluck'?'Tavuklar gıdaklıyor.':UNIT_SFX[u]==='moo'?'İnekler sesleniyor.':''}`,()=>goLocation(locOf(u))]);break}}
   if(ro)H.push(['han',`${ro} sipariş teslime hazır. Kasabalılar bekliyor!`,()=>mode==='desk'?deskAction('ledger'):goLocation('han')]);
