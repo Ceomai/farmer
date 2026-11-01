@@ -75,7 +75,9 @@ function deskFrame(dt,t){const d=dayFactor();if(deskL.fill){deskL.fill.intensity
     g.position.copy(b);const s0=g.userData.s0||1;g.scale.setScalar(s0)}
   const a=dcam.aspect,vf=dcam.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*a),PT=a<.85,W=PT?1.5:a<1.3?3:3.9,dist=Math.max(PT?2.95/Math.tan(vf/2):2.5/Math.tan(vf/2),Math.min(12,W/Math.tan(hf/2))),ly=PT?(a>.52?2.95:2.62):2.85;if(PT)dcamX=0;
   dcam.position.set(dcamX,(PT?(a>.52?5.1:4.9):3.45),PT?dist*(a>.52?1.04:.93):dist);dcam.lookAt(dcamX*.9,ly,-.8)}
-function renderWindow(dt){stepWinCam(dt||.016);winFrame=(winFrame+1)%GFX.winEvery;if(winFrame)return;const bg=world.background;world.background=skyTop;R.setRenderTarget(rt);R.clear();R.render(world,winCam);R.setRenderTarget(null);world.background=bg}
+// Penceredeki harita artık canlı değil: birkaç saniyede bir yenilenen sabit bir manzara (masa ekranı çok daha hafif ve akıcı)
+let deskWinT=0,deskShN=0;
+function renderWindow(){stepWinCam(10);const bg=world.background;world.background=skyTop;R.setRenderTarget(rt);R.clear();R.render(world,winCam);R.setRenderTarget(null);world.background=bg}
 function deskStatus(k){switch(k){case'borsa':{const n=Object.keys(ITEMS).filter(x=>has(x)>0&&(S.market.m[x]||1)>=1.12).length;return n?{c:'ok',n:'▲'+n}:null}case'map':{const n=countReady();return n?{c:'ok',n}:null}case'ledger':{const n=readyOrders();return n?{c:'ok',n}:null}case'mail':{const n=S.contracts.filter(c=>has(c.k)>0).length;return n?{c:'ok',n}:null}
   case'calendar':return(S.daily&&(!S.daily.login||S.daily.tasks.some(t=>t.p>=t.n&&!t.c)))||goalReady()?{c:'new',n:'!'}:null;case'basket':return stored()/cap()>=.9?{c:'warn',n:'!'}:null;case'radio':return{c:'idle',n:S.sound.music?'♪':'✕'};default:return null}}
 function deskAction(k){const g=deskObjs[k];if(g)g.userData.pop=1;
@@ -107,7 +109,7 @@ function sheetStats(){const st=S.stats,sum=p=>Object.entries(st).filter(([k])=>k
   <div class="inv">${items.map(([e,n,v])=>`<div class="slot" title="${n}"><em>${e}</em><b>${v}</b><small style="display:block;font-size:10px;font-weight:800;color:var(--muted);white-space:normal;line-height:1.15">${n}</small></div>`).join('')}</div></div>`}
 function sheetLedger(){const tb=view.tab||'o';return head('📒','Sipariş Defteri','★ ×'+repMult().toFixed(2))+`<div class="sh-body"><div class="tabs"><button aria-selected="${tb==='o'}" data-act="vtab" data-t="o">📜 Siparişler</button><button aria-selected="${tb==='f'}" data-act="vtab" data-t="f">❤️ Kasabalılar</button></div>${tb==='o'?ordersBody():friendsBody()}</div>`}
 function sheetMail(){return head('✉️','Posta','Tedarik sözleşmeleri')+`<div class="sh-body">${contractsBody()}</div>`}
-function toDesk(){fade(()=>{if(mode==='hub')hubSaved={t:ctl.target.clone(),p:cam.position.clone()};mode='desk';focus=null;interior=null;view=null;ctl.enabled=false;ictl.enabled=false;setModeUI();renderSheet();syncMarks()})}
+function toDesk(){deskWinT=0;fade(()=>{if(mode==='hub')hubSaved={t:ctl.target.clone(),p:cam.position.clone()};mode='desk';focus=null;interior=null;view=null;ctl.enabled=false;ictl.enabled=false;setModeUI();renderSheet();syncMarks()})}
 function enterWorld(after){fade(()=>{mode='hub';interior=null;ctl.enabled=true;ictl.enabled=false;hubLimits();const h=hubSaved||{t:HUB_T,p:HUB_T.clone().addScaledVector(HUB_DIR,HUB_D)};ctl.target.copy(h.t);cam.position.copy(h.p);view=null;setModeUI();renderSheet();syncMarks();if(after)after()})}
 function worldTick(dt,t){waterTex.offset.y-=dt*.08;worldFx.forEach(f=>f(dt,t));ambience(dt,t);stepWeather(dt,t);regFx.forEach(f=>f(dt,t));
   for(const k in locGroups){const g=locGroups[k];if(g.userData.pop!=null){g.userData.pop=Math.min(1,g.userData.pop+dt*2.2);const p=g.userData.pop,s=1+Math.sin(p*Math.PI)*.1;g.scale.set(s,.3+p*.7*s,s);if(p>=1){g.scale.set(1,1,1);delete g.userData.pop}}
