@@ -2619,7 +2619,13 @@ const INT={
         if(k%3===0)P(g,'cyl',cols[k%6],[.18,.4,.18],[-1.3+c*.52,.85+r*.9,0]);else{P(g,'cyl',cols[(k+2)%6],[.14,.3,.14],[-1.3+c*.52,.8+r*.9,0]);P(g,'cyl',0xf6efe0,[.15,.05,.15],[-1.3+c*.52,.97+r*.9,0])}}}},
 };
 const intT=key=>key==='kulube'?{b:'kulube',l:S.house}:{b:key,...S.units[key]};
-function buildInterior(key){const t=intT(key),def=INT[key];const sc=new THREE.Scene();sc.background=new THREE.Color(0x2b1d12);sc.fog=new THREE.Fog(0x2b1d12,24,42);
+// İç mekân sahnesi bırakılırken GPU kaynakları serbest bırakılır: gölge haritası (2048² doku), o sahneye özel dokular,
+// malzemeler ve geometriler. Paylaşılan (önbellekteki) geometri ve malzemelere dokunulmaz.
+function disposeScene(sc){if(!sc)return;const sharedG=new Set(Object.values(GE)),sharedM=new Set(Object.values(MC));sharedM.add(OUT);
+  sc.traverse(o=>{if(o.isLight&&o.shadow&&o.shadow.map){o.shadow.map.dispose();o.shadow.map=null}
+    if(o.isMesh||o.isPoints){if(o.geometry&&!sharedG.has(o.geometry))o.geometry.dispose();for(const m of[].concat(o.material||[])){if(!m||sharedM.has(m))continue;for(const k of['map','emissiveMap','alphaMap'])if(m[k]&&m[k].isTexture)m[k].dispose();m.dispose()}}})}
+function dropInterior(){const o=interior;interior=null;if(o&&o.scene)setTimeout(()=>disposeScene(o.scene),0)}
+function buildInterior(key){if(interior&&interior.scene)disposeScene(interior.scene);const t=intT(key),def=INT[key];const sc=new THREE.Scene();sc.background=new THREE.Color(0x2b1d12);sc.fog=new THREE.Fog(0x2b1d12,24,42);
   const ic={key,scene:sc,fx:[],dyn:G(sc),nests:[],buckets:[],shelf:null,sig:''};
   ic.fx.push(room(sc,def.floor(t),def.wall(t)));def.build(ic,t);
   ic.refresh=()=>{sc.remove(ic.dyn);ic.dyn=G(sc);ic.fx=ic.fx.filter(f=>!f.dyn);def.dyn(ic,intT(key));ic.sig=intSig(key)};
@@ -2632,7 +2638,7 @@ function setModeUI(){applyUI();document.body.dataset.mode=mode;if(typeof wxUI===
   document.body.classList.toggle('desk',mode==='desk');const b=$('#backBtn');b.hidden=mode==='desk';b.textContent=mode==='interior'?'← Dışarı':mode==='focus'?'← Harita':'← Masa'}
 function enterInterior(key){if(!INT[key]||(key!=='kulube'&&!S.units[key]))return;fade(()=>{buildInterior(key);mode='interior';const lk=key==='kulube'?'ev':locOf(key);if(!LOC[focus])focus=lk;if(!view||view.k!=='loc')view={k:'loc',loc:lk};ctl.enabled=false;ictl.enabled=true;
   icam.position.set(0,6.4,14.5);ictl.target.set(0,1.4,-.6);ictl.update();if(view)view.mini=false;setModeUI();renderSheet();syncMarks();stat('enter_'+key)})}
-function leaveInterior(){if(mode!=='interior')return;fade(()=>{mode='focus';interior=null;ctl.enabled=true;ictl.enabled=false;setModeUI();renderSheet();syncMarks()})}
+function leaveInterior(){if(mode!=='interior')return;fade(()=>{mode='focus';dropInterior();ctl.enabled=true;ictl.enabled=false;setModeUI();renderSheet();syncMarks()})}
 
 // ---- 10-camera.js ----
 // ================= KAMERA VE GEÇİŞLER =================
@@ -2645,14 +2651,14 @@ function stepFly(){if(!fly)return;const k=S&&S.fastNav?1:Math.min(1,(now()-fly.t
   if(fly.arc){cam.position.copy(ctl.target).add(fly.off.clone().applyAxisAngle(Y,fly.arc*e))}else cam.position.lerpVectors(fly.fp,fly.tp,e);if(k>=1)fly=null}
 const FOCUS_DIR=new V3(.16,.8,.58).normalize();
 function goLocation(k){if(mode==='desk'){enterWorld(()=>goLocation(k));return}const L=LOC[k];if(!owned(L.reg)){openRegion(L.reg);return}
-  if(mode==='interior'){fade(()=>{mode='hub';interior=null;ctl.enabled=true;ictl.enabled=false;goLocation(k)});return}
+  if(mode==='interior'){fade(()=>{mode='hub';dropInterior();ctl.enabled=true;ictl.enabled=false;goLocation(k)});return}
   if(mode==='hub')hubSaved={t:ctl.target.clone(),p:cam.position.clone()};
   if(locGroups[k]&&mode==='hub')locGroups[k].userData.pop=.55;
   mode='focus';focus=k;view={k:'loc',loc:k};setModeUI();renderSheet();
   const d=L.r*2.3+9;ctl.enablePan=false;ctl.minDistance=d*.55;ctl.maxDistance=d*1.5;
   const tt=new V3(L.p[0],0,L.p[2]);flyCam(tt,tt.clone().addScaledVector(FOCUS_DIR,d));syncMarks();
 }
-function toHub(){const go=()=>{mode='hub';focus=null;view=null;interior=null;ctl.enabled=true;ictl.enabled=false;hubLimits();setModeUI();renderSheet();syncMarks();
+function toHub(){const go=()=>{mode='hub';focus=null;view=null;dropInterior();ctl.enabled=true;ictl.enabled=false;hubLimits();setModeUI();renderSheet();syncMarks();
     const h=hubSaved||{t:HUB_T,p:HUB_T.clone().addScaledVector(HUB_DIR,HUB_D)};flyCam(h.t,h.p)};
   if(mode==='interior')fade(go);else go()}
 function openRegion(r){if(!REG[r]||!REG[r].rect)return;if(mode==='desk'){enterWorld(()=>openRegion(r));return}if(mode!=='hub'){toHub()}view={k:'region',r};renderSheet();const d=REG[r],[x1,z1,x2,z2]=d.rect;const tt=new V3((x1+x2)/2,0,(z1+z2)/2);flyCam(tt,tt.clone().addScaledVector(HUB_DIR,Math.max(50,cam.position.distanceTo(ctl.target)*.8)))}
@@ -3296,8 +3302,8 @@ function sheetStats(){const st=S.stats,sum=p=>Object.entries(st).filter(([k])=>k
   <div class="inv">${items.map(([e,n,v])=>`<div class="slot" title="${n}"><em>${e}</em><b>${v}</b><small style="display:block;font-size:10px;font-weight:800;color:var(--muted);white-space:normal;line-height:1.15">${n}</small></div>`).join('')}</div></div>`}
 function sheetLedger(){const tb=view.tab||'o';return head('📒','Sipariş Defteri','★ ×'+repMult().toFixed(2))+`<div class="sh-body"><div class="tabs"><button aria-selected="${tb==='o'}" data-act="vtab" data-t="o">📜 Siparişler</button><button aria-selected="${tb==='f'}" data-act="vtab" data-t="f">❤️ Kasabalılar</button></div>${tb==='o'?ordersBody():friendsBody()}</div>`}
 function sheetMail(){return head('✉️','Posta','Tedarik sözleşmeleri')+`<div class="sh-body">${contractsBody()}</div>`}
-function toDesk(){deskWinT=0;fade(()=>{if(mode==='hub')hubSaved={t:ctl.target.clone(),p:cam.position.clone()};mode='desk';focus=null;interior=null;view=null;ctl.enabled=false;ictl.enabled=false;setModeUI();renderSheet();syncMarks()})}
-function enterWorld(after){fade(()=>{mode='hub';interior=null;ctl.enabled=true;ictl.enabled=false;hubLimits();const h=hubSaved||{t:HUB_T,p:HUB_T.clone().addScaledVector(HUB_DIR,HUB_D)};ctl.target.copy(h.t);cam.position.copy(h.p);view=null;setModeUI();renderSheet();syncMarks();if(after)after()})}
+function toDesk(){deskWinT=0;fade(()=>{if(mode==='hub')hubSaved={t:ctl.target.clone(),p:cam.position.clone()};mode='desk';focus=null;dropInterior();view=null;ctl.enabled=false;ictl.enabled=false;setModeUI();renderSheet();syncMarks()})}
+function enterWorld(after){fade(()=>{mode='hub';dropInterior();ctl.enabled=true;ictl.enabled=false;hubLimits();const h=hubSaved||{t:HUB_T,p:HUB_T.clone().addScaledVector(HUB_DIR,HUB_D)};ctl.target.copy(h.t);cam.position.copy(h.p);view=null;setModeUI();renderSheet();syncMarks();if(after)after()})}
 function worldTick(dt,t){waterTex.offset.y-=dt*.08;worldFx.forEach(f=>f(dt,t));ambience(dt,t);stepWeather(dt,t);regFx.forEach(f=>f(dt,t));
   for(const k in locGroups){const g=locGroups[k];if(g.userData.pop!=null){g.userData.pop=Math.min(1,g.userData.pop+dt*2.2);const p=g.userData.pop,s=1+Math.sin(p*Math.PI)*.1;g.scale.set(s,.3+p*.7*s,s);if(p>=1){g.scale.set(1,1,1);delete g.userData.pop}}
     const fx=g.userData.allFx;for(let i=0;i<fx.length;i++)fx[i](dt,t)}stepPuffs(dt)}

@@ -82,7 +82,13 @@ const INT={
         if(k%3===0)P(g,'cyl',cols[k%6],[.18,.4,.18],[-1.3+c*.52,.85+r*.9,0]);else{P(g,'cyl',cols[(k+2)%6],[.14,.3,.14],[-1.3+c*.52,.8+r*.9,0]);P(g,'cyl',0xf6efe0,[.15,.05,.15],[-1.3+c*.52,.97+r*.9,0])}}}},
 };
 const intT=key=>key==='kulube'?{b:'kulube',l:S.house}:{b:key,...S.units[key]};
-function buildInterior(key){const t=intT(key),def=INT[key];const sc=new THREE.Scene();sc.background=new THREE.Color(0x2b1d12);sc.fog=new THREE.Fog(0x2b1d12,24,42);
+// İç mekân sahnesi bırakılırken GPU kaynakları serbest bırakılır: gölge haritası (2048² doku), o sahneye özel dokular,
+// malzemeler ve geometriler. Paylaşılan (önbellekteki) geometri ve malzemelere dokunulmaz.
+function disposeScene(sc){if(!sc)return;const sharedG=new Set(Object.values(GE)),sharedM=new Set(Object.values(MC));sharedM.add(OUT);
+  sc.traverse(o=>{if(o.isLight&&o.shadow&&o.shadow.map){o.shadow.map.dispose();o.shadow.map=null}
+    if(o.isMesh||o.isPoints){if(o.geometry&&!sharedG.has(o.geometry))o.geometry.dispose();for(const m of[].concat(o.material||[])){if(!m||sharedM.has(m))continue;for(const k of['map','emissiveMap','alphaMap'])if(m[k]&&m[k].isTexture)m[k].dispose();m.dispose()}}})}
+function dropInterior(){const o=interior;interior=null;if(o&&o.scene)setTimeout(()=>disposeScene(o.scene),0)}
+function buildInterior(key){if(interior&&interior.scene)disposeScene(interior.scene);const t=intT(key),def=INT[key];const sc=new THREE.Scene();sc.background=new THREE.Color(0x2b1d12);sc.fog=new THREE.Fog(0x2b1d12,24,42);
   const ic={key,scene:sc,fx:[],dyn:G(sc),nests:[],buckets:[],shelf:null,sig:''};
   ic.fx.push(room(sc,def.floor(t),def.wall(t)));def.build(ic,t);
   ic.refresh=()=>{sc.remove(ic.dyn);ic.dyn=G(sc);ic.fx=ic.fx.filter(f=>!f.dyn);def.dyn(ic,intT(key));ic.sig=intSig(key)};
@@ -95,4 +101,4 @@ function setModeUI(){applyUI();document.body.dataset.mode=mode;if(typeof wxUI===
   document.body.classList.toggle('desk',mode==='desk');const b=$('#backBtn');b.hidden=mode==='desk';b.textContent=mode==='interior'?'← Dışarı':mode==='focus'?'← Harita':'← Masa'}
 function enterInterior(key){if(!INT[key]||(key!=='kulube'&&!S.units[key]))return;fade(()=>{buildInterior(key);mode='interior';const lk=key==='kulube'?'ev':locOf(key);if(!LOC[focus])focus=lk;if(!view||view.k!=='loc')view={k:'loc',loc:lk};ctl.enabled=false;ictl.enabled=true;
   icam.position.set(0,6.4,14.5);ictl.target.set(0,1.4,-.6);ictl.update();if(view)view.mini=false;setModeUI();renderSheet();syncMarks();stat('enter_'+key)})}
-function leaveInterior(){if(mode!=='interior')return;fade(()=>{mode='focus';interior=null;ctl.enabled=true;ictl.enabled=false;setModeUI();renderSheet();syncMarks()})}
+function leaveInterior(){if(mode!=='interior')return;fade(()=>{mode='focus';dropInterior();ctl.enabled=true;ictl.enabled=false;setModeUI();renderSheet();syncMarks()})}
