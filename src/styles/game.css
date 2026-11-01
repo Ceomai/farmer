@@ -356,3 +356,6 @@ body.photo .guidebtn{display:none!important}
 @media (max-width:700px){body[data-mode="hub"] .guidebtn,body[data-mode="focus"] .guidebtn{top:calc(146px + env(safe-area-inset-top,0px))}}
 .gall{display:flex;flex-direction:column}
 .gall>p.note:not(.gempty){display:none}
+/* Panel içeriği hiçbir zaman ezilmesin: panel kaydırılır, içindeki bölümler küçülmez (tohum satırı 6px'e iniyordu) */
+.sh-body>*{flex-shrink:0}
+button.job.ready{gap:20px}
