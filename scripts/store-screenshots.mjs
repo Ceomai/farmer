@@ -18,8 +18,8 @@ const clean=p=>p.evaluate(()=>{document.querySelectorAll('.modal,.toast').forEac
 // 1) Ekran görüntüleri (360x640 @3x = 1080x1920)
 const shots=[['01-masa',async p=>{}],['02-harita',async p=>{await p.evaluate(()=>enterWorld());await p.waitForFunction(()=>mode==='hub',null,{timeout:20000});await p.waitForTimeout(2500)}],
   ['03-tarlalar',async p=>{await p.evaluate(()=>{enterWorld(()=>goLocation('tarla'))});await p.waitForTimeout(2600)}],
-  ['04-kumes',async p=>{await p.evaluate(()=>{enterWorld(()=>goLocation('kumes'))});await p.waitForFunction(()=>mode==='interior',null,{timeout:20000});await p.waitForTimeout(1500);await p.evaluate(()=>{view.mini=true;renderSheet()})}],
-  ['05-ev',async p=>{await p.evaluate(()=>{enterWorld(()=>goLocation('ev'))});await p.waitForFunction(()=>mode==='interior',null,{timeout:20000});await p.waitForTimeout(1500);await p.evaluate(()=>{view.mini=true;renderSheet()})}],
+  ['04-kumes',async p=>{await p.evaluate(()=>{enterWorld(()=>{goLocation('kumes');setTimeout(()=>enterInterior('kumes'),900)})});await p.waitForFunction(()=>mode==='interior',null,{timeout:20000});await p.waitForTimeout(1500);await p.evaluate(()=>{view.mini=true;renderSheet()})}],
+  ['05-ev',async p=>{await p.evaluate(()=>{enterWorld(()=>{goLocation('ev');setTimeout(()=>enterInterior('kulube'),900)})});await p.waitForFunction(()=>mode==='interior',null,{timeout:20000});await p.waitForTimeout(1500);await p.evaluate(()=>{view.mini=true;renderSheet()})}],
   ['06-borsa',async p=>{await p.evaluate(()=>deskAction('borsa'));await p.waitForTimeout(600)}]];
 const p=await page({width:360,height:640},3);
 for(const [n,fn] of shots){await p.evaluate(()=>{document.querySelectorAll('.modal').forEach(m=>m.remove());if(mode!=='desk'){mode='desk';interior=null;view=null;setModeUI();renderSheet();syncMarks()}view=null;renderSheet()});await p.waitForTimeout(500);

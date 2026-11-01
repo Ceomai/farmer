@@ -14,7 +14,7 @@ function goLocation(k){if(mode==='desk'){enterWorld(()=>goLocation(k));return}co
   mode='focus';focus=k;view={k:'loc',loc:k};setModeUI();renderSheet();
   const d=L.r*2.3+9;ctl.enablePan=false;ctl.minDistance=d*.55;ctl.maxDistance=d*1.5;
   const tt=new V3(L.p[0],0,L.p[2]);flyCam(tt,tt.clone().addScaledVector(FOCUS_DIR,d));syncMarks();
-  const ik=AUTO_IN[k];if(ik&&(ik==='kulube'||S.units[ik]))setTimeout(()=>{if(mode==='focus'&&focus===k)enterInterior(ik)},820)}
+}
 function toHub(){const go=()=>{mode='hub';focus=null;view=null;interior=null;ctl.enabled=true;ictl.enabled=false;hubLimits();setModeUI();renderSheet();syncMarks();
     const h=hubSaved||{t:HUB_T,p:HUB_T.clone().addScaledVector(HUB_DIR,HUB_D)};flyCam(h.t,h.p)};
   if(mode==='interior')fade(go);else go()}

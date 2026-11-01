@@ -77,7 +77,6 @@ const LOC={
 };
 const SIGN={ev:[0,3.4],tarla:[0,7.2],kumes:[0,2.6],silo:[0,2.6],pazar:[0,3.6],han:[0,2.6],atolye:[0,5],ahir:[0,2.6],agil:[0,2.6],bahce:[0,2.8],besi:[0,2.6],sera:[0,2.6],hipo:[0,6.8],panayir:[0,4.2]};
 for(const k in SIGN)LOC[k].s=SIGN[k];
-const AUTO_IN={ev:'kulube',kumes:'kumes',ahir:'ahir',agil:'agil',besi:'besi'};
 const INSIDE_UNITS={kumes:1,ahir:1,agil:1,besi:1,hara:1};
 const PLOT_COST=[0,0,150,300,500,800,1200,1800,2600],PLOT_LV=[1,1,1,2,3,4,5,6,7];
 const FIELD_UP=[0,600,2500,9000,22000];

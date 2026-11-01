@@ -1684,7 +1684,6 @@ const LOC={
 };
 const SIGN={ev:[0,3.4],tarla:[0,7.2],kumes:[0,2.6],silo:[0,2.6],pazar:[0,3.6],han:[0,2.6],atolye:[0,5],ahir:[0,2.6],agil:[0,2.6],bahce:[0,2.8],besi:[0,2.6],sera:[0,2.6],hipo:[0,6.8],panayir:[0,4.2]};
 for(const k in SIGN)LOC[k].s=SIGN[k];
-const AUTO_IN={ev:'kulube',kumes:'kumes',ahir:'ahir',agil:'agil',besi:'besi'};
 const INSIDE_UNITS={kumes:1,ahir:1,agil:1,besi:1,hara:1};
 const PLOT_COST=[0,0,150,300,500,800,1200,1800,2600],PLOT_LV=[1,1,1,2,3,4,5,6,7];
 const FIELD_UP=[0,600,2500,9000,22000];
@@ -2501,7 +2500,7 @@ function goLocation(k){if(mode==='desk'){enterWorld(()=>goLocation(k));return}co
   mode='focus';focus=k;view={k:'loc',loc:k};setModeUI();renderSheet();
   const d=L.r*2.3+9;ctl.enablePan=false;ctl.minDistance=d*.55;ctl.maxDistance=d*1.5;
   const tt=new V3(L.p[0],0,L.p[2]);flyCam(tt,tt.clone().addScaledVector(FOCUS_DIR,d));syncMarks();
-  const ik=AUTO_IN[k];if(ik&&(ik==='kulube'||S.units[ik]))setTimeout(()=>{if(mode==='focus'&&focus===k)enterInterior(ik)},820)}
+}
 function toHub(){const go=()=>{mode='hub';focus=null;view=null;interior=null;ctl.enabled=true;ictl.enabled=false;hubLimits();setModeUI();renderSheet();syncMarks();
     const h=hubSaved||{t:HUB_T,p:HUB_T.clone().addScaledVector(HUB_DIR,HUB_D)};flyCam(h.t,h.p)};
   if(mode==='interior')fade(go);else go()}
