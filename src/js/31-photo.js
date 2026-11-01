@@ -1,6 +1,6 @@
 // ================= FOTOĞRAF MODU =================
 function photoMode(on){document.body.classList.toggle('photo',on);if(on){view=null;renderSheet();toast('Kadrajı ayarla, deklanşöre bas')}}
-function shoot(){const fl=document.createElement('div');fl.className='flash';document.body.appendChild(fl);setTimeout(()=>fl.remove(),500);tone(1800,.05,'square',.05);tone(900,.08,'square',.04,.06);
+function shoot(){if(R.getContext().isContextLost())return toast("Görüntü hazırlanıyor, birazdan tekrar dene");const fl=document.createElement('div');fl.className='flash';document.body.appendChild(fl);setTimeout(()=>fl.remove(),500);tone(1800,.05,'square',.05);tone(900,.08,'square',.04,.06);
   R.render(world,cam);const src=R.domElement.toDataURL('image/jpeg',.92);const im=new Image();im.onload=()=>{const W=1080,ih=Math.round(W*im.height/im.width),pad=40,c=document.createElement('canvas');c.width=W+pad*2;c.height=ih+pad*2+120;const x=c.getContext('2d');
     x.fillStyle='#fbf6ea';x.fillRect(0,0,c.width,c.height);x.drawImage(im,pad,pad,W,ih);x.strokeStyle='#2a1a10';x.lineWidth=4;x.strokeRect(pad,pad,W,ih);
     x.fillStyle='#3a2414';x.font='italic 44px Georgia,serif';x.textAlign='center';x.fillText('Çiftlik İmparatorluğu',c.width/2,ih+pad+62);x.font='bold 24px Nunito,sans-serif';x.fillStyle='#7d6c52';

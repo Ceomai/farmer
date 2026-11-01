@@ -5,7 +5,10 @@ function viewOffset(c){const W=innerWidth,H=innerHeight;let tx=0,ty=0;if(!sheet.
   vo.x+=(tx-vo.x)*.12;vo.y+=(ty-vo.y)*.12;if(!tx&&!ty&&Math.abs(vo.x)<.5&&Math.abs(vo.y)<.5){vo.x=vo.y=0;if(c.view&&c.view.enabled)c.clearViewOffset();return}c.setViewOffset(W,H,vo.x,vo.y,W,H)}
 function resize(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);dcam.aspect=w/h;dcam.fov=w<700?50:42;dcam.updateProjectionMatrix();if(typeof S!=='undefined'&&S&&(dcam.aspect<.85)!==deskPortrait&&DESKP.length)buildDesk();cam.aspect=w/h;cam.fov=w<700?50:36;cam.updateProjectionMatrix();icam.aspect=w/h;icam.fov=w<700?60:42;icam.updateProjectionMatrix()}
 addEventListener('resize',resize);
-function frame(ts){requestAnimationFrame(frame);if(GFX.fpsCap&&ts&&ts-_lastFrame<1000/GFX.fpsCap-2)return;if(ts){gfxAdapt(ts-(_lastFrame||ts));_lastFrame=ts}const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;
+// Grafik bağlamı kaybolursa (Android'de arka plana atınca sık olur) çizimi durdur, geri gelince kaldığı yerden devam et
+let glLost=false;R.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();glLost=true},false);
+R.domElement.addEventListener('webglcontextrestored',()=>{glLost=false;try{R.shadowMap.needsUpdate=true;deskWinT=0}catch(e){}},false);
+function frame(ts){requestAnimationFrame(frame);if(glLost||R.getContext().isContextLost())return;if(GFX.fpsCap&&ts&&ts-_lastFrame<1000/GFX.fpsCap-2)return;if(ts){gfxAdapt(ts-(_lastFrame||ts));_lastFrame=ts}const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;
   if(mode==='desk'){deskWinT-=dt;const fresh=deskWinT<=0;R.shadowMap.autoUpdate=false;if(fresh){deskWinT=3;worldTick(.016,t);R.shadowMap.needsUpdate=true;renderWindow()}if(fresh||++deskShN%8===0)R.shadowMap.needsUpdate=true;viewOffset(dcam);deskFrame(dt,t);placeMarks();R.render(deskScene,dcam)}
   else if(mode!=='interior'){R.shadowMap.autoUpdate=true;viewOffset(cam);stepFly();ctl.update();worldTick(dt,t);placeMarks();R.render(world,cam)}
   else if(interior){R.shadowMap.autoUpdate=true;viewOffset(icam);ictl.update();interior.fx.forEach(f=>f(dt,t));for(const o of interior.scene.children){const u=o.userData;if(u.hop){u.hop=Math.max(0,u.hop-dt*2.5);o.position.y=Math.sin((1-u.hop)*Math.PI)*.5}}R.render(interior.scene,icam)}
