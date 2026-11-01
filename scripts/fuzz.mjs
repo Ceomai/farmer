@@ -30,8 +30,10 @@ function makeSave(r,kind){const base={coins:300,xp:0,lv:1,rep:50,items:{yem:6},h
     case'zengin':{D.lv=40;D.xp=10;D.coins=9e8;D.gems=999;D.house=4;D.fieldLv=5;for(const k of['dere','kavak','yamac','ova'])D.regions[k]=1;
       for(const u of['kumes','silo','yemhane','degirmen','ahir','firin','agil','mandira','kovan','bahce','konserve','besi','yaghane','dokuma','sera','hara'])D.units[u]={l:1+Math.floor(r()*5)};
       D.fields=Array.from({length:9},()=>({}));D.items={bugday:400,misir:200,un:50,sut:80,yem:300,at:3,yumurta:40,bal:20,tereyag:5,kumas:9,yun:20,elma:30,domates:30,aycicegi:20,pamuk:10,kabak:3};
-      D.horses=[{n:'Rüzgar',spd:20,sta:20,w:3,rest:0,train:0},{n:'Bozok',spd:5,sta:5,w:0,rest:0,train:0}];D.league={tier:3,pts:8};return JSON.stringify(D)}
-    case'garip':{D.coins=-50;D.gems=null;D.items={bugday:-3,yok_urun:5,misir:'7',un:NaN};D.fields=[{job:{r:'olmayan',s:0,e:0}},null,{}];D.units={kumes:{l:9},olmayan_bina:{l:1}};D.house=7;D.lastCrop='silinmis';D.weather={k:'kasirga',until:0};D.regions={baba:1};D.horses=[{n:'X'}];D.league={tier:9,pts:-1};D.contracts=[{who:'Kimse',k:'yok',total:5,got:0,until:0}];D.orders=[{who:'Biri',items:{yok:2},r:10}];return JSON.stringify(D)}
+      D.horses=[{n:'Rüzgar',spd:20,sta:20,w:3,rest:0,train:0},{n:'Bozok',spd:5,sta:5,w:0,rest:0,train:0}];D.league={tier:3,pts:8};
+      D.regions.bagyolu=1;D.units.bag={l:2,q:['uzum','bagbozumu']};D.units.pekmezhane={l:1};D.workers={fields:Date.now()+3e6,kumes:Date.now()-5,bag:1};D.proj={cesme:1};D.quests={'Kasap Rıza':2};D.ach={ilkhasat:1};D.gen=1;D.ui={fs:'b'};D.keepN=5;D.autoSell=true;D.items.uzum=50;return JSON.stringify(D)}
+    case'garip':{D.coins=-50;D.gems=null;D.items={bugday:-3,yok_urun:5,misir:'7',un:NaN};D.fields=[{job:{r:'olmayan',s:0,e:0}},null,{}];D.units={kumes:{l:9},olmayan_bina:{l:1}};D.house=7;D.lastCrop='silinmis';D.weather={k:'kasirga',until:0};D.regions={baba:1};D.horses=[{n:'X'}];D.league={tier:9,pts:-1};D.contracts=[{who:'Kimse',k:'yok',total:5,got:0,until:0}];D.orders=[{who:'Biri',items:{yok:2},r:10}];
+      D.units.kumes={l:2,q:'x',job:{r:'besle',s:0,e:0}};D.workers={kumes:'abc',yok:5};D.proj=[];D.quests={Kimse:9,'Kasap Rıza':'iki'};D.evt={cur:'yok',until:9e15};D.ui=5;D.gen=-3;D.ach='hepsi';D.keepN=7;D.tut2='x';D.market={m:{bugday:'x'},sat:{bugday:{v:'a',t:null}}};return JSON.stringify(D)}
     case'tipler':{D.coins='500';D.lv='4';D.fields='bozuk';D.units=[];D.items=[];D.stats=null;D.album=null;D.decor=null;D.sound=null;D.market=null;D.fin=null;return JSON.stringify(D)}
     case'ambar-dolu':{D.house=1;D.items={bugday:79,yem:1};D.fields=[{job:{r:'bugday',s:0,e:1}},{job:{r:'bugday',s:0,e:1}}];return JSON.stringify(D)}
     default:return JSON.stringify(D)}}
@@ -48,6 +50,11 @@ const INVARIANTS=()=>{const bad=[];const fin=v=>typeof v==='number'&&isFinite(v)
   if(!Array.isArray(S.fields))bad.push('fields dizi değil');else S.fields.forEach((f,i)=>{if(!f||typeof f!=='object')bad.push('parsel '+i+' bozuk');else if(f.job&&!cropOf(f.job.r))bad.push('parsel '+i+' bilinmeyen ürün '+f.job.r)});
   for(const u in S.units)if(!B[u])bad.push('bilinmeyen bina '+u);else if(S.units[u].job&&!B[u].recipes.find(r=>r.id===S.units[u].job.r))bad.push(u+' bilinmeyen tarif');
   if(!(S.house>=1&&S.house<=HOUSE.length))bad.push('ev='+S.house);
+  for(const u in S.units){const q=S.units[u].q;if(q&&(!Array.isArray(q)||q.length>3||q.some(id=>!(B[u].recipes||[]).find(r=>r.id===id))))bad.push(u+' sırası bozuk')}
+  for(const k in S.workers)if(!fin(S.workers[k]))bad.push('işçi '+k+'='+S.workers[k]);
+  if(!fin(S.gen||0)||(S.gen||0)<0)bad.push('nesil='+S.gen);
+  if(S.market&&S.market.sat)for(const k in S.market.sat){const v=satF(k);if(!fin(v)||v<=0)bad.push('doygunluk '+k+'='+v)}
+  for(const k of Object.keys(ITEMS))if(!fin(sellPrice(k))||sellPrice(k)<1)bad.push('fiyat '+k+'='+sellPrice(k));
   try{const j=JSON.stringify(S);const back=migrate(JSON.parse(j));if(back.coins!==S.coins)bad.push('kayıt geri yüklemesi farklı')}catch(e){bad.push('kayıt JSON hatası '+e.message)}
   for(const c of[cam.position,ctl.target,icam.position])if(![c.x,c.y,c.z].every(fin))bad.push('kamera NaN');
   const txt=[...document.querySelectorAll('.hud,.sheet:not([hidden]),.toast,.modal,.strip:not([hidden]),.farmer-say:not([hidden]),#marks')].map(e=>e.innerText).join(' ');
@@ -82,6 +89,13 @@ const API_CALLS=[ // oyun fonksiyonlarına doğrudan (bazen geçersiz) çağrıl
   'S=migrate(JSON.parse(JSON.stringify(S)))','photoMode&&photoMode(true)','photoMode&&photoMode(false)',
   'view={k:"loc",loc:__P(Object.keys(LOC))};renderSheet()','view={k:"region",r:__P(Object.keys(REG))};renderSheet()',
   'setModeUI()','resize()','PLATFORM.hap("heavy")','celebrate("Test")','flyCoins(8)',
+  // yeni özellikler: sıra, fazlayı sat, işçi vardiyası, uzun basma menüsü, olaylar, hikâyeler, başarımlar, projeler, yeni nesil, yazı boyutu, ikinci öğretici
+  'queueAdd(__P(Object.keys(B)),__P(["besle","un","ekmek","uzum","pekmez","kaymak","yok"]))','queueDel(__P(Object.keys(B)),__R(4)-1)','queueAll()',
+  'sellExcess(__P([0,5,10,20]))','S.autoSell=!S.autoSell;autoSellTick()','renewAll()','renewWorker(__P(["fields","kumes","ahir","yok"]))','for(const k in S.workers)S.workers[k]=now()-1',
+  'openQpop(__P(Object.keys(LOC)))','closeQpop()','refreshQpop()',
+  'S.evt={cur:__P(Object.keys(EVENTS)),until:now()+60000,next:now()+1e9};runEvent()','S.evt={next:0};evtTick()','evtHint()',
+  'befriend(__P(NAMES),3)','doQuest(__P(NAMES))','claimAch(__P(ACH).id)','achTick()','doProj(__P(PROJ).id)','askGen()','genReady()&&doGen()',
+  'S.ui={fs:__P(["n","b","xb"]),left:Math.random()<.5};applyUI()','S.tut2=null;tut2Start();tut2Tick()','extraHorses()','ensureContests()','buyRegion("bagyolu")','buildUnit(__P(["bag","pekmezhane"]))',
 ];
 
 async function run(b,seed){const r=mulberry(seed),R=n=>Math.floor(r()*n);const [w,h]=VPS[R(VPS.length)];const kind=KINDS[R(KINDS.length)];const env=ENVS[R(ENVS.length)];
