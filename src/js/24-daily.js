@@ -33,7 +33,7 @@ function migrate(s){const d=fresh();if(!s||typeof s!=='object'||Array.isArray(s)
     if(x.job&&obj(x.job)){const r=rs.find(r=>r.id===x.job.r);if(r){o.job=fixJob(x.job,r.t)}}if(rs.find(r=>r.id===x.last))o.last=x.last;un[u]=o}s.units=un;
   s.fields=s.fields.slice(0,9).map(f=>{if(!obj(f))return{};if(f.job){const c=obj(f.job)&&cropOf(f.job.r);return c?{job:fixJob(f.job,c.t)}:{}}return{}});while(s.fields.length<2)s.fields.push({});
   if(!cropOf(s.lastCrop))s.lastCrop='bugday';if(!WEATHER[s.weather.k])s.weather={k:'sun',until:0};
-  const wk={};for(const k in s.workers)if(k==='fields'||B[k])wk[k]=1;s.workers=wk;
+  const wk={};for(const k in s.workers)if(k==='fields'||B[k]){const v=Number(s.workers[k]);wk[k]=v>1e12&&v<T+SHIFT*2?v:T+SHIFT}s.workers=wk;
   s.horses=s.horses.filter(obj).slice(0,4).map(h=>({n:typeof h.n==='string'&&h.n?h.n:'Rüzgar',spd:num(h.spd,5,1,20,true),sta:num(h.sta,5,1,20,true),w:num(h.w,0,0,1e6,true),rest:num(h.rest,0),train:num(h.train,0)}));
   s.league=obj(s.league)?s.league:d.league;s.league.tier=num(s.league.tier,0,0,TIERS.length-1,true);s.league.pts=num(s.league.pts,0,0,1e6,true);
   const okItems=o=>obj(o)&&Object.keys(o).length&&Object.keys(o).every(k=>ITEMS[k]&&num(o[k],0)>0);

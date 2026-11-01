@@ -3,14 +3,15 @@ const $=s=>document.querySelector(s);
 const fmt=n=>Math.floor(n).toLocaleString('tr-TR');
 let TIME_OFF=0;const now=()=>Date.now()+TIME_OFF;
 const has=k=>S.items[k]||0;
-const stored=()=>Object.values(S.items).reduce((a,b)=>a+b,0);
+const stored=()=>Object.entries(S.items).reduce((a,[k,v])=>k==='at'?a:a+v,0); // taylar ambarda değil ahırda durur
 const owned=r=>!!S.regions[r];
 function cap(){return [80,160,260,400][S.house-1]+(S.units.silo?150*S.units.silo.l:0)}
 const xpNeed=l=>Math.round(60*Math.pow(l,1.55));
 const TRACKED=new Set(['built','orders','contracts','contest','race','mg','photo','sold','harvest_field','iap']);
 const stat=(k,n=1)=>{S.stats[k]=(S.stats[k]||0)+n;if(TRACKED.has(k)&&typeof track==='function')track(k,{n});if(S.daily)for(const t of S.daily.tasks){if(t.k===k||(t.k==='plant'&&k.startsWith('plant_')&&CROPS.some(c=>'plant_'+c.id===k)))t.p+=n}};
 const secs=s=>s>=3600?Math.floor(s/3600)+' sa'+(Math.floor(s%3600/60)?' '+Math.floor(s%3600/60)+' dk':''):s>=60?Math.floor(s/60)+' dk'+(s%60?' '+String(s%60).padStart(2,'0')+' sn':''):s+' sn';
-function scaled(r,l){const out={};for(const k in r.out)out[k]=Math.floor(r.out[k]*(1+0.5*(l-1)));return {out,t:Math.round(r.t*Math.max(.4,1-0.15*(l-1)))}}
+// Seviye başına +%30 ürün ve %10 kısa süre (Sv5: 2,2 kat ürün, %60 süre). Yeni nesil bonusu (S.gen) tüm üretime eklenir.
+function scaled(r,l){const g=1+0.1*((S&&S.gen)||0),out={};for(const k in r.out)out[k]=Math.max(1,Math.round(r.out[k]*(1+0.3*(l-1))*g));return {out,t:Math.round(r.t*Math.max(.6,1-0.1*(l-1)))}}
 function canPay(r){if((r.cost||0)>S.coins)return false;for(const k in (r.in||{}))if(has(k)<r.in[k])return false;return true}
 const prog=j=>Math.min(1,(now()-j.s)/(j.e-j.s));
 const stageOf=j=>{const p=prog(j);return p<.34?1:p<.67?2:3};

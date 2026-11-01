@@ -9,7 +9,7 @@ document.addEventListener('click',e=>{
   const op=e.target.closest('[data-open]');if(op){openView(op.dataset.open);return}
   const a=e.target.closest('[data-act]');if(!a||a.tagName==='INPUT')return;const d=a.dataset,rc=a.getBoundingClientRect(),cx=rc.left+rc.width/2,cy=rc.top;sfx('click');
   switch(d.act){
-    case'close':closeSheet();break;case'back':mode==='interior'?leaveInterior():mode==='focus'?toHub():toDesk();break;case'home':toDesk();break;case'guide':openView('guide');break;
+    case'close':closeSheet();break;case'back':mode==='interior'?leaveInterior():mode==='focus'?toHub():toDesk();break;case'home':toDesk();break;case'renew':renewWorker(d.k);break;case'guide':openView('guide');break;
     case'enterIn':enterInterior(d.k);break;
     case'build':buildUnit(d.u);break;case'upU':upgradeUnit(d.u);break;case'upHouse':upgradeHouse();break;case'upFields':upgradeFields();break;
     case'start':startUnit(d.u,d.r);break;case'collect':collectUnit(d.u,cx,cy);break;

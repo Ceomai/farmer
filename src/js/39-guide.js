@@ -25,11 +25,11 @@ function gItems(){const first=k=>{let l=99;CROPS.forEach(c=>{if(c.out[k])l=Math.
     return gEntry(`<em>${it.e}</em> ${it.n}<small>~₺${it.p}${has(k)?` · ambarda ${has(k)}`:''}</small>`,
       `<p><b>Nereden elde edilir?</b></p><ul>${src.map(s=>`<li>${s}</li>`).join('')||'<li>Özel ödüllerle</li>'}</ul>`+
       (use.length?`<p><b>Nerede kullanılır?</b></p><ul>${use.map(s=>`<li>${s}</li>`).join('')}</ul>`:'')+
-      `<p class="note">Pazar fiyatı ~₺${it.p}; her 3 dakikada %80–125 arasında değişir (Borsa'dan takip et). Siparişlerde ve sözleşmelerde de istenebilir.</p>`)}).join('')}
+      `<p class="note">Pazar fiyatı ~₺${it.p}; her 3 dakikada %80–125 arasında değişir (Borsa'dan takip et). Aynı üründen çok satarsan pazar doyar ve fiyat düşer (📉), 15 dakikada toparlanır. Siparişler ve sözleşmeler doygunluktan etkilenmez.</p>`)}).join('')}
 function gPlaces(){let h='';
   h+=gEntry(`<em>🌾</em> Tarlalar`,`<p>Ürün yetiştirdiğin parseller. Boş parsele dokun ya da parmağını parseller üstünde sürükle: ekilir. Olgunlaşınca aynı şekilde topla.</p>
     <ul><li>Başta 2 parsel var, en fazla 9 olur. Yeni parsel fiyatları: ${PLOT_COST.slice(2).map((c,i)=>`₺${fmt(c)} (Sv ${PLOT_LV[i+2]})`).join(', ')}</li>
-    <li>Tarla seviyesi (⬆): +%50 ürün ve daha hızlı büyüme. Fiyatlar: ${FIELD_UP.slice(1).map((c,i)=>`Sv ${i+2}: ₺${fmt(c)}`).join(', ')}</li>
+    <li>Tarla seviyesi (⬆): +%30 ürün ve %10 daha hızlı büyüme. Fiyatlar: ${FIELD_UP.slice(1).map((c,i)=>`Sv ${i+2}: ₺${fmt(c)}`).join(', ')}</li>
     <li>Ekilebilir ürünler: ${CROPS.map(c=>`${ITEMS[c.id].e} ${c.n} (${secs(c.t)}, Sv ${c.lvl})`).join(' · ')}</li>
     <li>Yağmurda ekinler daha hızlı büyür.</li></ul>`);
   for(const u in B){const d=B[u],k=locOf(u),L=k&&LOC[k],R0=L&&REG[L.reg];
@@ -38,7 +38,7 @@ function gPlaces(){let h='';
       ${d.storage?`<li>Her seviyede ambara +${d.storage} yer.</li>`:''}
       ${(d.recipes||[]).filter(r=>!(u==='sera'&&CROPS.some(c=>c.id===r.id))).map(r=>`<li><b>${r.n}</b>: ${gIn(r)}${r.cost?` + ₺${r.cost}`:''} → ${gOut(r)} · ${secs(r.t)} ${gLv(r.lvl)}</li>`).join('')}
       ${u==='sera'?'<li>Tarladaki bütün ürünler burada yarı sürede yetişir.</li>':''}
-      <li>Yükseltme (⬆): her seviye +%50 ürün, daha kısa süre. En fazla Sv ${MAXL}. Sv 4–5 için ev ve oyuncu seviyesi gerekir.</li>
+      <li>Yükseltme (⬆): her seviye +%30 ürün ve %10 kısa süre; maliyeti her seviyede iki katına çıkar. En fazla Sv ${MAXL}. Sv 4–5 için ev ve oyuncu seviyesi gerekir.</li>
       ${INSIDE_UNITS[u]?'<li>🚪 İçeri girip hayvanları sev: mutluluk 70 üstündeyse her toplamada +1 ürün.</li>':''}</ul>`)}
   h+=gEntry(`<em>🏡</em> Çiftlik Evi`,`<p>Evin büyüdükçe ambar büyür ve binaların üst seviyelerinin kilidi açılır.</p><ul>${HOUSE.map((x,i)=>`<li>${x.e} <b>${x.n}</b>${x.cost?` · ₺${fmt(x.cost)} · Sv ${x.lvl}`:' (başlangıç)'} · ambar ${[80,160,260,400][i]}</li>`).join('')}</ul><p>Kumbaradan aldığın süsleri evin içine ve bahçeye yerleştirebilirsin.</p>`);
   h+=gEntry(`<em>🗺️</em> Araziler`,`<p>Haritadaki bulutlu alanlar satın alınabilir araziler. Alt şeritteki 🔒 kartlara ya da bulutlara dokun.</p><ul>${Object.values(REG).filter(r=>r.rect&&r.cost).map(r=>`<li><b>${r.n}</b>: ₺${fmt(r.cost)} · Sv ${r.lvl} · ${Object.values(LOC).filter(L=>REG[L.reg]===r).map(L=>L.e+' '+L.n).join(', ')}</li>`).join('')}</ul>`);
@@ -61,7 +61,7 @@ function guideBody(tab){switch(tab){
       +gEntry('🎪 Panayır',`<p>Her gün 3 yarışma çıkar (${CONTESTS.map(c=>c.e+' '+c.n).join(', ')}). İstenen ürünleri ver ve katıl. İlgili binan ya da tarlan ne kadar yüksek seviyedeyse şansın o kadar artar. Birinciye para, 🍀 ve itibar, şanslıysan 🏆 Panayır Kupası.</p>`)
       +gEntry('🏇 At ligi',`<p>Harada tay yetiştir, Yarış Alanı'nda ahıra al (en fazla 4 at). Antrenman (4 yem) hız ya da dayanıklılığı artırır. Ligler: ${TIERS.map(t=>`${t.n} (giriş ₺${fmt(t.fee)}, ödül ₺${fmt(t.prize)})`).join(', ')}.</p>`)
       +gEntry('🏆 Koleksiyon',`<p>Toplama yaparken nadiren özel buluntular çıkar. Her biri kalıcı bir bonus verir:</p><ul>${COL.map(c=>`<li>${c.e} <b>${c.n}</b> (${c.hint}): ${c.bonus}</li>`).join('')}</ul>`)
-      +gEntry('👷 İşçiler',`<p>Seviye ${WORKER_LV}'ten itibaren her bina ve tarla için işçi tutabilirsin. İşçi hazır ürünü toplar ve aynı üretimi yeniden başlatır; sen oyunda yokken de çalışır.</p>`)
+      +gEntry('👷 İşçiler',`<p>Seviye ${WORKER_LV}'ten itibaren her bina ve tarla için işçi tutabilirsin. İşçi hazır ürünü toplar ve aynı üretimi yeniden başlatır; sen oyunda yokken de çalışır.</p><ul><li><b>Vardiya:</b> işçi 8 saat çalışır, sonra ☕ çay molası verir. Panelde ya da alttaki kartta <b>☕ Devam</b>'a dokun, 8 saat daha çalışsın.</li><li><b>Kaç işçi?</b> Evin büyüdükçe artar: Kulübe 2, Taş Ev 5, Çiftlik Evi 9, Konak sınırsız.</li></ul>`)
       +gEntry('🤝 Dostluk',`<p>Kasabalılara sipariş ve sözleşme teslim ettikçe dostluğun artar: ${FR_N.join(' → ')}. Her kademe ödemeleri %6 artırır ve 🍀 verir; dostların her gün küçük hediyeler bırakır.</p>`)
       +gEntry('🎮 Mini oyunlar',`<ul><li>🥚 <b>Yumurta yakala</b>: kümes çalışırken panelden.</li><li>🥛 <b>Sağım ritmi</b>: ahır çalışırken panelden.</li><li>🤝 <b>Pazarlık</b>: pazarda tüccarla.</li></ul><p>Ödül olarak üretimi hızlandırır, ekstra ürün ya da 🍀 verir.</p>`)
       +gEntry('📅 Günlük ödül ve görevler',`<p>Her gün giriş yap: 7 günlük seri ödülleri (para, yem, 🍀). Takvimde her gün 3 küçük görev çıkar; bitirince ödülünü al.</p>`);

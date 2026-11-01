@@ -2,7 +2,8 @@
 let popLoc=null,popPlot=null;
 function buildUnit(u){const d=B[u];if(S.units[u]||S.lv<d.lvl)return;if(S.coins<d.cost)return toast('Yeterli paran yok');
   pay(d.cost,'İnşaat');S.units[u]={l:1,built:now()};markRecent(locOf(u),B[u].n);sfx('build');puff(unitWorld(u,.4),14,1.3);addXP(Math.round(d.cost/50)+2);stat('built');popLoc=locOf(u);toast(`${d.n} kuruldu!`);commit()}
-const upCost=u=>Math.round(B[u].cost*1.6*S.units[u].l);
+// Yükseltme maliyeti her seviyede iki katına çıkar
+const upCost=u=>Math.round(B[u].cost*1.2*2**(S.units[u].l-1));
 function upgradeUnit(u){const s=S.units[u];if(!s||s.l>=MAXL||upBlock(s.l+1))return;const c=upCost(u);if(S.coins<c)return toast('Yeterli paran yok');
   pay(c,'İnşaat');s.l++;s.built=now();markRecent(locOf(u),B[u].n);sfx('build');if(mode!=='interior')puff(unitWorld(u,.5),12,1.2);addXP(Math.round(c/50));popLoc=locOf(u);toast(`${B[u].n} ${s.l}. seviyeye çıktı`);commit();if(interior&&interior.key===u)buildInterior(u)}
 function upgradeHouse(){const h=HOUSE[S.house];if(!h||S.lv<h.lvl)return;if(S.coins<h.cost)return toast('Yeterli paran yok');pay(h.cost,'İnşaat');S.house++;markRecent('ev',HOUSE[S.house-1].n);sfx('build');addXP(Math.round(h.cost/40));popLoc='ev';toast(`${HOUSE[S.house-1].n} hazır!`);commit();if(interior&&interior.key==='kulube')buildInterior('kulube')}
@@ -12,9 +13,11 @@ function startUnit(u,rid,quiet){const s=S.units[u];if(!s||s.job||!B[u].recipes)r
   const sc=scaled(r,s.l),t=sc.t*(u==='mandira'&&has1('bakir_kazan')?.9:1);s.job={r:rid,s:now(),e:now()+t*1000};s.last=rid;stat('plant_'+rid);if(!quiet){sfx('plant');commit()}}
 function giveOut(out,x,y,xp,quiet){const n=Object.values(out).reduce((a,b)=>a+b,0);if(stored()+n>cap()){if(!quiet)toast('Ambar dolu! Pazarda sat ya da siloyu büyüt.');return false}
   for(const k in out)S.items[k]=has(k)+out[k];addXP(xp);if(quiet){autoGain+=n;return true}sfx('pop');PLATFORM.hap();if(n>=6)celebrate();if(x!=null){floatXY(x,y,Object.entries(out).map(([k,v])=>`+${v} ${ITEMS[k].e}`).join('  ')+`  +${xp} xp`);flyItems(x,y,out)}return true}
+// Ahırda en fazla 6 tay bekler; fazlası pazar fiyatından kendiliğinden satılır (ambar dolmasın, üretim durmasın)
+const HORSE_KEEP=6;function extraHorses(quiet){const n=has('at')-HORSE_KEEP;if(n<=0)return;const pr=sellPrice('at',n);S.items.at-=n;addSat('at',n);gain(pr*n,'Pazar');stat('sold',n);if(!quiet)toast(`🐎 Ahır dolu: ${n} tay satıldı · +₺${fmt(pr*n)}`)}
 function collectUnit(u,x,y,quiet){const s=S.units[u];if(!s||!s.job||now()<s.job.e)return false;const r=unitRecipe(u),sc=scaled(r,s.l),out={...sc.out};const cb=COL_BONUS[u];if(cb&&has1(cb)){const k0=Object.keys(out)[0];out[k0]+=1}if(loveBonus(u)){const k0=Object.keys(out)[0];out[k0]+=1}
   if(!quiet&&x==null){const p=screenOfW(unitWorld(u,markH(u)));x=p.x;y=p.y}
-  if(!giveOut(out,x,y,Math.ceil(r.t/12)+1,quiet))return !quiet;stat('harvest_'+u);stat('make_'+r.id);s.job=null;tryDrop(u);if(quiet)return true;
+  if(!giveOut(out,x,y,Math.ceil(r.t/12)+1,quiet))return !quiet;stat('harvest_'+u);stat('make_'+r.id);s.job=null;tryDrop(u);if(u==='hara')extraHorses(quiet);if(quiet)return true;
   sfx(UNIT_SFX[u]);if(mode!=='interior')puff(unitWorld(u,1),8);if(locGroups[locOf(u)])squash(locOf(u),u);commit();return true}
 function plantPlot(i,rid,quiet){const f=S.fields[i];if(!f||f.job)return false;const r=cropOf(rid);if(!r||cropLocked(r))return false;if(S.coins<r.cost){if(!quiet)toast('Tohum için paran yetmiyor');return false}
   pay(r.cost,'Tohum');const sc=scaled(r,S.fieldLv);f.job={r:rid,s:now(),e:now()+sc.t*1000};S.lastCrop=rid;stat('plant_'+rid);if(!quiet)sfx('plant');return true}
