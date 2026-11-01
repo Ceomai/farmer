@@ -18,4 +18,4 @@ function goLocation(k){if(mode==='desk'){enterWorld(()=>goLocation(k));return}co
 function toHub(){const go=()=>{mode='hub';focus=null;view=null;interior=null;ctl.enabled=true;ictl.enabled=false;hubLimits();setModeUI();renderSheet();syncMarks();
     const h=hubSaved||{t:HUB_T,p:HUB_T.clone().addScaledVector(HUB_DIR,HUB_D)};flyCam(h.t,h.p)};
   if(mode==='interior')fade(go);else go()}
-function openRegion(r){if(mode==='desk'){enterWorld(()=>openRegion(r));return}if(mode!=='hub'){toHub()}view={k:'region',r};renderSheet();const d=REG[r],[x1,z1,x2,z2]=d.rect;const tt=new V3((x1+x2)/2,0,(z1+z2)/2);flyCam(tt,tt.clone().addScaledVector(HUB_DIR,Math.max(50,cam.position.distanceTo(ctl.target)*.8)))}
+function openRegion(r){if(!REG[r]||!REG[r].rect)return;if(mode==='desk'){enterWorld(()=>openRegion(r));return}if(mode!=='hub'){toHub()}view={k:'region',r};renderSheet();const d=REG[r],[x1,z1,x2,z2]=d.rect;const tt=new V3((x1+x2)/2,0,(z1+z2)/2);flyCam(tt,tt.clone().addScaledVector(HUB_DIR,Math.max(50,cam.position.distanceTo(ctl.target)*.8)))}

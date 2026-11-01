@@ -336,7 +336,7 @@ function raceTrack(g,hara){const rx=7.5,rz=5;
   const crowd=[];const q=rng(77);for(let k=0;k<18;k++){const row=k%3;const c=P(gs,'sph',[0xc4492e,0x3f6fa0,0xf2b330,0x2f6b3a,0xf6efe0][k%5],[.17,.2,.17],[-3+Math.floor(k/3)*1.2+q()*.3,.75+row*.5,-.9+row*.9]);crowd.push(c)}
   addFx(g,(dt,t)=>crowd.forEach((c,k)=>{c.position.y=c.userData.y0??(c.userData.y0=c.position.y);c.position.y=c.userData.y0+Math.max(0,Math.sin(t*6+k))*.12}));
   for(const x of[-rx-1,rx+1]){P(g,'cyl',0xfaf6ee,[.05,3,.05],[x,1.5,rz+.5]);const fl=P(g,'box',0xc4492e,[.6,.35,.03],[x+.32,2.8,rz+.5]);addFx(g,(dt,t)=>{fl.rotation.y=Math.sin(t*3+x)*.3})}
-  if(hara){const n=2+hara.l;const cols=[[0x8a5530,0xc4492e],[0x3a2a22,0x3f6fa0],[0xd9c3a0,0xf2b330],[0x6a4a30,0x2f6b3a],[0xb07a4a,0xf6efe0]];
+  if(hara){const n=Math.min(5,2+hara.l);const cols=[[0x8a5530,0xc4492e],[0x3a2a22,0x3f6fa0],[0xd9c3a0,0xf2b330],[0x6a4a30,0x2f6b3a],[0xb07a4a,0xf6efe0]];
     for(let k=0;k<n;k++){const h=horse(cols[k][0],0x2e1d12,cols[k][1]);h.scale.setScalar(.55);g.add(h);let a=k*.5;const sp=.42+k*.03+Math.random()*.05,rr=.85-k*.035;
       addFx(g,(dt,t)=>{a+=dt*sp*(1+Math.sin(t*.7+k)*.15);const x=Math.cos(a)*rx*rr,z=Math.sin(a)*rz*rr;h.position.set(x,Math.abs(Math.sin(t*10+k))*.15,z);h.rotation.y=Math.atan2(-Math.sin(a)*rx,Math.cos(a)*rz);
         h.userData.legs.forEach((l,i)=>l.rotation.x=Math.sin(t*10+k+(i>1?Math.PI:0)+(i%2)*.6)*.7)})}}}

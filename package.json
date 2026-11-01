@@ -7,6 +7,8 @@
     "build": "node scripts/build.mjs",
     "build:fast": "node scripts/build.mjs --no-fonts",
     "test": "node scripts/smoke-test.mjs",
+    "fuzz": "node scripts/fuzz.mjs",
+    "layout": "node scripts/layout-check.mjs out/layout",
     "screenshots": "node scripts/store-screenshots.mjs",
     "cap:sync": "npm run build && npx cap sync",
     "android": "npm run build && npx cap sync android && npx cap open android"

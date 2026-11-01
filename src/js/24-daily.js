@@ -19,4 +19,32 @@ function awaySummary(away){if(away<120000)return;const mins=Math.round(away/6000
   d.querySelector('button').onclick=()=>d.remove();document.body.appendChild(d)}
 let lastReady=0;
 function notifyReady(){const rc=countReady();document.title=(rc?`(${rc}) `:'')+'Çiftlik İmparatorluğu';if(S.sound.notif&&document.hidden&&rc>lastReady){try{new Notification('Çiftlik İmparatorluğu',{body:`${rc} ürün toplanmayı bekliyor 🌾`})}catch(e){}}lastReady=rc}
-function migrate(s){const d=fresh();for(const k in d)if(s[k]==null)s[k]=d[k];for(const k of['house','farm','owned'])if(!s.decor[k])s.decor[k]={};delete s.dark;delete s.rooster;return s}
+// Kayıt onarımı: eski sürüm, yarım kalmış, elle bozulmuş ya da tanınmayan değer içeren her kayıt oyunu açılabilir hale getirilir.
+// Bilinmeyen bina/ürün/tarif atılır, sayılar sınırlara çekilir, ileri tarihli işler (saat geri alınmışsa) makul süreye indirilir.
+function migrate(s){const d=fresh();if(!s||typeof s!=='object'||Array.isArray(s))return d;
+  const obj=v=>v&&typeof v==='object'&&!Array.isArray(v),num=(v,def,lo=-Infinity,hi=Infinity,int=false)=>{v=Number(v);if(!isFinite(v))v=def;v=Math.min(hi,Math.max(lo,v));return int?Math.floor(v):v};
+  for(const k in d){if(s[k]==null)s[k]=d[k];else if(obj(d[k])&&!obj(s[k]))s[k]=d[k];else if(Array.isArray(d[k])&&!Array.isArray(s[k]))s[k]=d[k]}
+  s.coins=num(s.coins,d.coins,0);s.gems=num(s.gems,d.gems,0,1e9,true);s.lv=num(s.lv,1,1,999,true);s.xp=num(s.xp,0,0);s.rep=num(s.rep,50,0,100);
+  s.house=num(s.house,1,1,HOUSE.length,true);s.fieldLv=num(s.fieldLv,1,1,MAXL,true);s.goal=num(s.goal,0,0,GOALS.length,true);
+  const items={};for(const k in s.items)if(ITEMS[k]){const v=num(s.items[k],0,0,1e9,true);if(v)items[k]=v}s.items=items;
+  const rg={baba:1,town:1};for(const k in s.regions)if(REG[k]&&s.regions[k])rg[k]=1;s.regions=rg;
+  const T=now(),fixJob=(j,sec)=>{if(!obj(j))return null;j.s=num(j.s,T);j.e=num(j.e,T);if(j.e>T+sec*1000*2){j.s=T;j.e=T+sec*1000}return j};
+  const un={};for(const u in s.units){if(!B[u]||!obj(s.units[u]))continue;const x=s.units[u],o={l:num(x.l,1,1,MAXL,true)};const rs=B[u].recipes||[];
+    if(x.job&&obj(x.job)){const r=rs.find(r=>r.id===x.job.r);if(r){o.job=fixJob(x.job,r.t)}}if(rs.find(r=>r.id===x.last))o.last=x.last;un[u]=o}s.units=un;
+  s.fields=s.fields.slice(0,9).map(f=>{if(!obj(f))return{};if(f.job){const c=obj(f.job)&&cropOf(f.job.r);return c?{job:fixJob(f.job,c.t)}:{}}return{}});while(s.fields.length<2)s.fields.push({});
+  if(!cropOf(s.lastCrop))s.lastCrop='bugday';if(!WEATHER[s.weather.k])s.weather={k:'sun',until:0};
+  const wk={};for(const k in s.workers)if(k==='fields'||B[k])wk[k]=1;s.workers=wk;
+  s.horses=s.horses.filter(obj).slice(0,4).map(h=>({n:typeof h.n==='string'&&h.n?h.n:'Rüzgar',spd:num(h.spd,5,1,20,true),sta:num(h.sta,5,1,20,true),w:num(h.w,0,0,1e6,true),rest:num(h.rest,0),train:num(h.train,0)}));
+  s.league=obj(s.league)?s.league:d.league;s.league.tier=num(s.league.tier,0,0,TIERS.length-1,true);s.league.pts=num(s.league.pts,0,0,1e6,true);
+  const okItems=o=>obj(o)&&Object.keys(o).length&&Object.keys(o).every(k=>ITEMS[k]&&num(o[k],0)>0);
+  s.orders=s.orders.filter(o=>obj(o)&&okItems(o.items));s.contracts=s.contracts.filter(c=>obj(c)&&ITEMS[c.k]&&num(c.total,0)>0);
+  if(s.daily!=null&&!(obj(s.daily)&&Array.isArray(s.daily.tasks)))s.daily=null;
+  for(const k of['house','farm','owned'])if(!obj(s.decor[k]))s.decor[k]={};
+  for(const k of['music','sfx','notif'])s.sound[k]=typeof s.sound[k]==='boolean'?s.sound[k]:d.sound[k];
+  if(!obj(s.market.m))s.market.m={};if(!obj(s.market.h))s.market.h={};s.market.at=num(s.market.at,0);
+  for(const k of['inc','exp'])if(!obj(s.fin[k]))s.fin[k]={};if(!Array.isArray(s.fin.hist))s.fin.hist=[];
+  if(!obj(s.contests)||!Array.isArray(s.contests.list)||!obj(s.contests.done))s.contests=d.contests;
+  for(const k of['love','friends'])if(s[k]!=null&&!obj(s[k]))delete s[k];
+  if(s.tut!=null&&!obj(s.tut))s.tut={done:1};
+  s.lastSeen=Math.min(num(s.lastSeen,Date.now()),Date.now());
+  delete s.dark;delete s.rooster;return s}

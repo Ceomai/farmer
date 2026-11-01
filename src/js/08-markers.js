@@ -17,7 +17,7 @@ function locStatus(k){const L=LOC[k];let ready=0,run=0,idle=0,minLeft=Infinity,u
   return{c:'',t:''}}
 function wantMarks(){const w={};if(mode==='desk'){for(const k in deskObjs)w['D:'+k]=1;return w}
   if(mode==='hub'){}
-  else if(mode==='focus'){const L=LOC[focus];if(L.kind==='fields')S.fields.forEach((f,i)=>{if(f.job)w['P:'+i]=1});(L.units||[]).forEach(u=>{const s=S.units[u];if(s&&s.job)w['U:'+u]=1})}
+  else if(mode==='focus'){const L=LOC[focus];if(!L)return w;if(L.kind==='fields')S.fields.forEach((f,i)=>{if(f.job)w['P:'+i]=1});(L.units||[]).forEach(u=>{const s=S.units[u];if(s&&s.job)w['U:'+u]=1})}
   return w}
 function syncMarks(){const w=wantMarks();for(const k in MK)if(!w[k]){MK[k].el.remove();delete MK[k]}for(const k in w)if(!MK[k]){const el=document.createElement('div');el.className='mk';marks.appendChild(el);MK[k]={el,sig:''}}updateMarks()}
 function bubble(m,em,pg,act,id){if(pg>=1){const h=`<button class="bub ready" data-act="${act}" data-id="${id}" aria-label="Topla">${em}</button>`;if(m.sig!==h){m.sig=h;m.el.innerHTML=h}}
