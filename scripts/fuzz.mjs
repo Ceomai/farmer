@@ -35,6 +35,8 @@ function makeSave(r,kind){const base={coins:300,xp:0,lv:1,rep:50,items:{yem:6},h
     case'tipler':{D.coins='500';D.lv='4';D.fields='bozuk';D.units=[];D.items=[];D.stats=null;D.album=null;D.decor=null;D.sound=null;D.market=null;D.fin=null;return JSON.stringify(D)}
     case'ambar-dolu':{D.house=1;D.items={bugday:79,yem:1};D.fields=[{job:{r:'bugday',s:0,e:1}},{job:{r:'bugday',s:0,e:1}}];return JSON.stringify(D)}
     default:return JSON.stringify(D)}}
+// Ortam koşulları: her koşu bunlardan birinde çalışır
+const ENVS=['normal','normal','depolama-yok','depolama-dolu','gfx-dusuk','gfx-yuksek','webgl-kayip','hizli','hareket-azalt','dpr2'];
 const KINDS=['yok','normal','normal','eski','uzun-yokluk','gelecek','zengin','zengin','garip','tipler','bozukjson','bos','ambar-dolu'];
 
 // --- Sayfa içinde çalışan denetim: tutarlılık kuralları ---
@@ -70,19 +72,32 @@ const API_CALLS=[ // oyun fonksiyonlarına doğrudan (bazen geçersiz) çağrıl
   'openView(__P(["guide","barn","goals","settings","shop","album","ledger","mail","borsa","budget","stats","places"]))','closeSheet()',
   'deliverContract(__R(3))','enterContest(__P(CONTESTS).id)','stableHorse()','trainHorse(__R(3))','leagueRace(__R(3))','petAnimal(__P(LOVE_U),__R(5),100,100)',
   'TIME_OFF+=__R(4)*60000','TIME_OFF+=__R(3)*3600000','TIME_OFF+=86400000*__R(3)','updateWeather()','S.weather.until=0;updateWeather()','refreshMarket(true)','tick()','save()',
-  'farmerSay(true)','renderStrip(true)','syncWorld(true)','checkDaily()&&showLogin()','friendGifts()','automate()',
+  'farmerSay(true)','renderStrip(true)','syncWorld(true)','checkDaily()&&showLogin()','friendGifts()','automate()','rescue()',
+  // geçiş animasyonunun ortasında başka yere atlama
+  'enterInterior("kumes");toDesk()','toDesk();enterWorld()','goLocation("tarla");enterInterior("kumes");leaveInterior()','enterWorld();goLocation(__P(Object.keys(LOC)));toHub()','leaveInterior();enterInterior("ahir")',
+  // saat geri gidiyor (telefon saati elle değiştirildi)
+  'TIME_OFF-=__R(5)*3600000','TIME_OFF-=86400000*__R(3)',
+  // oyun sürerken kayıt bozuluyor, sonra yeniden yükleniyor gibi
+  'try{localStorage.setItem(SAVE,"{bozuk")}catch(e){};S=migrate(load()||JSON.parse(JSON.stringify(S)))',
+  'S=migrate(JSON.parse(JSON.stringify(S)))','photoMode&&photoMode(true)','photoMode&&photoMode(false)',
+  'view={k:"loc",loc:__P(Object.keys(LOC))};renderSheet()','view={k:"region",r:__P(Object.keys(REG))};renderSheet()',
+  'setModeUI()','resize()','PLATFORM.hap("heavy")','celebrate("Test")','flyCoins(8)',
 ];
 
-async function run(b,seed){const r=mulberry(seed),R=n=>Math.floor(r()*n);const [w,h]=VPS[R(VPS.length)];const kind=KINDS[R(KINDS.length)];
-  const p=await b.newPage({viewport:{width:w,height:h},deviceScaleFactor:1,isMobile:w<700,hasTouch:w<700});
+async function run(b,seed){const r=mulberry(seed),R=n=>Math.floor(r()*n);const [w,h]=VPS[R(VPS.length)];const kind=KINDS[R(KINDS.length)];const env=ENVS[R(ENVS.length)];
+  const p=await b.newPage({viewport:{width:w,height:h},deviceScaleFactor:env==='dpr2'?2:1,isMobile:w<700,hasTouch:w<700,reducedMotion:env==='hareket-azalt'?'reduce':'no-preference'});
   const errs=[];const log=[];p.on('pageerror',e=>errs.push('hata: '+e.message+' @ '+((e.stack||'').split('\n').slice(1,3).map(l=>l.trim().replace(/file:.*index.html:/,'')).join(' < '))));p.on('console',m=>{if(m.type()==='error'&&!/Failed to load resource|net::ERR|favicon/.test(m.text()))errs.push('console.error: '+m.text().slice(0,200))});
   await p.route(/^https?:/,rt=>rt.abort());
   const save=makeSave(r,kind);
-  await p.addInitScript(([seed,save])=>{let a=seed*7919;Math.random=()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
-    if(!sessionStorage.getItem('fz')){sessionStorage.setItem('fz','1');localStorage.clear();if(save!=null)localStorage.setItem('ciftlik-imparatorlugu-v3',save)}
-    addEventListener('unhandledrejection',e=>console.error('unhandledrejection: '+(e.reason&&e.reason.message||e.reason)))},[seed,save]);
-  const res={seed,vp:`${w}x${h}`,kind,steps:0,errs,bad:[],log};
-  try{await p.goto(FILE,{timeout:120000});await p.waitForFunction(()=>typeof S==='object'&&S&&!document.getElementById('boot'),null,{timeout:120000})}
+  await p.addInitScript(([seed,save,env])=>{let a=seed*7919;Math.random=()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+    if(!sessionStorage.getItem('fz')){sessionStorage.setItem('fz','1');localStorage.clear();if(save!=null)localStorage.setItem('ciftlik-imparatorlugu-v3',save);
+      if(env==='gfx-dusuk')localStorage.setItem('ci-gfx','low');if(env==='gfx-yuksek')localStorage.setItem('ci-gfx','high')}
+    // gizli sekme / engellenmiş depolama: her erişim hata fırlatır; dolu depolama: yazma hata fırlatır
+    if(env==='depolama-yok'){const th=()=>{throw new DOMException('SecurityError','SecurityError')};Storage.prototype.getItem=th;Storage.prototype.setItem=th;Storage.prototype.removeItem=th}
+    if(env==='depolama-dolu'){Storage.prototype.setItem=function(){throw new DOMException('QuotaExceededError','QuotaExceededError')}}
+    addEventListener('unhandledrejection',e=>console.error('unhandledrejection: '+(e.reason&&e.reason.message||e.reason)))},[seed,save,env]);
+  const res={seed,vp:`${w}x${h}`,kind:kind+'/'+env,steps:0,errs,bad:[],log};
+  try{await p.goto(FILE,{timeout:240000});await p.waitForFunction(()=>typeof S==='object'&&S&&!document.getElementById('boot'),null,{timeout:240000})}
   catch(e){errs.push('açılmadı: '+e.message.split('\n')[0]);await p.close();return res}
   await p.evaluate(()=>{window.__R=n=>Math.floor(Math.random()*n);window.__P=a=>a[Math.floor(Math.random()*a.length)]});
   for(let i=0;i<STEPS;i++){res.steps=i+1;const t=r();let act;
@@ -93,11 +108,17 @@ async function run(b,seed){const r=mulberry(seed),R=n=>Math.floor(r()*n);const [
       else if(t<.70){act='kaydır';await p.mouse.wheel(0,R(800)-400)}
       else if(t<.72){const [w2,h2]=VPS[R(VPS.length)];act=`ekran ${w2}x${h2}`;await p.setViewportSize({width:w2,height:h2})}
       else if(t<.73){act='Escape';await p.keyboard.press('Escape')}
+      else if(t<.735&&env!=='depolama-yok'&&env!=='depolama-dolu'){act='yeniden başlat';const before=await p.evaluate(()=>{save();return S.coins});await p.reload({timeout:240000});
+        await p.waitForFunction(()=>typeof S==='object'&&S&&!document.getElementById('boot'),null,{timeout:240000});await p.evaluate(()=>{window.__R=n=>Math.floor(Math.random()*n);window.__P=a=>a[Math.floor(Math.random()*a.length)]});
+        const after=await p.evaluate(()=>S.coins);if(Math.abs(after-before)>1e-6&&after<before)errs.push(`kayıt kaybı: yeniden açınca para ${before} → ${after}`)}
+      else if(t<.745&&env==='webgl-kayip'){act='webgl kayıp';await p.evaluate(()=>{const x=R.getContext().getExtension('WEBGL_lose_context');if(x){x.loseContext();setTimeout(()=>x.restoreContext(),400)}})}
+      else if(t<.76){const n=3+R(6);act=`hızlı ${n} dokunuş`;const ms=[];for(let k=0;k<n;k++){const m=await p.evaluate(PICK,r());if(m)ms.push(m)}for(const m of ms)p.mouse.click(m.x,m.y).catch(()=>{});await p.waitForTimeout(30)}
+      else if(t<.77){act='çift dokunuş';const m=await p.evaluate(PICK,r());if(m){await p.mouse.click(m.x,m.y,{clickCount:2})}}
       else if(t<.74){act='arka plan';await p.evaluate(()=>{document.dispatchEvent(new Event('visibilitychange'));dispatchEvent(new Event('blur'));dispatchEvent(new Event('focus'))})}
       else{const c=API_CALLS[R(API_CALLS.length)];act='api '+c;await p.evaluate(c=>{try{eval(c)}catch(e){console.error('api hatası ['+c+']: '+e.message)}},c)}
     }catch(e){if(!/Target closed|navigation|Execution context/.test(e.message))errs.push(`adım ${i} (${act}): `+e.message.split('\n')[0])}
     log.push(act);if(log.length>12)log.shift();
-    if(i%3===2){await p.waitForTimeout(40);try{const bad=await p.evaluate(INVARIANTS);if(bad.length){res.bad.push({step:i,act,bad});if(res.bad.length>=3)break}}catch(e){}}
+    if(i%3===2){if(env!=='hizli')await p.waitForTimeout(40);try{const bad=await p.evaluate(INVARIANTS);if(bad.length){res.bad.push({step:i,act,bad});if(res.bad.length>=3)break}}catch(e){}}
     if(errs.length>=3)break}
   await p.waitForTimeout(300);try{const bad=await p.evaluate(INVARIANTS);if(bad.length)res.bad.push({step:'son',bad})}catch(e){}
   await p.close();return res}
