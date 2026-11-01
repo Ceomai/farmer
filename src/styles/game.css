@@ -205,7 +205,8 @@ button.job.ready b{font-family:var(--f-display);font-weight:400;font-size:17px;c
 .modal .badge{width:80px;height:80px;margin:0 auto 10px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe9a3,var(--honey) 60%,var(--honey-dk));display:grid;place-items:center;font-family:var(--f-display);font-size:36px;color:#6b4100;border:3px solid var(--ink);animation:boing .7s .2s}
 .modal p{font-weight:700;color:#5d503c;line-height:1.5}
 #iris{position:fixed;inset:0;z-index:20;pointer-events:none;overflow:hidden}
-#iris i{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:300vmax;height:300vmax;border-radius:50%;box-shadow:0 0 0 300vmax #1d140b;transition:width .45s cubic-bezier(.65,0,.35,1),height .45s cubic-bezier(.65,0,.35,1)}
+#iris i{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:300vmax;height:300vmax;border-radius:50%;box-shadow:0 0 0 300vmax #1d140b;transition:width .28s cubic-bezier(.65,0,.35,1),height .28s cubic-bezier(.65,0,.35,1)}
+body.fastnav #iris i{transition-duration:.15s}
 #iris.close i{width:0;height:0}
 #boot{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:linear-gradient(180deg,var(--sky-top),var(--sky-low))}
 #boot div{font-family:var(--f-display);font-size:30px;line-height:1.08;text-align:center;color:var(--paper);background:linear-gradient(180deg,#9a5a32,#7a3f22);border:3px solid var(--ink);border-radius:22px;padding:16px 24px;box-shadow:6px 7px 0 var(--ink);transform:rotate(-2deg)}
@@ -307,3 +308,16 @@ body.photo .cam .ph{display:none}
   body.sheet-open .dock,body.sheet-open .cam{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* Kart şeridi: tek dokunuşla iş (topla / yeniden başlat) */
+.scard .qa{display:block;width:100%;margin-top:2px;padding:6px 0;border:2px solid var(--ink);border-radius:10px;background:var(--leaf);color:#fff;font-size:12px;font-weight:900;box-shadow:0 2px 0 var(--ink);animation:qaPulse 1.6s ease-in-out infinite}
+.scard .qa.re{background:var(--honey);color:var(--ink);animation:none}
+.scard .qa:active{transform:translateY(2px);box-shadow:none}
+@keyframes qaPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.scard.all{background:var(--forest);color:#fff}.scard.all .ph{background:#3f7a4a;border-color:#fff;font-size:30px}.scard.all small{color:#e8f3d8}
+/* Bölümler arası geçiş okları */
+.sh-head .nav{flex:none;width:34px;height:34px;border:2px solid var(--ink);border-radius:50%;background:var(--paper-2);font:900 22px/1 var(--f-display,inherit);color:var(--wood);display:grid;place-items:center;padding:0 0 3px;box-shadow:0 2px 0 var(--ink)}
+.sh-head .nav:active{transform:translateY(2px);box-shadow:none}
+.sh-head .nav[data-locstep="-1"]{margin-left:auto}
+.sheet.dark .sh-head .nav{background:#3a2a1c;color:#f3e6c4;border-color:#f3e6c4}
+@media (prefers-reduced-motion:reduce){.scard .qa{animation:none}}
+.sh-head{touch-action:pan-y}

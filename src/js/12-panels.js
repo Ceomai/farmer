@@ -3,7 +3,7 @@ let view=null,race=null;const sheet=$('#sheet');
 const THUMB={};
 const img=k=>THUMB[k]?`<img src="${THUMB[k]}" alt="">`:(B[k]?B[k].e:(LOC[k]?LOC[k].e:'🏠'));
 function stars(n,max){return `<div class="stars">${Array.from({length:max},(_,k)=>`<i class="${k<n?'on':''}"></i>`).join('')}</div>`}
-function head(thumb,title,sub){return `<div class="sh-head"><div class="thumb">${thumb}</div><div class="ttl"><h2>${title}</h2>${sub?`<div class="sub">${sub}</div>`:''}</div><button class="x" data-act="close" aria-label="Kapat">✕</button></div>`}
+function head(thumb,title,sub){return `<div class="sh-head"><div class="thumb">${thumb}</div><div class="ttl"><h2>${title}</h2>${sub?`<div class="sub">${sub}</div>`:''}</div>${view&&view.k==='loc'&&locOrder().length>1?`<button class="nav" data-locstep="-1" aria-label="Önceki bölüm">‹</button><button class="nav" data-locstep="1" aria-label="Sonraki bölüm">›</button>`:''}<button class="x" data-act="close" aria-label="Kapat">✕</button></div>`}
 function closeSheet(){if(mode!=='hub'){view.mini=!view.mini;renderSheet();return}view=null;renderSheet()}
 function openView(k){view={k};renderSheet()}
 function setDock(){document.querySelectorAll('.dock button[data-open]').forEach(b=>b.setAttribute('aria-current',String(!!view&&b.dataset.open===view.k)))}
@@ -78,6 +78,7 @@ function sheetSettings(){return head('⚙️','Ayarlar','')+`<div class="sh-body
   <p class="note">Otomatik: cihaza göre ayarlanır, takılırsa çözünürlüğü düşürür. Pil tasarrufu: gölgeler kapanır, 30 FPS. Değişiklik oyunu yeniden yükler.</p>
   <label class="switch"><input type="checkbox" id="optMusic" ${S.sound.music?'checked':''}><span><b>Müzik</b><br><span class="note">50'ler tarzı çiftlik ezgisi</span></span></label>
   <label class="switch"><input type="checkbox" id="optSfx" ${S.sound.sfx?'checked':''}><span><b>Ses efektleri</b><br><span class="note">Hayvanlar, hasat, para sesi</span></span></label>
+  <label class="switch"><input type="checkbox" id="optFast" ${S.fastNav?'checked':''}><span><b>Hızlı gezinme</b><br><span class="note">Kamera uçmadan bölümler arasında anında geçer</span></span></label>
   <label class="switch"><input type="checkbox" id="optNotif" ${S.sound.notif?'checked':''}><span><b>Hazır bildirimleri</b><br><span class="note">Sekme arka plandayken ürün hazır olunca haber verir. Tarayıcı izin vermezse çalışmaz.</span></span></label>
   ${view.confirm?`<div class="urow"><span class="note">Tüm ilerleme silinsin mi?</span><button class="btn red" data-act="reset2">Sil</button><button class="btn soft" data-act="reset0">Vazgeç</button></div>`:`<button class="btn ghost" data-act="reset">Baştan başla</button>`}</div>`}
 

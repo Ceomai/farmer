@@ -15,6 +15,8 @@ for(const vp of[{width:390,height:844,n:'telefon'},{width:1280,height:800,n:'mas
   const before=await p.evaluate(()=>S.coins);await p.evaluate(()=>{goLocation('tarla');plantAll()});await p.waitForTimeout(400);
   ok(await p.evaluate(b=>S.coins<b&&S.fields.some(f=>f.job),before),`${vp.n}: tarlaya ekim`);
   await p.evaluate(()=>{S.fields.forEach(f=>{if(f.job)f.job.e=Date.now()-1});harvestAll()});ok(await p.evaluate(()=>has('bugday')>0),`${vp.n}: hasat`);
+  await p.evaluate(()=>{toHub();S.fields.forEach((f,i)=>plantPlot(i,'bugday',true));S.fields.forEach(f=>{f.job.e=Date.now()-1})});const w0=await p.evaluate(()=>has('bugday'));
+  ok(await p.evaluate(w=>{const r=quickLoc('tarla');return has('bugday')>w&&r.got>0&&S.fields.every(f=>f.job)},w0),`${vp.n}: karttan tek dokunuşla topla + yeniden ek`);
   await p.evaluate(()=>{goLocation('pazar');sell('bugday',1)});ok(await p.evaluate(()=>S.stats.sold>0),`${vp.n}: pazarda satış`);
   await p.evaluate(()=>goLocation('kumes'));await p.waitForFunction(()=>mode==='focus'&&focus==='kumes',null,{timeout:15000}).catch(()=>{});
   ok(await p.evaluate(()=>mode==='focus'),`${vp.n}: karttan bölüme gidince içeri otomatik girmiyor`);await p.evaluate(()=>enterInterior('kumes'));await p.waitForFunction(()=>mode==='interior',null,{timeout:15000}).catch(()=>{});ok(await p.evaluate(()=>mode==='interior'),`${vp.n}: kümes iç mekânı`);

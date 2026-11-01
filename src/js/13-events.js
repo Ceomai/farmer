@@ -1,7 +1,10 @@
 // ================= OLAYLAR =================
 document.addEventListener('click',e=>{
   const dk=e.target.closest('[data-desk]');if(dk){sfx('click');deskAction(dk.dataset.desk);return}
-  const go=e.target.closest('[data-go]');if(go){goLocation(go.dataset.go);return}
+  const qk=e.target.closest('[data-quick]');if(qk){quickFeedback(quickLoc(qk.dataset.quick),qk);return}
+  const qa=e.target.closest('[data-quickall]');if(qa){quickAll(qa);return}
+  const ln=e.target.closest('[data-locstep]');if(ln){stepLoc(+ln.dataset.locstep);return}
+  const go=e.target.closest('[data-go]');if(go){PLATFORM.hap();goLocation(go.dataset.go);return}
   const rg=e.target.closest('[data-region]');if(rg){openRegion(rg.dataset.region);return}
   const op=e.target.closest('[data-open]');if(op){openView(op.dataset.open);return}
   const a=e.target.closest('[data-act]');if(!a||a.tagName==='INPUT')return;const d=a.dataset,rc=a.getBoundingClientRect(),cx=rc.left+rc.width/2,cy=rc.top;sfx('click');
@@ -33,7 +36,7 @@ document.addEventListener('click',e=>{
     case'dbonus':if(S.daily&&S.daily.tasks.every(t=>t.c)&&!S.daily.bonus){S.daily.bonus=true;S.gems+=2;sfx('win');commit()}break;
     case'albumDone':if(!S.stats.albumDone){S.stats.albumDone=1;S.gems+=50;sfx('win');commit()}break;
   }});
-document.addEventListener('change',e=>{const id=e.target.id;if(id==='optMusic'){S.sound.music=e.target.checked;audioInit();applySound();save()}if(id==='optSfx'){S.sound.sfx=e.target.checked;save()}
+document.addEventListener('change',e=>{const id=e.target.id;if(id==='optMusic'){S.sound.music=e.target.checked;audioInit();applySound();save()}if(id==='optSfx'){S.sound.sfx=e.target.checked;save()}if(id==='optFast'){S.fastNav=e.target.checked;save()}
   if(id==='optAn'){S.consent={analytics:e.target.checked,at:Date.now()};save();toast(e.target.checked?'Anonim veri paylaşımı açık':'Anonim veri paylaşımı kapalı')}
   if(id==='optNotif'&&NATIVE){if(e.target.checked)PLATFORM.askNotif().then(g=>{S.sound.notif=!!g;if(!g)toast('Bildirim izni verilmedi');save();renderSheet()});else{S.sound.notif=false;save()}return}
   if(id==='optNotif'){if(e.target.checked){try{Notification.requestPermission().then(pm=>{S.sound.notif=pm==='granted';if(!S.sound.notif)toast('Tarayıcı bildirim izni vermedi');save();renderSheet()}).catch(()=>{toast('Bildirimler bu ortamda desteklenmiyor');renderSheet()})}catch(err){toast('Bildirimler bu ortamda desteklenmiyor');e.target.checked=false}}else{S.sound.notif=false;save()}}});
@@ -52,3 +55,6 @@ let panelSwipeUsed=false;
 sheet.addEventListener('pointerdown',e=>{const b=e.target.closest('.plot[data-i]');if(!b)return;const i=+b.dataset.i,k=swipeKind(i);if(!k)return;
   swipe={kind:k,done:new Set(),n:0,panel:1};panelSwipeUsed=true;try{b.releasePointerCapture&&b.releasePointerCapture(e.pointerId)}catch(err){}const r=b.getBoundingClientRect();swipeApply(i,r.left+r.width/2,r.top)});
 sheet.addEventListener('pointermove',e=>{if(!swipe||!swipe.panel)return;const el=document.elementFromPoint(e.clientX,e.clientY),b=el&&el.closest('.plot[data-i]');if(b){const i=+b.dataset.i;if(!swipe.done.has(i)){const r=b.getBoundingClientRect();swipeApply(i,r.left+r.width/2,r.top)}}});
+// Başlıkta sağa-sola kaydırınca bir sonraki / önceki bölüme geç
+{let hs=null;sheet.addEventListener('pointerdown',e=>{const h=e.target.closest('.sh-head');hs=h&&view&&view.k==='loc'&&!e.target.closest('button')?{x:e.clientX,y:e.clientY}:null});
+  sheet.addEventListener('pointerup',e=>{if(!hs)return;const dx=e.clientX-hs.x,dy=e.clientY-hs.y;hs=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)stepLoc(dx<0?1:-1)})}
