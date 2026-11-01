@@ -1,7 +1,7 @@
 // ================= İŞÇİLER =================
 const WORKER_LV=5;const workerCost=k=>k==='fields'?800:Math.max(500,Math.round(B[k].cost*.6));
 let autoGain=0,autoTick=0;
-function hire(k){if(S.lv<WORKER_LV)return toast('İşçiler seviye 5\'te açılır');if(S.workers[k])return;const c=workerCost(k);if(S.coins<c)return toast('Yeterli paran yok');pay(c,'İşçi');S.workers[k]=1;sfx('build');toast('👷 İşçi işe başladı!');popLoc=k==='fields'?'tarla':locOf(k);commit()}
+function hire(k){if(k!=='fields'&&!(B[k]&&B[k].recipes&&S.units[k]))return;if(S.lv<WORKER_LV)return toast('İşçiler seviye 5\'te açılır');if(S.workers[k])return;const c=workerCost(k);if(S.coins<c)return toast('Yeterli paran yok');pay(c,'İşçi');S.workers[k]=1;sfx('build');toast('👷 İşçi işe başladı!');popLoc=k==='fields'?'tarla':locOf(k);commit()}
 function workerBtn(k){if(S.workers[k])return `<span class="pill-btn" style="cursor:default">👷 İşçi çalışıyor</span>`;
   return `<button class="pill-btn" data-act="hire" data-k="${k}" ${S.lv>=WORKER_LV&&S.coins>=workerCost(k)?'':'disabled'} title="Hazır ürünü toplar, aynı üretimi yeniden başlatır">👷 ${S.lv>=WORKER_LV?'İşçi ₺'+fmt(workerCost(k)):'İşçi · Sv '+WORKER_LV}</button>`}
 // Güvenlik ağı: para tohuma yetmiyor, satacak ürün yok, hiçbir iş çalışmıyor ve işçi yoksa oyuncu kilitlenir.
