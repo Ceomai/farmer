@@ -10,23 +10,23 @@ Son güncelleme: 2026-11-02. Bu dosya, denetim yarıda kalırsa kaldığı yerde
 | 2 | İşlevsel testler | Tamam | `scripts/smoke-test.mjs`, `scripts/personas.mjs` |
 | 3 | Persona yolculukları (22) | Tamam: 68/68 | `scripts/personas.mjs` |
 | 4 | Uç durumlar | Tamam: 32/32 | `scripts/edge-test.mjs` |
-| 5 | Arayüz ve görsel | Tamam (4 ekran boyutu, 40+ ekran) | `scripts/layout-check.mjs`, ajan incelemesi sürüyor |
+| 5 | Arayüz ve görsel | Tamam (4 ekran boyutu, 43 ekran; 12 inceleme bulgusu düzeltildi) | `scripts/layout-check.mjs` |
 | 6 | Arka uç, veritabanı, veri bütünlüğü | Tamam: 43/43 | `scripts/backend-test.mjs` (Firebase emülatörü) |
-| 7 | Performans ve stres | Tamam: 14/14 | `scripts/perf-test.mjs` |
+| 7 | Performans ve stres | Tamam: 15/15 | `scripts/perf-test.mjs`, `scripts/bot-sim.mjs` |
 | 8 | Güvenlik | Tamam: 9/9 + kural testleri | `scripts/security-test.mjs`, `scripts/backend-test.mjs` |
 | 9 | Otomatik test altyapısı | Tamam | `package.json` betikleri |
-| 10 | Hata düzeltme + regresyon | Sürüyor | `reports/BUGS_AND_FIXES.md` |
-| 11 | Sürekli test döngüleri | Sürüyor | büyük fuzz turu (80 senaryo), bot simülasyonu |
-| 12 | Son rapor | Bekliyor | `reports/FULL_APPLICATION_AUDIT.md` |
+| 10 | Hata düzeltme + regresyon | Tamam: 54 hata düzeltildi | `reports/BUGS_AND_FIXES.md` |
+| 11 | Sürekli test döngüleri | Tamam | 2 tam regresyon turu, ~105 simülasyon koşusu, 4 bot turu |
+| 12 | Son rapor | Tamam | `reports/FULL_APPLICATION_AUDIT.md` |
 
-## Bekleyen işler
+## İşler
 
-- [ ] Arayüz kod incelemesi (bağımsız ajan) bulgularını düzelt
-- [ ] Çizim, döngü ve platform kod incelemesi (bağımsız ajan) bulgularını düzelt
-- [ ] Büyük fuzz turunun sonuçlarını işle
-- [ ] Bot simülasyonunu yeni denge ve özelliklerle koştur (6 tarz)
-- [ ] Tüm test setlerini son kez regresyon olarak koştur
-- [ ] Raporları yaz: denetim, kapsam, hatalar, performans, güvenlik
+- [x] Arayüz kod incelemesi (bağımsız ajan) bulgularını düzelt
+- [x] Çizim, döngü ve platform kod incelemesi (bağımsız ajan) bulgularını düzelt
+- [x] Büyük fuzz turunun sonuçlarını işle
+- [x] Bot simülasyonunu yeni denge ve özelliklerle koştur (6 tarz)
+- [x] Tüm test setlerini son kez regresyon olarak koştur
+- [x] Raporları yaz: denetim, kapsam, hatalar, performans, güvenlik
 
 ## Testleri yeniden çalıştırma
 
@@ -42,3 +42,10 @@ npm run fuzz -- 24 200   # rastgele simülasyon (koşu sayısı, adım)
 npm run bot -- 60        # bot oyuncu, 60 sanal gün
 npm run test:backend     # Firebase emülatörü (Java 11+ gerekir)
 ```
+
+## Sonraki oturum için
+
+- [ ] Gerçek cihazda test (Play Console yayın öncesi raporu)
+- [ ] Capacitor 7'ye geçiş (geliştirme aracı açıkları)
+- [ ] Firebase App Check ve API anahtarı kısıtlaması
+- [ ] `validatePurchase` yayını ve `CONFIG.iapValidatorUrl`

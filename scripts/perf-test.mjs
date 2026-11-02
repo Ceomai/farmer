@@ -25,7 +25,7 @@ const mem=()=>p.evaluate(()=>{if(window.gc)gc();return{geo:R.info.memory.geometr
 // ısınma: haritanın her yeri bir kez görülsün (ilk yüklemeler sızıntı sayılmasın)
 const cycle=async n=>{for(let i=0;i<n;i++){await p.evaluate(i=>{const ks=Object.keys(LOC);const k=ks[i%ks.length];goLocation(k);if(i%5===0){enterInterior(['kumes','ahir','agil','besi','hara','kulube'][i%6])}},i);await p.waitForTimeout(60);
   await p.evaluate(i=>{if(mode==='interior')leaveInterior();if(i%10===0){toDesk()}else if(i%10===1){enterWorld()}else toHub();view={k:['barn','guide','ledger','album','settings'][i%5]};renderSheet();closeSheet()},i);await p.waitForTimeout(60)}};
-await cycle(40);await p.evaluate(()=>{if(mode==='desk')enterWorld();else toHub()});await p.waitForTimeout(4000);const m0=await mem();const t0=Date.now();await cycle(100);
+await cycle(80);await p.evaluate(()=>{if(mode==='desk')enterWorld();else toHub()});await p.waitForTimeout(4000);const m0=await mem();const t0=Date.now();await cycle(100);
 await p.evaluate(()=>{if(mode==='desk')enterWorld();else toHub()});await p.waitForTimeout(1500);const m1=await mem();R.nav={m0,m1,ms:Date.now()-t0};
 ok(m1.geo-m0.geo<=40,`100 tur gezinmede geometri sayısı ${m0.geo} → ${m1.geo}`);ok(m1.tex-m0.tex<=10,`100 tur gezinmede doku sayısı ${m0.tex} → ${m1.tex}`);
 ok(m1.heap-m0.heap<=25,`100 tur gezinmede JS belleği ${m0.heap} → ${m1.heap} MB`);ok(m1.dom-m0.dom<=80,`100 tur gezinmede sayfa öğesi ${m0.dom} → ${m1.dom}`);

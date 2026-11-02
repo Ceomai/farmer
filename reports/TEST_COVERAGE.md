@@ -56,15 +56,15 @@ Aşağıdaki sayılar gerçekten çalıştırılmış testlerin sonuçlarıdır.
 
 | Set | Son regresyon turu | Döngü boyunca |
 |---|---|---|
-| Duman | SONUÇ_SMOKE | her değişiklikten sonra (60+ kez) |
-| Persona | SONUÇ_PERSONA | 1 ilk koşu: 68/68 (2 boş denetim düzeltildi) |
-| Uç durumlar | SONUÇ_EDGE | ilk koşu düzenek takıldı, düzeltildi |
-| Arka uç | SONUÇ_BACKEND | ilk koşu 38/43: 2 kritik veri kaybı testi + 1 düzenek |
-| Güvenlik | SONUÇ_SECURITY | XSS önceki sürümde yeniden üretildi |
-| Performans | SONUÇ_PERF | ilk koşu 12/14: doku sızıntısı bulundu |
-| Yerleşim | SONUÇ_LAYOUT | 4 boyut × 43 ekran |
-| Rastgele simülasyon | SONUÇ_FUZZ | 96 + 80 + düzeltme doğrulama koşuları; ilk 80'lik turda 12 sorunlu → hepsi çözüldü |
-| Bot | 6/6 tarz, 30 gün, hata yok | 3 tur |
+| Duman | 28/28 denetim | her değişiklikten sonra (60+ kez) |
+| Persona | 68/68 denetim (22 persona) | 1 ilk koşu: 68/68 (2 boş denetim düzeltildi) |
+| Uç durumlar | 32/32 | ilk koşu düzenek takıldı, düzeltildi |
+| Arka uç | 43/43 (24 kural + 19 entegrasyon) | ilk koşu 38/43: 2 kritik veri kaybı testi + 1 düzenek |
+| Güvenlik | 9/9 | XSS önceki sürümde yeniden üretildi |
+| Performans | 15/15 (ilk koşuda 14/15: ısınma kısa kalmıştı, sızıntı olmadığı 320 turla doğrulandı) | ilk koşu 12/14: doku sızıntısı bulundu |
+| Yerleşim | 4 boyut × 43 ekran; 2 uyarı (bölge paneli açılış animasyonu sırasında ölçüm: görüntüde sorun yok) | 4 boyut × 43 ekran |
+| Rastgele simülasyon | 12 koşu × 200 adım, 12/12 temiz | 96 + 80 + düzeltme doğrulama koşuları; ilk 80'lik turda 12 sorunlu → hepsi çözüldü |
+| Bot | 6/6 tarz, 5–30 sanal gün, hata ve kilitlenme yok | 4 tur (2'si düzenek sorunu nedeniyle yarıda kaldı) |
 | Bağımsız kod incelemesi | 3 alan, 33 bulgu | 32'si düzeltildi, 1'i tasarım |
 
 ## 5. Test edilemeyenler (engelli)
@@ -77,3 +77,11 @@ Aşağıdaki sayılar gerçekten çalıştırılmış testlerin sonuçlarıdır.
 | Canlı Firebase projesi | Gerçek oyuncu verisine dokunulmaması kuralı | Bütün arka uç testleri emülatörde |
 | Yerel bildirimler, titreşim | Cihaz gerekir | Kod incelemesi |
 | iOS | Yapılandırılmadı | — |
+
+## 6. Toplam
+
+Son regresyon turunda **195 denetim** (duman 28, güvenlik 9, persona 68, uç durum 32, performans 15, arka uç 43) çalıştırıldı ve **hepsi geçti**. Ayrıca 4 ekran boyutunda 43 ekranlık yerleşim taraması, 12 rastgele simülasyon koşusu (2.400 hamle) ve 6 oyun tarzıyla bot simülasyonu çalıştırıldı.
+
+Denetim döngüsü boyunca ek olarak yaklaşık 105 rastgele simülasyon koşusu (en büyüğü 80 senaryo × 200 hamle) ve 3 bağımsız kod incelemesi yapıldı. Başarısız olan her koşu tek tek yeniden oynatıldı ve kök nedeni bulundu (bkz. `BUGS_AND_FIXES.md`).
+
+**Engellenen testler:** gerçek cihaz, reklam, satın alma, canlı Firebase, bildirim/titreşim, iOS (bkz. bölüm 5).
