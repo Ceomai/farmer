@@ -4,12 +4,12 @@ document.addEventListener('click',e=>{
   const qk=e.target.closest('[data-quick]');if(qk){quickFeedback(quickLoc(qk.dataset.quick),qk);return}
   const qa=e.target.closest('[data-quickall]');if(qa){quickAll(qa);return}
   const ln=e.target.closest('[data-locstep]');if(ln){stepLoc(+ln.dataset.locstep);return}
-  const go=e.target.closest('[data-go]');if(go){PLATFORM.hap();goLocation(go.dataset.go);return}
+  const go=e.target.closest('[data-go]');if(go){PLATFORM.hap();closeQpop();goLocation(go.dataset.go);return}
   const rg=e.target.closest('[data-region]');if(rg){openRegion(rg.dataset.region);return}
   const op=e.target.closest('[data-open]');if(op){openView(op.dataset.open);return}
   const a=e.target.closest('[data-act]');if(!a||a.tagName==='INPUT')return;const d=a.dataset,rc=a.getBoundingClientRect(),cx=rc.left+rc.width/2,cy=rc.top;sfx('click');
   switch(d.act){
-    case'close':closeSheet();break;case'back':mode==='interior'?leaveInterior():mode==='focus'?toHub():toDesk();break;case'home':toDesk();break;case'proj':doProj(d.id);break;case'gen':askGen();break;case'quest':doQuest(d.n);break;case'ach':claimAch(d.id);break;case'fs':S.ui=Object.assign(S.ui||{},{fs:d.k});applyUI();renderSheet();save();break;case'qpclose':closeQpop();break;case'qpplant':plantAll();refreshQpop();break;case'keepN':S.keepN=+d.n;renderSheet();save();break;case'sellEx':sellExcess(S.keepN??10);break;case'renew':renewWorker(d.k);break;case'guide':openView('guide');break;
+    case'close':closeSheet();break;case'back':mode==='interior'?leaveInterior():mode==='focus'?toHub():toDesk();break;case'home':toDesk();break;case'proj':doProj(d.id);break;case'gen':askGen();break;case'quest':doQuest(d.n,d.i!=null?+d.i:null);break;case'ach':claimAch(d.id);break;case'fs':S.ui=Object.assign(S.ui||{},{fs:d.k});applyUI();renderSheet();save();break;case'qpclose':closeQpop();break;case'qpplant':plantAll();refreshQpop();break;case'keepN':S.keepN=+d.n;renderSheet();save();break;case'sellEx':sellExcess(S.keepN??10);break;case'renew':renewWorker(d.k);break;case'guide':openView('guide');break;
     case'enterIn':enterInterior(d.k);break;
     case'build':buildUnit(d.u);break;case'upU':upgradeUnit(d.u);break;case'upHouse':upgradeHouse();break;case'upFields':upgradeFields();break;
     case'start':startUnit(d.u,d.r);break;case'queue':queueAdd(d.u,d.r);break;case'qdel':queueDel(d.u,+d.i);break;case'collect':collectUnit(d.u,cx,cy);break;
@@ -40,7 +40,7 @@ document.addEventListener('change',e=>{const id=e.target.id;if(id==='optMusic'){
   if(id==='optAn'){S.consent={analytics:e.target.checked,at:Date.now()};save();toast(e.target.checked?'Anonim veri paylaşımı açık':'Anonim veri paylaşımı kapalı')}
   if(id==='optNotif'&&NATIVE){if(e.target.checked)PLATFORM.askNotif().then(g=>{S.sound.notif=!!g;if(!g)toast('Bildirim izni verilmedi');save();renderSheet()});else{S.sound.notif=false;save()}return}
   if(id==='optNotif'){if(e.target.checked){try{Notification.requestPermission().then(pm=>{S.sound.notif=pm==='granted';if(!S.sound.notif)toast('Tarayıcı bildirim izni vermedi');save();renderSheet()}).catch(()=>{toast('Bildirimler bu ortamda desteklenmiyor');renderSheet()})}catch(err){toast('Bildirimler bu ortamda desteklenmiyor');e.target.checked=false}}else{S.sound.notif=false;save()}}});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(mode==='interior')leaveInterior();else if(mode==='focus')toHub();else if(view){view=null;renderSheet()}else if(mode==='hub')toDesk()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(backOverlay())return;if(mode==='interior')leaveInterior();else if(mode==='focus')toHub();else if(view){view=null;renderSheet()}else if(mode==='hub')toDesk()}
   if(mode==='hub'&&!(e.target.closest&&e.target.closest('input'))){if(e.key==='q')rotateCam(Math.PI/4);if(e.key==='e')rotateCam(-Math.PI/4)}});
 
 let lastCoins=null;
@@ -48,6 +48,8 @@ function renderHUD(){$('#coins').textContent=fmt(S.coins);if(lastCoins!=null&&S.
   $('#lv').textContent=S.lv;$('#lvring').style.setProperty('--p',Math.min(100,S.xp/xpNeed(S.lv)*100)+'%');$('#pLv').title=`Seviye ${S.lv} · ${fmt(S.xp)}/${fmt(xpNeed(S.lv))} xp`;
   $('#rep').textContent=S.rep;$('#store').textContent=stored()+'/'+cap();$('#pStore').classList.toggle('full',stored()/cap()>=.9);
   $('#gems').textContent=S.gems;const se=SEASONS[season()],wx=WEATHER[S.weather.k];$('#era').textContent=`${se.e} ${se.n} · ${wx.e} ${clockStr()}`;$('#goalDot').hidden=!goalReady()&&!(S.daily&&S.daily.tasks.some(t=>t.p>=t.n&&!t.c))}
+// Geri / Escape: önce açık pencere (mini oyunsa düzgün kapatılır) ve uzun basma menüsü kapanır
+function backOverlay(){const m=document.querySelector('.modal');if(m){const x=m.querySelector('.mgx');if(x)x.click();else m.remove();return true}if(typeof qpop!=='undefined'&&!qpop.hidden){closeQpop();return true}return false}
 function commit(skipSheet){save();renderHUD();syncWorld();if(!skipSheet)renderSheet();refreshQpop();if(interior&&intSig(interior.key)!==interior.sig)interior.refresh()}
 
 // Kart içindeki parsel ızgarasında da sürükleyerek ekme/toplama

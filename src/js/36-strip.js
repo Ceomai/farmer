@@ -55,10 +55,12 @@ function openQpop(k){lpKey=k;qpop.innerHTML=qpopHTML(k);qpop.hidden=false;PLATFO
 function closeQpop(){qpop.hidden=true;lpKey=null}
 function refreshQpop(){if(!qpop.hidden&&lpKey)qpop.innerHTML=qpopHTML(lpKey)}
 stripEl.addEventListener('pointerdown',e=>{const c=e.target.closest('.scard[data-go]');if(!c||e.target.closest('[data-quick]'))return;lpStart={x:e.clientX,y:e.clientY};clearTimeout(lpT);
-  lpT=setTimeout(()=>{lpT=null;lpSuppress=Date.now();openQpop(c.dataset.go)},480)});
+  lpT=setTimeout(()=>{lpT=null;lpSuppress=1;openQpop(c.dataset.go)},480)});
 for(const ev of['pointerup','pointercancel','pointerleave'])stripEl.addEventListener(ev,()=>{clearTimeout(lpT);lpT=null});
 stripEl.addEventListener('pointermove',e=>{if(lpT&&lpStart&&Math.hypot(e.clientX-lpStart.x,e.clientY-lpStart.y)>9){clearTimeout(lpT);lpT=null}});
 stripEl.addEventListener('contextmenu',e=>{if(e.target.closest('.scard'))e.preventDefault()});
 // uzun basmadan hemen sonraki tıklama karta gitmesin
-document.addEventListener('click',e=>{if(Date.now()-lpSuppress<500&&e.target.closest('.scard')){e.stopPropagation();e.preventDefault()}},true);
+document.addEventListener('click',e=>{if(lpSuppress&&e.target.closest('.scard')){lpSuppress=0;e.stopPropagation();e.preventDefault()}},true);
+// uzun basmadan sonra başka bir yere dokunulursa yutma işareti temizlenir
+document.addEventListener('pointerdown',e=>{if(lpSuppress&&!lpT&&!e.target.closest('.scard'))lpSuppress=0},true);
 document.addEventListener('pointerdown',e=>{if(!qpop.hidden&&!e.target.closest('.qpop')&&!e.target.closest('.scard'))closeQpop()},true);

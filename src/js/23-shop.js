@@ -6,10 +6,10 @@ function watchAd(cb){if(adsLeft()<=0)return toast('Bugünlük reklam hakkın bit
   const iv=setInterval(()=>{n--;const c=d.querySelector('#adc');if(c)c.textContent=n;if(n<=0){clearInterval(iv);d.remove();S.ads.n++;cb();save()}},1000)}
 const speedCost=ms=>Math.max(1,Math.ceil(ms/600000));
 function finishJob(j){j.e=now()}
-function speedUnit(u,how){const s=S.units[u];if(!s||!s.job||now()>=s.job.e)return;if(how==='ad')watchAd(()=>{finishJob(s.job);sfx('pop');toast('⚡ Üretim tamamlandı!');commit()});
+function speedUnit(u,how){const s=S.units[u];if(!s||!s.job||now()>=s.job.e)return;if(how==='ad'){const job=s.job;watchAd(()=>{if(s.job!==job||!job)return;finishJob(job);sfx('pop');toast('⚡ Üretim tamamlandı!');commit()})}
   else{const c=speedCost(s.job.e-now());if(S.gems<c)return toast('Yeterli yoncan yok');S.gems-=c;finishJob(s.job);sfx('pop');commit()}}
 function speedFields(how){const run=S.fields.filter(f=>f.job&&now()<f.job.e);if(!run.length)return;const ms=Math.max(...run.map(f=>f.job.e-now()));
-  if(how==='ad')watchAd(()=>{run.forEach(f=>finishJob(f.job));sfx('pop');toast('⚡ Bütün ekinler olgunlaştı!');commit()});else{const c=speedCost(ms);if(S.gems<c)return toast('Yeterli yoncan yok');S.gems-=c;run.forEach(f=>finishJob(f.job));sfx('pop');commit()}}
+  const jobs=run.map(f=>f.job);if(how==='ad')watchAd(()=>{run.forEach((f,i)=>{if(f.job===jobs[i]&&now()<f.job.e)finishJob(f.job)});sfx('pop');toast('⚡ Bütün ekinler olgunlaştı!');commit()});else{const c=speedCost(ms);if(S.gems<c)return toast('Yeterli yoncan yok');S.gems-=c;run.forEach(f=>finishJob(f.job));sfx('pop');commit()}}
 function speedBtns(kind,ms,u){const c=speedCost(ms);return `<button class="pill-btn" data-act="ad${kind}" ${u?`data-u="${u}"`:''} ${adsLeft()>0?'':'disabled'} title="Ödüllü reklam izle, hemen bitir">📺 Bitir</button><button class="pill-btn" data-act="gem${kind}" ${u?`data-u="${u}"`:''} ${S.gems>=c?'':'disabled'} title="Yonca ile hemen bitir">🍀${c} Bitir</button>`}
 function extraRow(u){const s=S.units[u];let h='';if(s.job&&now()<s.job.e){h+=speedBtns('U',s.job.e-now(),u);
     if(!s.job.mg&&u==='ahir')h+=`<button class="pill-btn gold" data-act="mg" data-k="milk" data-u="ahir">🎮 Sağım oyunu</button>`;if(!s.job.mg&&u==='kumes')h+=`<button class="pill-btn gold" data-act="mg" data-k="eggs">🎮 Yumurta yakala</button>`}

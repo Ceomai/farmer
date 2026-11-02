@@ -33,7 +33,7 @@ const PLATFORM={ads:false,iap:false,prices:{},
   // ---- Uygulama yaşam döngüsü, geri tuşu, bildirimler ----
   initApp(){const A=PL('App');if(!A)return;
     A.addListener('appStateChange',({isActive})=>{if(!isActive){save();flushEvents();this.scheduleReady()}else{this.cancelReady();syncCloud(false)}});
-    A.addListener('backButton',()=>{const m=document.querySelector('.modal');if(m){m.remove();return}if(document.body.classList.contains('photo')){photoMode(false);return}
+    A.addListener('backButton',()=>{if(backOverlay())return;if(document.body.classList.contains('photo')){photoMode(false);return}
       if(mode==='interior'){leaveInterior();return}if(mode==='focus'){toHub();return}if(view){view=null;renderSheet();return}if(mode==='hub'){toDesk();return}A.minimizeApp()})},
   async scheduleReady(){const N=PL('LocalNotifications');if(!N||!S.sound.notif)return;const ends=[];S.fields.forEach(f=>{if(f.job&&f.job.e>now())ends.push([f.job.e,'Ekinlerin hasada hazır 🌾'])});
     for(const u in S.units){const s=S.units[u];if(s.job&&s.job.e>now())ends.push([s.job.e,`${B[u].n} hazır! ${B[u].e}`])}if(!ends.length)return;ends.sort((a,b)=>a[0]-b[0]);

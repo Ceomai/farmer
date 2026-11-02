@@ -402,3 +402,11 @@ body.lefty .cam{right:auto;left:max(14px,env(safe-area-inset-left,0px))}
 /* Haftanın yarışması */
 .order.weekly{background:#fff3c8}.wk{font-size:11px;color:#8a5a00;margin-left:4px}
 .order.pdone{background:#e8f3d8}
+/* Dar ekranda pencereler taşmasın; çok büyük yazıda pencere ekrana sığacak kadar küçülür */
+.modal>div{max-width:min(320px,100%);min-width:0}.modal .btn{white-space:normal}
+body.fs-b .modal>div{max-width:calc((100vw - 32px)/1.12)}body.fs-xb .modal>div{max-width:calc((100vw - 32px)/1.25)}
+/* Büyük yazıda öğretici balonu: düğmeler metnin altına iner, balon daha az yer kaplar */
+body:is(.fs-b,.fs-xb) .tut-say{flex-wrap:wrap}body:is(.fs-b,.fs-xb) .tut-t{flex:1 1 calc(100% - 50px)}body:is(.fs-b,.fs-xb) .tut-next{margin-left:auto}
+body.fs-xb .tut-say{zoom:1.1}
+/* Fotoğraf modunda alt şerit ve uzun basma menüsü gizli */
+body.photo .strip,body.photo .qpop{display:none!important}

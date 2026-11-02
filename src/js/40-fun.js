@@ -61,8 +61,8 @@ function questOf(n){if(!S.quests||typeof S.quests!=='object')S.quests={};const i
 const questReward=(q)=>({c:Math.round(Object.entries(q.need).reduce((a,[k,n])=>a+ITEMS[k].p*n,0)*2.5),g:q.last?5:2});
 function questHTML(n){if(frLv(n)<1)return'';const q=questOf(n);if(!q)return `<div class="quest done">✓ ${n} ile bütün hikâye tamam</div>`;const r=questReward(q),ok=Object.entries(q.need).every(([k,v])=>has(k)>=v);
   return `<div class="quest"><p>“${q.txt}”</p><div class="needs">${Object.entries(q.need).map(([k,v])=>`<span class="need ${has(k)<v?'miss':''}" title="${ITEMS[k].n}"><em>${ITEMS[k].e}</em>${Math.min(has(k),v)}/${v}</span>`).join('')}</div>
-    <div class="urow"><button class="pill-btn gold" data-act="quest" data-n="${n}" ${ok?'':'disabled'}>Teslim et · ₺${fmt(r.c)} +🍀${r.g}</button><span class="tm">${q.i+1}/3</span></div></div>`}
-function doQuest(n){const q=questOf(n);if(!q)return;for(const k in q.need)if(has(k)<q.need[k])return toast('Eksik ürün var');for(const k in q.need)S.items[k]-=q.need[k];const r=questReward(q);
+    <div class="urow"><button class="pill-btn gold" data-act="quest" data-n="${n}" data-i="${q.i}" ${ok?'':'disabled'}>Teslim et · ₺${fmt(r.c)} +🍀${r.g}</button><span class="tm">${q.i+1}/3</span></div></div>`}
+function doQuest(n,i){const q=questOf(n);if(!q||(i!=null&&q.i!==i))return;for(const k in q.need)if(has(k)<q.need[k])return toast('Eksik ürün var');for(const k in q.need)S.items[k]-=q.need[k];const r=questReward(q);
   gain(r.c,'Hikâye');S.gems+=r.g;S.quests[n]=q.i+1;befriend(n,2);addXP(Math.round(r.c/20));stat('quest');sfx('win');flyCoins(8);toast(q.last?`${face(n)} ${n}: "Sen olmasan ne yapardık!" Hikâye tamam · +₺${fmt(r.c)} +🍀${r.g}`:`${face(n)} ${n} çok sevindi · +₺${fmt(r.c)} +🍀${r.g}`);commit()}
 
 // --- Başarımlar: koşulu sağlanınca ödülü Koleksiyon > Başarımlar'dan alınır ---
