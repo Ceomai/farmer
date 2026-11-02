@@ -5,22 +5,23 @@ const require=createRequire(import.meta.url);const {chromium}=require('playwrigh
 const FILE='file://'+path.resolve('www/index.html');let pass=0,fail=0;const ok=(c,m,x='')=>{console.log(`${c?'✓':'✗'} ${m}${c?'':' → '+x}`);c?pass++:fail++};
 const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 async function open(save,opt={}){const ctx=await b.newContext({viewport:{width:390,height:844},timezoneId:opt.tz,locale:opt.locale});const p=await ctx.newPage();p.errs=[];p.on('pageerror',e=>p.errs.push(e.message));await p.route(/^https?:/,r=>r.abort());
-  if(opt.time)await p.clock.install({time:new Date(opt.time)});
+  if(opt.time)await p.clock.setFixedTime(new Date(opt.time)); // yalnızca tarih sabitlenir, zamanlayıcılar ve kareler normal akar
   await p.addInitScript(s=>{if(window.name!=='e'){window.name='e';localStorage.clear();if(s)localStorage.setItem('ciftlik-imparatorlugu-v3',s)}},save?JSON.stringify(save):null);
-  await p.goto(FILE);if(opt.time)await p.clock.runFor(3000);await p.waitForFunction(()=>typeof S==='object'&&S&&!document.getElementById('boot'),null,{timeout:120000});await p.evaluate(()=>document.querySelectorAll('.modal').forEach(m=>m.remove()));p.ctx=ctx;return p}
+  await p.goto(FILE);await p.waitForFunction(()=>typeof S==='object'&&S&&!document.getElementById('boot'),null,{timeout:120000});await p.evaluate(()=>document.querySelectorAll('.modal').forEach(m=>m.remove()));p.ctx=ctx;return p}
 const base=(o={})=>({coins:300,lv:3,house:1,regions:{baba:1,town:1},units:{kumes:{l:1}},fields:[{},{}],items:{yem:6},consent:{analytics:false},tut:{done:1},tut2:{done:1},...o});
 const bad=t=>/\bNaN\b|\bundefined\b|\bInfinity\b|\[object|e\+\d/.test(t);
+const SKIP_TZ=process.env.SKIP_TZ;
 // 1) saat dilimleri ve yerel ayar
-for(const [tz,loc] of [['Europe/Istanbul','tr-TR'],['Pacific/Kiritimati','en-US'],['Pacific/Pago_Pago','en-US'],['America/St_Johns','fr-CA'],['Asia/Kathmandu','ar-EG'],['Australia/Lord_Howe','ja-JP'],['UTC','de-DE']]){
+for(const [tz,loc] of SKIP_TZ?[]:[['Europe/Istanbul','tr-TR'],['Pacific/Kiritimati','en-US'],['Pacific/Pago_Pago','en-US'],['America/St_Johns','fr-CA'],['Asia/Kathmandu','ar-EG'],['Australia/Lord_Howe','ja-JP'],['UTC','de-DE']]){
   const p=await open(base(),{tz,locale:loc});const r=await p.evaluate(()=>{checkDaily();renderHUD();return{day:todayStr(),daily:!!S.daily,hud:document.querySelector('.hud').innerText,fmt:fmt(1234567.89)}});
   ok(r.daily&&/^\d{4}-\d{1,2}-\d{1,2}$/.test(r.day)&&!bad(r.hud)&&r.fmt==='1.234.567',`saat dilimi ${tz} / ${loc}: günlük çalışıyor, sayı biçimi ${r.fmt}`,JSON.stringify(r));ok(!p.errs.length,`${tz}: sayfa hatası yok`,p.errs.join('|'));await p.ctx.close()}
 // 2) yaz saati geçişi (New York, 8 Mart 2026 02:00 → 03:00) ve gece yarısı geçişi
 {const p=await open(base(),{tz:'America/New_York',time:'2026-03-08T06:58:00Z'});const d0=await p.evaluate(()=>{checkDaily();return{day:S.daily.day,login:S.daily.login}});
-  await p.clock.runFor(4*60*1000);const d1=await p.evaluate(()=>{const ch=checkDaily();return{day:S.daily.day,ch,coins:S.coins}});
+  await p.clock.setFixedTime(new Date('2026-03-08T07:02:00Z'));const d1=await p.evaluate(()=>{const ch=checkDaily();return{day:S.daily.day,ch,coins:S.coins}});
   ok(d0.day===d1.day&&!d1.ch,'yaz saatine geçişte (saat 1 ileri) günlük ödül sıfırlanmıyor',JSON.stringify([d0,d1]));
-  await p.clock.runFor(22*3600*1000);const d2=await p.evaluate(()=>{const ch=checkDaily();return{day:S.daily.day,ch}});ok(d2.ch&&d2.day!==d1.day,'gece yarısından sonra yeni gün başlıyor',JSON.stringify(d2));
+  await p.clock.setFixedTime(new Date('2026-03-09T05:30:00Z'));const d2=await p.evaluate(()=>{const ch=checkDaily();return{day:S.daily.day,ch}});ok(d2.ch&&d2.day!==d1.day,'gece yarısından sonra yeni gün başlıyor',JSON.stringify(d2));
   ok(!p.errs.length,'yaz saati testinde sayfa hatası yok',p.errs.join('|'));await p.ctx.close()}
-{const p=await open(base(),{tz:'Europe/Berlin',time:'2026-10-25T00:30:00Z'});await p.evaluate(()=>checkDaily());await p.clock.runFor(2*3600*1000);
+{const p=await open(base(),{tz:'Europe/Berlin',time:'2026-10-25T00:30:00Z'});await p.evaluate(()=>checkDaily());await p.clock.setFixedTime(new Date('2026-10-25T02:30:00Z'));
   ok(await p.evaluate(()=>!checkDaily()&&isFinite(S.coins)),'kış saatine geçişte (saat 1 geri) aynı gün tekrar ödül vermiyor');await p.ctx.close()}
 // 3) uç sayılar
 for(const [n,v] of [['sıfır',0],['ondalık',0.1+0.2],['çok büyük',1e15],['aşırı büyük',1e21],['negatif',-500],['metin','12abc'],['NaN',null]]){

@@ -56,6 +56,6 @@ function migrate(s){const d=fresh();if(!s||typeof s!=='object'||Array.isArray(s)
   // Güvenlik: kayıttaki metinler ekrana HTML olarak basılabildiği için (at adı, görev metni...) tüm metinlerden < > " ' ` temizlenir.
   // Böylece dışarıdan alınmış kötü niyetli bir kayıt (ör. "bu kodu gir" tuzağı) sayfada kod çalıştıramaz.
   const clean=(o,d=0)=>{if(d>8||!o||typeof o!=='object')return;for(const k of Object.keys(o)){const v=o[k];if(typeof v==='string')o[k]=v.replace(/[<>"'`]/g,'').slice(0,2000);else if(typeof v==='object')clean(v,d+1);if(/[<>"'`]/.test(k)){o[k.replace(/[<>"'`]/g,'')]=o[k];delete o[k]}}};clean(s);
-  s.horses.forEach(h=>{h.n=String(h.n).slice(0,24)||'Rüzgar'});s.orders=s.orders.filter(o=>NAMES.includes(o.who));s.contracts=s.contracts.filter(c=>NAMES.includes(c.who));
+  s.horses.forEach(h=>{h.n=String(h.n).slice(0,24)||'Rüzgar'});s.orders=s.orders.filter(o=>NAMES.includes(o.who)).slice(0,6);s.contracts=s.contracts.filter(c=>NAMES.includes(c.who)).slice(0,4);
   if(s.recent&&!(obj(s.recent)&&LOC[s.recent.loc]))delete s.recent;
   delete s.dark;delete s.rooster;return s}
