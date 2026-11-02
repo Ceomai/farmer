@@ -2106,7 +2106,10 @@ function horse(c=0x8a5530,m=0x2e1d12,jockey){const g=G(null);P(g,'box',c,[.48,.5
   const legs=[];for(const [x,z] of [[.17,.48],[-.17,.48],[.17,-.48],[-.17,-.48]]){const l=G(g,[x,.86,z]);P(l,'box',c,[.13,.86,.13],[0,-.43,0]);P(l,'box',0x2a2420,[.14,.08,.14],[0,-.82,0]);legs.push(l)}
   if(jockey){P(g,'box',jockey,[.36,.5,.32],[0,1.62,.05]);P(g,'sph',0xe8b48a,[.14,.15,.14],[0,1.98,.1]);P(g,'hsph',jockey,[.16,.12,.16],[0,2.05,.1])}
   const tail=G(g,[0,1.25,-.62]);tail.rotation.x=.5;P(tail,'box',m,[.1,.7,.12],[0,-.35,0]);g.userData.head=n;g.userData.tail=tail;g.userData.headRest=-.55;g.userData.legs=legs;return g}
-function wanderFx(a,cx,cz,rx,rz,speed=.6,peck=.6){const u=a.userData;u.noBatch=1; // hareketli: statik birleştirmeye girmez
+// Hareketli figürler (hayvan, insan): grup kendi içinde birleştirilir (gövde tek parça olur, grup yürümeye devam eder);
+// ayrıca dönen/sallanan parçalar (kafa, kuyruk, bacak, kol) hiç birleştirilmez.
+function movingParts(a){const u=a.userData;u.batchAnchor=1;for(const x of[u.head,u.tail,...(u.legs||[]),...(u.arms||[]),...(u.wings||[])])if(x&&x.isObject3D)x.userData.noBatch=1}
+function wanderFx(a,cx,cz,rx,rz,speed=.6,peck=.6){const u=a.userData;movingParts(a);
 u.tx=cx;u.tz=cz;u.wait=Math.random()*2;a.position.set(cx+(Math.random()-.5)*rx,0,cz+(Math.random()-.5)*rz);a.rotation.y=Math.random()*6.28;
   const rest=u.headRest||0;
   return (dt,t)=>{const p=a.position,dx=u.tx-p.x,dz=u.tz-p.z,d=Math.hypot(dx,dz);
@@ -2116,7 +2119,7 @@ u.tx=cx;u.tz=cz;u.wait=Math.random()*2;a.position.set(cx+(Math.random()-.5)*rx,0
     if(d<.05){u.tx=cx+(Math.random()*2-1)*rx;u.tz=cz+(Math.random()*2-1)*rz;u.wait=.5+Math.random()*3;return}
     const s=Math.min(d,speed*dt);p.x+=dx/d*s;p.z+=dz/d*s;let da=Math.atan2(dx,dz)-a.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));a.rotation.y+=da*Math.min(1,dt*7);
     if(u.bs==null)u.bs=a.scale.x;const hop=Math.abs(Math.sin(t*11+cx));p.y=hop*.06*u.bs;a.scale.set(u.bs*(1-hop*.05),u.bs*(1+hop*.08),u.bs*(1-hop*.05));if(u.head)u.head.rotation.x=rest}}
-function idleFx(a,ph=0){a.userData.noBatch=1;const u=a.userData,rest=u.headRest||0;return(dt,t)=>{if(u.head)u.head.rotation.x=rest+Math.max(0,Math.sin(t*.9+ph))*.45;if(u.tail)u.tail.rotation.z=Math.sin(t*2.6+ph)*.3}}
+function idleFx(a,ph=0){movingParts(a);const u=a.userData,rest=u.headRest||0;return(dt,t)=>{if(u.head)u.head.rotation.x=rest+Math.max(0,Math.sin(t*.9+ph))*.45;if(u.tail)u.tail.rotation.z=Math.sin(t*2.6+ph)*.3}}
 
 // --- ekinler ---
 function plant(par,type,stage,x,z,q){
@@ -2253,8 +2256,8 @@ function person(o={}){const g=G(null);const skin=o.skin||0xe8b48a,shirt=o.shirt|
   else if(o.hat==='scarf'){P(hd,'hsph',o.hatc||0xc4492e,[.24,.2,.24],[0,0,-.02])}
   else if(o.hat==='straw'){P(hd,'cyl',0xe2c46a,[.38,.03,.38],[0,.15,0]);P(hd,'cyl',0xe2c46a,[.18,.2,.18],[0,.26,0]);P(hd,'cyl',0xb5402c,[.185,.045,.185],[0,.19,0])}
   g.userData.legs=legs;g.userData.arms=arms;g.userData.head=hd;return g}
-function idlePerson(p,ph){p.userData.noBatch=1;return(dt,t)=>{const u=p.userData;u.head.rotation.y=Math.sin(t*.7+ph)*.5;u.arms[1].rotation.x=Math.sin(t*.9+ph)>.75?-1.3+Math.sin(t*9)*.3:Math.sin(t*1.3+ph)*.1;u.arms[0].rotation.x=Math.sin(t*1.1+ph)*.08;p.position.y=Math.abs(Math.sin(t*1.6+ph))*.02}}
-function walkPerson(p,pts,speed=1.2,pause=1.5){p.userData.noBatch=1;let i=0,w=Math.random()*2;p.position.set(pts[0][0],0,pts[0][1]);return(dt,t)=>{const u=p.userData,[tx,tz]=pts[i],dx=tx-p.position.x,dz=tz-p.position.z,d=Math.hypot(dx,dz);let walking=false;
+function idlePerson(p,ph){movingParts(p);return(dt,t)=>{const u=p.userData;u.head.rotation.y=Math.sin(t*.7+ph)*.5;u.arms[1].rotation.x=Math.sin(t*.9+ph)>.75?-1.3+Math.sin(t*9)*.3:Math.sin(t*1.3+ph)*.1;u.arms[0].rotation.x=Math.sin(t*1.1+ph)*.08;p.position.y=Math.abs(Math.sin(t*1.6+ph))*.02}}
+function walkPerson(p,pts,speed=1.2,pause=1.5){movingParts(p);let i=0,w=Math.random()*2;p.position.set(pts[0][0],0,pts[0][1]);return(dt,t)=>{const u=p.userData,[tx,tz]=pts[i],dx=tx-p.position.x,dz=tz-p.position.z,d=Math.hypot(dx,dz);let walking=false;
   if(w>0)w-=dt;else if(d<.06){i=(i+1)%pts.length;w=pause*(.5+Math.random())}else{walking=true;const s=Math.min(d,speed*dt);p.position.x+=dx/d*s;p.position.z+=dz/d*s;p.rotation.y=lerpA(p.rotation.y,Math.atan2(dx,dz),Math.min(1,dt*8))}
   const sw=walking?Math.sin(t*9):0;u.legs[0].rotation.x=sw*.6;u.legs[1].rotation.x=-sw*.6;u.arms[0].rotation.x=-sw*.5;u.arms[1].rotation.x=sw*.5;p.position.y=walking?Math.abs(Math.sin(t*9))*.06:0}}
 // --- dekorasyon ---
