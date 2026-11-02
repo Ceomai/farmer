@@ -32,6 +32,12 @@ ok(m1.heap-m0.heap<=25,`100 tur gezinmede JS belleği ${m0.heap} → ${m1.heap} 
 // 4) dünya yeniden kurulumu: 300 ekim/hasat/yükseltme döngüsü (bölüm grupları yeniden oluşturulur)
 const w0=await mem();await p.evaluate(()=>{for(let i=0;i<300;i++){plantAll();S.fields.forEach(f=>{if(f.job)f.job.e=0});harvestAll();startUnit('kumes','besle',true);if(S.units.kumes.job)S.units.kumes.job.e=0;collectUnit('kumes',null,null,true);syncWorld()}document.querySelectorAll('.conf,.celeb,.float,.flyi,.toast').forEach(e=>e.remove())});
 await p.waitForTimeout(4000);const w1=await mem();R.rebuild={w0,w1};ok(w1.geo-w0.geo<=60,`300 üretim döngüsünde geometri ${w0.geo} → ${w1.geo}`);ok(w1.heap-w0.heap<=30,`300 üretim döngüsünde JS belleği ${w0.heap} → ${w1.heap} MB`);
+// 4b) masada uzun bekleme: ekinler büyüdükçe bölümler yeniden kurulur; birleştirme kuyruğu ve bellek büyümemeli
+const dq=await p.evaluate(async()=>{toDesk();await new Promise(r=>setTimeout(r,800));const h0=performance.memory?performance.memory.usedJSHeapSize:0;
+  for(let i=0;i<200;i++){for(const k in locSigs)locSigs[k]='x';syncWorld();tick()}await new Promise(r=>setTimeout(r,600));tick();
+  return{q:_bq.length,groups:Object.keys(locGroups).length+3,heapMB:Math.round(((performance.memory?performance.memory.usedJSHeapSize:0)-h0)/1048576)}});
+R.deskQueue=dq;ok(dq.q<=dq.groups,`masada 200 yeniden kurulumda birleştirme kuyruğu ${dq.q} (sınır ${dq.groups})`);
+await p.evaluate(()=>enterWorld());await p.waitForTimeout(1500);
 // 5) kayıt boyutu ve süresi, tick süresi
 const sv=await p.evaluate(()=>{const t=[];for(let i=0;i<50;i++){const a=performance.now();save();t.push(performance.now()-a)}const tk=[];for(let i=0;i<50;i++){const a=performance.now();tick();tk.push(performance.now()-a)}
   const s=t.sort((a,b)=>a-b),k=tk.sort((a,b)=>a-b);return{kb:Math.round(JSON.stringify(S).length/102.4)/10,save:+s[25].toFixed(2),saveMax:+s[49].toFixed(2),tick:+k[25].toFixed(2),tickMax:+k[49].toFixed(2)}});

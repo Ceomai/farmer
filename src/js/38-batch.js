@@ -21,7 +21,12 @@ function batchSnap(q){q.list=batchCandidates(q.root,q.skip).map(e=>{const ch=[];
     return{m:e.m,chain:ch.map(o=>({o,s:relMat(e.m,o,new THREE.Matrix4()).elements.slice()}))}});q.at=performance.now()+q.delay}
 function batchWatch(root,skip,delay=2600){const q={root,skip,delay};batchSnap(q);_bq.push(q)}
 // Masada dünya 3 sn'de bir güncellenir: orada hareketsiz görünen hayvan/insan gerçekte hareketlidir. Gözlem penceresi masa dışında tamamlanmalı.
-function batchCheck(){const t=performance.now();for(let i=_bq.length-1;i>=0;i--){const q=_bq[i];if(mode==='desk'){if(t>=q.at)batchSnap(q);continue}if(t<q.at)continue;_bq.splice(i,1);
+function batchCheck(){const t=performance.now();for(let i=_bq.length-1;i>=0;i--){const q=_bq[i];
+    // sahneden kaldırılmış (yeniden kurulmuş) grupların kaydı hemen atılır: kuyruk masada beklerken de büyümez
+    if(q.root!==world&&!q.root.parent){_bq.splice(i,1);continue}
+    if(mode==='desk'){q.stale=true;q.list=null;continue}           // masada ölçülmez, anlık görüntü bırakılır (bellek)
+    if(q.stale){q.stale=false;const d=q.delay;q.delay=1200;batchSnap(q);q.delay=d;continue} // masadan çıkınca kısa yeni gözlem (hareketliler zaten işaretli)
+    if(t<q.at)continue;_bq.splice(i,1);
     if(q.root!==world&&!q.root.parent)continue;bakeStatic(q)}}
 function inTree(o,root){while(o){if(o===root)return true;o=o.parent}return false}
 function bakeStatic(q){const SG=_sharedG();const by=new Map();
