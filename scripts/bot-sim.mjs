@@ -22,9 +22,12 @@ for(const [name,st] of Object.entries(STYLES)){
   await p.goto(FILE,{timeout:120000});await p.waitForFunction(()=>typeof S==='object'&&S&&!document.getElementById('boot'),null,{timeout:120000});
   await p.evaluate(([st,DAYS])=>{DAYS=st.days||DAYS;
     // görselleri durdur: yalnızca oyun mantığı koşsun (hız için)
-    document.querySelectorAll('.modal').forEach(m=>m.remove());S.consent={a:1};S.tut={done:1};
+    document.querySelectorAll('.modal').forEach(m=>m.remove());S.consent={a:1};S.tut={done:1};S.tut2={done:1};
+    // görsel efektler botta kapalı (ekonomi mantığı aynen çalışır): binlerce animasyonlu öğe birikmesin
+    flyCoins=()=>{};flyItems=()=>{};celebrate=()=>{};floatXY=()=>{};puff=()=>{};sfx=()=>{};
     const end=now()+DAYS*864e5;window.__B={end};let turns=0,stuck=0,stuckMax=0,stuckRun=0,lastProg='',lastProgT=now(),flat=0;const snaps=[];const errs=[];
     const val=k=>ITEMS[k].p;
+    window.__B.dbg=()=>({turns,errs:errs.length,e0:errs[0]&&errs[0].slice(0,160),dom:document.getElementsByTagName('*').length,modals:document.querySelectorAll('.modal').length,bq:typeof _bq!=='undefined'?_bq.length:-1,heap:performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):0});
     window.__B.run=(N)=>{let c=0;while(now()<end&&c++<N){turns++;
       try{
         if(checkDaily()){}if(S.daily&&!S.daily.login){const r=LOGIN[S.daily.streak-1];if(r.c)gain(r.c,'Ödül');if(r.yem)S.items.yem=has('yem')+r.yem;if(r.g)S.gems+=r.g;S.daily.login=true}
@@ -59,7 +62,8 @@ for(const [name,st] of Object.entries(STYLES)){
       if(turns%Math.max(1,Math.round(864e5/st.gap))===0)snaps.push({gün:Math.round((now()-end+DAYS*864e5)/864e5),sv:S.lv,para:Math.round(S.coins),bina:Object.keys(S.units).length,arazi:Object.keys(S.regions).length,ev:S.house});
       TIME_OFF+=st.gap;if(errs.length>5)break}
     };window.__B.result=()=>{    const __dump=()=>JSON.stringify({coins:S.coins,items:S.items,cap:cap(),stored:stored(),units:S.units,fields:S.fields,workers:S.workers,lastCrop:S.lastCrop,orders:S.orders.length});return{flat:Math.round(flat*10)/10,dump:__dump(),turns,stuck,stuckMax,errs:[...new Set(errs)].slice(0,6),snaps,final:{sv:S.lv,para:Math.round(S.coins),yonca:S.gems,bina:Object.keys(S.units).length,arazi:Object.keys(S.regions).length,ev:S.house,parsel:S.fields.length,hedef:S.goal,isci:Object.keys(S.workers).length,nesil:S.gen||0,proje:Object.keys(S.proj||{}).length,hikaye:Object.values(S.quests||{}).reduce((a,b)=>a+b,0),basarim:Object.keys(S.ach||{}).length}}};},[st,DAYS]);
-  let out;while(true){const fin=await p.evaluate(()=>{window.__B.run(150);document.querySelectorAll('.conf,.celeb,.float,.flyi').forEach(e=>e.remove());return now()>=window.__B.end});await p.waitForTimeout(5);if(fin)break}
+  let out,ch=0;const tc=Date.now();while(true){const st0=Date.now();const fin=await p.evaluate(()=>{window.__B.run(150);document.querySelectorAll('.conf,.celeb,.float,.flyi,.toast').forEach(e=>e.remove());return now()>=window.__B.end});await p.waitForTimeout(5);
+    if(process.env.DEBUG&&++ch%5===0)console.error(`  [${name}] parça ${ch} · ${Date.now()-st0} ms · `+await p.evaluate(()=>JSON.stringify(window.__B.dbg())));if(fin)break}
   out=await p.evaluate(()=>window.__B.result());
   const all=[...errs,...out.errs];const ok=!all.length&&out.stuckMax<3&&!(out.flat>=4&&out.final.sv<30&&!out.final.nesil);if(!ok)fail++;
   console.log(`${ok?'✓':'✗'} ${name}: ${out.turns} tur · ${st.days||DAYS} gün sonunda ${JSON.stringify(out.final)}${out.flat>=2?` · ${out.flat} gün ilerlemedi`:''}${out.stuck?` · kilitlenme ${out.stuck} tur (en uzun ${out.stuckMax})`:''}`);
