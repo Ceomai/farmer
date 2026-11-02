@@ -60,7 +60,7 @@ function reportError(msg,stack){if(!consentOk()||errCount++>20)return;const e={m
 addEventListener('error',e=>reportError(e.message,e.error&&e.error.stack));
 addEventListener('unhandledrejection',e=>reportError('promise: '+(e.reason&&e.reason.message||e.reason),e.reason&&e.reason.stack));
 // ---- KVKK / izin ekranı (ilk açılış) ----
-function askConsent(){if(S.consent)return;const d=document.createElement('div');d.className='modal login';
+function askConsent(){if(S.consent)return;const d=document.createElement('div');d.className='modal login';d.dataset.nodismiss=1;
   d.innerHTML=`<div><div class="badge">🌾</div><h2 style="font-size:24px">Hoş geldin!</h2><p style="text-align:left;font-size:13px">Oyunu geliştirebilmek için <b>anonim</b> kullanım verisi (hangi bölümlerin oynandığı, hata raporları) toplamak istiyoruz. Adın, e-postan ya da konumun toplanmaz. ${NATIVE?'Ücretsiz sürümde isteğe bağlı ödüllü reklamlar gösterilir.':''}</p>
   <label class="switch" style="text-align:left"><input type="checkbox" id="cAn" checked><span><b>Anonim kullanım verisi ve hata raporu</b><br><span class="note">İstediğin zaman Ayarlar'dan değiştirebilirsin.</span></span></label>
   <p class="note" style="margin-top:8px"><a href="${CONFIG.privacyUrl}" target="_blank" rel="noopener">Gizlilik Politikası</a> · <a href="${CONFIG.termsUrl}" target="_blank" rel="noopener">Kullanım Koşulları</a></p><button class="btn big gold" style="margin-top:10px">Başlayalım</button></div>`;

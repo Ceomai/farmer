@@ -3,7 +3,8 @@ const AD_MAX=8;
 function adsLeft(){const t=todayStr();if(S.ads.day!==t){S.ads.day=t;S.ads.n=0}return AD_MAX-S.ads.n}
 function watchAd(cb){if(adsLeft()<=0)return toast('Bugünlük reklam hakkın bitti');if(PLATFORM.showAd(cb))return;const d=document.createElement('div');d.className='modal mg';let n=5;
   d.innerHTML=`<div><div class="mgface">📺</div><h2 style="font-size:22px">Ödüllü reklam</h2><p class="note">Mağaza sürümünde burada kısa bir reklam oynar. Bu sürümde örnek olarak 5 saniye bekliyoruz.</p><div class="mgscore" id="adc">${n}</div></div>`;document.body.appendChild(d);
-  const iv=setInterval(()=>{n--;const c=d.querySelector('#adc');if(c)c.textContent=n;if(n<=0){clearInterval(iv);d.remove();S.ads.n++;cb();save()}},1000)}
+  const iv=setInterval(()=>{if(!d.isConnected){clearInterval(iv);return} // pencere kapatıldıysa ödül verilmez
+  n--;const c=d.querySelector('#adc');if(c)c.textContent=n;if(n<=0){clearInterval(iv);d.remove();S.ads.n++;cb();save()}},1000)}
 const speedCost=ms=>Math.max(1,Math.ceil(ms/600000));
 function finishJob(j){j.e=now()}
 function speedUnit(u,how){const s=S.units[u];if(!s||!s.job||now()>=s.job.e)return;if(how==='ad'){const job=s.job;watchAd(()=>{if(s.job!==job||!job)return;finishJob(job);sfx('pop');toast('⚡ Üretim tamamlandı!');commit()})}

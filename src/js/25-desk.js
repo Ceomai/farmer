@@ -21,7 +21,8 @@ function mapTex(){return canvasTex(640,440,(x,w,h)=>{x.fillStyle='#ead6a4';x.fil
 function calTex(){return canvasTex(200,240,(x,w,h)=>{x.fillStyle='#fbf3df';x.fillRect(0,0,w,h);x.fillStyle='#c4492e';x.fillRect(0,0,w,58);x.fillStyle='#fff6e0';x.font='bold 26px Georgia,serif';x.textAlign='center';x.fillText(SEASONS[season()].n.toUpperCase(),w/2,39);
   x.fillStyle='#2a1a10';x.font='bold 112px Georgia,serif';x.fillText(String(gameDay()%30+1),w/2,172);x.font='34px serif';x.fillText(SEASONS[season()].e,w/2,220);x.fillStyle='#555';for(const cx of[50,150]){x.beginPath();x.arc(cx,10,6,0,7);x.fill()}},null,4)}
 const deskSigNow=()=>Object.keys(S.regions).sort().join()+'|'+Object.keys(S.album).length+'|'+gameDay()+'|'+S.market.at;
-function buildDesk(){while(deskScene.children.length)deskScene.remove(deskScene.children[0]);deskObjs={};DESKP=[];deskFx=[];const sc=deskScene;
+// Masa yeniden kurulurken eski masanın dokuları, malzemeleri ve gölge haritası serbest bırakılır (pencere görüntüsü korunur)
+function buildDesk(){disposeScene(deskScene,rt.texture);while(deskScene.children.length)deskScene.remove(deskScene.children[0]);deskObjs={};DESKP=[];deskFx=[];const sc=deskScene;
   const dh=new THREE.HemisphereLight(0xfff0d6,0x5a4030,.7);sc.add(dh);
   const fill=new THREE.DirectionalLight(0xffe8c8,.75);fill.position.set(-3,6,6);fill.castShadow=true;fill.shadow.mapSize.set(2048,2048);Object.assign(fill.shadow.camera,{left:-6,right:6,top:6,bottom:-3});fill.shadow.bias=-.0005;fill.shadow.normalBias=.03;sc.add(fill);
   const win=new THREE.PointLight(0xffe2b0,.8,9);win.position.set(0,2.6,-1.1);sc.add(win);const lamp=new THREE.PointLight(0xffc070,.5,7);lamp.position.set(2.85,2.05,-.55);sc.add(lamp);deskL={dh,fill,win,lamp};

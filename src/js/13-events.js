@@ -49,7 +49,7 @@ function renderHUD(){$('#coins').textContent=fmt(S.coins);if(lastCoins!=null&&S.
   $('#rep').textContent=S.rep;$('#store').textContent=stored()+'/'+cap();$('#pStore').classList.toggle('full',stored()/cap()>=.9);
   $('#gems').textContent=S.gems;const se=SEASONS[season()],wx=WEATHER[S.weather.k];$('#era').textContent=`${se.e} ${se.n} · ${wx.e} ${clockStr()}`;$('#goalDot').hidden=!goalReady()&&!(S.daily&&S.daily.tasks.some(t=>t.p>=t.n&&!t.c))}
 // Geri / Escape: önce açık pencere (mini oyunsa düzgün kapatılır) ve uzun basma menüsü kapanır
-function backOverlay(){const m=document.querySelector('.modal');if(m){const x=m.querySelector('.mgx');if(x)x.click();else m.remove();return true}if(typeof qpop!=='undefined'&&!qpop.hidden){closeQpop();return true}return false}
+function backOverlay(){const m=document.querySelector('.modal');if(m){if(m.dataset.nodismiss)return true;const x=m.querySelector('.mgx');if(x)x.click();else m.remove();return true}if(typeof qpop!=='undefined'&&!qpop.hidden){closeQpop();return true}return false}
 function commit(skipSheet){save();renderHUD();syncWorld();if(!skipSheet)renderSheet();refreshQpop();if(interior&&intSig(interior.key)!==interior.sig)interior.refresh()}
 
 // Kart içindeki parsel ızgarasında da sürükleyerek ekme/toplama

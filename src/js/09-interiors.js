@@ -84,9 +84,9 @@ const INT={
 const intT=key=>key==='kulube'?{b:'kulube',l:S.house}:{b:key,...S.units[key]};
 // İç mekân sahnesi bırakılırken GPU kaynakları serbest bırakılır: gölge haritası (2048² doku), o sahneye özel dokular,
 // malzemeler ve geometriler. Paylaşılan (önbellekteki) geometri ve malzemelere dokunulmaz.
-function disposeScene(sc){if(!sc)return;const sharedG=new Set(Object.values(GE)),sharedM=new Set(Object.values(MC));sharedM.add(OUT);
+function disposeScene(sc,keepTex){if(!sc)return;const sharedG=new Set(Object.values(GE)),sharedM=new Set(Object.values(MC));sharedM.add(OUT);
   sc.traverse(o=>{if(o.isLight&&o.shadow&&o.shadow.map){o.shadow.map.dispose();o.shadow.map=null}
-    if(o.isMesh||o.isPoints){if(o.geometry&&!sharedG.has(o.geometry))o.geometry.dispose();for(const m of[].concat(o.material||[])){if(!m||sharedM.has(m))continue;for(const k of['map','emissiveMap','alphaMap'])if(m[k]&&m[k].isTexture)m[k].dispose();m.dispose()}}})}
+    if(o.isMesh||o.isPoints){if(o.geometry&&!sharedG.has(o.geometry))o.geometry.dispose();for(const m of[].concat(o.material||[])){if(!m||sharedM.has(m))continue;for(const k of['map','emissiveMap','alphaMap'])if(m[k]&&m[k].isTexture&&m[k]!==keepTex)m[k].dispose();m.dispose()}}})}
 function dropInterior(){const o=interior;interior=null;if(o&&o.scene)setTimeout(()=>disposeScene(o.scene),0)}
 function buildInterior(key){if(interior&&interior.scene)disposeScene(interior.scene);const t=intT(key),def=INT[key];const sc=new THREE.Scene();sc.background=new THREE.Color(0x2b1d12);sc.fog=new THREE.Fog(0x2b1d12,24,42);
   const ic={key,scene:sc,fx:[],dyn:G(sc),nests:[],buckets:[],shelf:null,sig:''};

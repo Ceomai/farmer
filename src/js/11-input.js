@@ -15,10 +15,13 @@ function swipeApply(i,x,y){if(!swipe||swipe.done.has(i))return;const f=S.fields[
   if(swipe.kind==='plant'&&!f.job){if(plantPlot(i,S.lastCrop)){swipe.n++;floatXY(x,y,ITEMS[S.lastCrop].e);PLATFORM.hap()}}
   else if(swipe.kind==='harvest'&&f.job&&now()>=f.job.e){if(harvestPlot(i,x,y))swipe.n++}}
 function swipeEnd(){if(!swipe)return;const s=swipe;swipe=null;ctl.enabled=mode!=='interior'&&mode!=='desk';if(s.n){if(s.kind==='harvest'&&s.n>=3)celebrate(s.n>=6?'Bereket yağdı!':'Bereketli!');commit()}}
-R.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,lx:e.clientX};
+// Çoklu parmak: iki parmakla yakınlaştırma/döndürme sırasında hiçbir parmak dokunma ya da sürükleyerek ekim sayılmaz
+const ptrs=new Set();let multi=false;
+R.domElement.addEventListener('pointerdown',e=>{ptrs.add(e.pointerId);if(ptrs.size>1){multi=true;down=null;if(swipe)swipeEnd();return}if(multi)return;down={x:e.clientX,y:e.clientY,lx:e.clientX};
   if(mode==='focus'&&focus==='tarla'){const h=pick(e);if(h&&h.plot!=null){const k=swipeKind(h.plot);if(k){swipe={kind:k,done:new Set(),n:0};ctl.enabled=false;swipeApply(h.plot,e.clientX,e.clientY-24);down.sw=1}}}});
 addEventListener('pointerup',swipeEnd);addEventListener('pointercancel',swipeEnd);
-R.domElement.addEventListener('pointerup',e=>{if(!down)return;const wasSw=down.sw,moved=Math.hypot(e.clientX-down.x,e.clientY-down.y)>10;down=null;if(moved||wasSw)return;const h=pick(e),x=e.clientX,y=e.clientY-24;
+for(const ev of['pointerup','pointercancel'])addEventListener(ev,e=>{ptrs.delete(e.pointerId);if(!ptrs.size)setTimeout(()=>{if(!ptrs.size)multi=false},0)});
+R.domElement.addEventListener('pointerup',e=>{if(!down||multi)return;const wasSw=down.sw,moved=Math.hypot(e.clientX-down.x,e.clientY-down.y)>10;down=null;if(moved||wasSw)return;const h=pick(e),x=e.clientX,y=e.clientY-24;
   if(mode==='desk'){if(h&&h.desk){sfx('click');deskAction(h.desk)}return}
   if(mode==='interior'){if(!h)return;if(h.act==='collect'&&interior.key!=='kulube')collectUnit(interior.key,x,y);
     else if(h.act==='pet'){let o=h.obj;while(o.parent&&o.parent!==interior.scene)o=o.parent;o.userData.hop=1;sfx(UNIT_SFX[interior.key]||'pop');const pl=interior.scene.children.filter(c=>c.userData.act==='pet');petAnimal(interior.key,Math.max(0,pl.indexOf(o)),x,y)}return}
