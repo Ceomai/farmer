@@ -12,6 +12,7 @@
     "bot": "node scripts/bot-sim.mjs",
     "test:security": "node scripts/security-test.mjs",
     "perf": "node scripts/perf-test.mjs --net",
+    "personas": "node scripts/personas.mjs",
     "layout": "node scripts/layout-check.mjs out/layout",
     "screenshots": "node scripts/store-screenshots.mjs",
     "cap:sync": "npm run build && npx cap sync",
