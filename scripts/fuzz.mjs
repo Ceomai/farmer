@@ -114,7 +114,10 @@ async function run(b,seed){const r=mulberry(seed),R=n=>Math.floor(r()*n);const [
   try{await p.goto(FILE,{timeout:240000});await p.waitForFunction(()=>typeof S==='object'&&S&&!document.getElementById('boot'),null,{timeout:240000})}
   catch(e){errs.push('açılmadı: '+e.message.split('\n')[0]);await p.close();return res}
   await p.evaluate(()=>{window.__R=n=>Math.floor(Math.random()*n);window.__P=a=>a[Math.floor(Math.random()*a.length)]});
-  for(let i=0;i<STEPS;i++){res.steps=i+1;const t=r();let act;
+  // oyun kendini yeniden yüklerse (ör. grafik ayarı) açılış beklenir, düzenek yardımcıları yeniden tanımlanır
+  let navd=false;p.on('framenavigated',f=>{if(f===p.mainFrame())navd=true});await p.waitForTimeout(10);navd=false;
+  for(let i=0;i<STEPS;i++){if(navd){navd=false;try{await p.waitForFunction(()=>typeof S==='object'&&S&&!document.getElementById('boot'),null,{timeout:240000});await p.evaluate(()=>{window.__R=n=>Math.floor(Math.random()*n);window.__P=a=>a[Math.floor(Math.random()*a.length)]})}catch(e){errs.push('yeniden yüklemeden sonra açılmadı: '+e.message.split('\n')[0]);break}}
+    res.steps=i+1;const t=r();let act;
     try{
       if(t<.45){const m=await p.evaluate(PICK,r());if(m){act='dokun '+m.label;await p.mouse.click(m.x,m.y)}}
       else if(t<.60){const x=R(w),y=R(h);act=`tuval ${x},${y}`;await p.mouse.click(x,y)}
