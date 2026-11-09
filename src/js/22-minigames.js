@@ -1,5 +1,5 @@
 // ================= MİNİ OYUNLAR =================
-function mgOpen(title,desc){const d=document.createElement('div');d.className='modal mg';d.innerHTML=`<div><h2 style="font-size:23px">${title}</h2><p class="note">${desc}</p><div class="mgb"></div><button class="btn ghost mgx" style="align-self:center">Vazgeç</button></div>`;
+function mgOpen(title,desc){const d=document.createElement('div');d.className='modal mg';d.innerHTML=`<div><h2 class="h-sm">${title}</h2><p class="note">${desc}</p><div class="mgb"></div><button class="btn ghost mgx" style="align-self:center">Vazgeç</button></div>`;
   document.body.appendChild(d);const o={d,body:d.querySelector('.mgb'),onClose:null};d.querySelector('.mgx').onclick=()=>{o.onClose&&o.onClose();d.remove()};return o}
 function mgEnd(o,msg){o.onClose&&o.onClose();o.body.innerHTML=`<div class="mgface">🎉</div><p style="text-align:center;font-weight:900">${msg}</p><button class="btn big gold">Harika</button>`;o.body.querySelector('button').onclick=()=>o.d.remove();const x=o.d.querySelector('.mgx');if(x)x.remove()}
 function mgMilk(u){const s=S.units[u];if(!s||!s.job||now()>=s.job.e||s.job.mg)return;const job=s.job;const o=mgOpen('🥛 Sağım ritmi','İbre yeşil bölgedeyken SAĞ! düğmesine bas. 6 deneme.');
@@ -22,8 +22,8 @@ function mgEggs(){const s=S.units.kumes;if(!s||!s.job||now()>=s.job.e||s.job.mg)
   raf=requestAnimationFrame(loop);o.onClose=()=>cancelAnimationFrame(raf)}
 function mgHaggle(){if(now()<(S.haggleAt||0))return toast('Tüccar biraz dinleniyor, birazdan gel');const inv=Object.keys(ITEMS).filter(k=>has(k)>0&&k!=='at'&&k!=='yem');if(!inv.length)return toast('Satacak ürünün yok');
   const k=inv.sort((a,b)=>ITEMS[b].p*has(b)-ITEMS[a].p*has(a))[0],qty=Math.min(has(k),5),base=sellPrice(k);const o=mgOpen('🤝 Pazarlık',`Tüccar ${qty} ${ITEMS[k].e} ${ITEMS[k].n} için tanesine ₺${base} veriyor.`);let pat=3;
-  const draw=msg=>{o.body.innerHTML=`<div class="mgface">🧔</div><p class="note" style="text-align:center">${msg}</p><div class="urow" style="justify-content:center">${[[1.15,'+%15'],[1.3,'+%30'],[1.6,'+%60']].map(([m,l])=>`<button class="pill-btn gold" data-m="${m}">${l} · ₺${Math.round(base*m)}</button>`).join('')}</div>
-    <div class="urow" style="justify-content:center;margin-top:8px"><button class="pill-btn" data-m="1">Kabul et · ₺${base}</button></div><div class="mgscore">Sabır ${'😐'.repeat(pat)}</div>`;
+  const draw=msg=>{o.body.innerHTML=`<div class="mgface">🧔</div><p class="note" style="text-align:center">${msg}</p><div class="urow center">${[[1.15,'+%15'],[1.3,'+%30'],[1.6,'+%60']].map(([m,l])=>`<button class="pill-btn gold" data-m="${m}">${l} · ₺${Math.round(base*m)}</button>`).join('')}</div>
+    <div class="urow center" style="margin-top:8px"><button class="pill-btn" data-m="1">Kabul et · ₺${base}</button></div><div class="mgscore">Sabır ${'😐'.repeat(pat)}</div>`;
     o.body.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const m=+b.dataset.m,acc=m===1?1:Math.max(.1,1-(m-1)*1.5-(3-pat)*.1+(has1('nazar')?.1:0));
       if(Math.random()<acc){const n=Math.min(qty,has(k));S.items[k]-=n;addSat(k,n);const earn=Math.round(base*m)*n;gain(earn,'Pazar');stat('sold',n);stat('mg');S.haggleAt=now()+180000;sfx('coin');flyCoins(6);mgEnd(o,`Anlaştınız! ${n} ${ITEMS[k].n} → +₺${fmt(earn)}`);commit()}
       else{pat--;sfx('fail');if(pat<=0){S.haggleAt=now()+180000;stat('mg');mgEnd(o,'Tüccar sinirlendi ve gitti 😤');save()}else draw(['','"Son teklifim bu!"','"Biraz in bakalım…"'][pat])}})};draw('Teklifini seç:')}

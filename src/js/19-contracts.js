@@ -8,5 +8,5 @@ function deliverContract(i){const c=S.contracts[i];if(!c)return;const n=Math.min
 const FACES={'Kasap Rıza':'🧔','Fırıncı Nuri':'👨‍🍳','Lokantacı Sevim':'👩‍🍳','Manav Hilmi':'👴','Otelci Gülten':'👩‍💼','Kooperatif':'🧑‍🌾','Bakkal Ahmet':'🧑','Konakçı Halit Bey':'🎩','Pazarcı Zehra':'👵'};
 const face=n=>FACES[n]||'🧑';
 function contractsBody(){ensureContracts();return `<p class="note">Uzun vadeli tedarik: parça parça teslim et, sonunda büyük ödül al.</p>`+S.contracts.map((c,i)=>`<div class="order"><div class="who">${face(c.who)} ${c.who}<span>₺${fmt(c.reward*repMult())} · 🍀${c.gems}</span></div>
-  <div class="meterbar"><span style="font-size:22px">${ITEMS[c.k].e}</span><span class="pbar"><i style="width:${c.got/c.total*100}%;animation:none"></i></span><b>${c.got}/${c.total}</b></div>
+  <div class="meterbar"><span class="ic-md">${ITEMS[c.k].e}</span><span class="pbar"><i style="width:${c.got/c.total*100}%" class="still"></i></span><b>${c.got}/${c.total}</b></div>
   <div class="urow"><button class="pill-btn gold" data-act="contract" data-i="${i}" ${has(c.k)?'':'disabled'}>📦 Teslim et (${Math.min(has(c.k),c.total-c.got)})</button><small class="tm" data-left="${c.until}" data-pre="⏳"></small></div></div>`).join('')}

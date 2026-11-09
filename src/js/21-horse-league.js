@@ -11,7 +11,7 @@ function leagueRace(i){const h=S.horses[i],T=TIERS[S.league.tier];if(!h||now()<h
     if(pl===1){gain(Math.round(T.prize*(projOn('tribun')?1.5:1)),'Yarış');h.w++;msg+=` · +₺${fmt(Math.round(T.prize*(projOn("tribun")?1.5:1)))}`;sfx('win');flyCoins(8)}else if(pl<=3){const p2=Math.round(T.prize*(pl===2?.4:.15)*(projOn('tribun')?1.5:1));gain(p2,'Yarış');msg+=` · +₺${fmt(p2)}`;sfx('coin')}else sfx('fail');
     if(S.league.pts>=9&&S.league.tier<TIERS.length-1){S.league.tier++;S.league.pts=0;S.gems+=T.g;msg+=` · 🎉 ${TIERS[S.league.tier].n}'ne yükseldin! +🍀${T.g}`}
     stat('race');addXP(pl===1?50:15);race.msg=msg;commit()};setTimeout(tk,300)}
-function raceBody(){const T=TIERS[S.league.tier];let h=`<div class="unit"><div class="uhead"><span>🏆 ${T.n}</span><span class="tm">Puan ${S.league.pts}/9</span></div><div class="pbar"><i style="width:${S.league.pts/9*100}%;animation:none"></i></div>`;
+function raceBody(){const T=TIERS[S.league.tier];let h=`<div class="unit"><div class="uhead"><span>🏆 ${T.n}</span><span class="tm">Puan ${S.league.pts}/9</span></div><div class="pbar"><i style="width:${S.league.pts/9*100}%" class="still"></i></div>`;
   if(race&&(race.running||race.done)){h+=`<div class="track">${race.horses.map((x,i)=>`<div class="lane ${x.own?'pick':''}" id="lane${i}"><span class="h" style="left:${x.pos}%">🐎</span><span class="nm">${x.n}${x.place?' · '+x.place+'.':''}</span></div>`).join('')}</div>`;
     if(race.done)h+=`<div class="log">${race.msg}</div><button class="btn big" data-act="rnew">Tamam</button>`;return h+'</div>'}
   if(has('at'))h+=`<button class="pill-btn go" data-act="stable">🐴 Tayı ahıra al (${has('at')})</button>`;

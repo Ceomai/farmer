@@ -28,7 +28,7 @@ function genHTML(){const g=S.gen||0;return `<div class="unit"><div class="uhead"
   <p class="note">Çiftliği çocuklarına devret: baştan başlarsın ama bütün üretim kalıcı olarak +%10 artar. Yonca, koleksiyon, başarımlar, süsler, dostluklar ve kasaba projeleri seninle kalır.</p>
   ${genReady()?`<button class="btn big gold" data-act="gen">🌳 Yeni nesle devret (+%10 üretim, +🍀10)</button>`:`<button class="btn big" disabled>🔒 Konak + seviye ${GEN_LV} gerekli</button>`}</div>`}
 function askGen(){if(!genReady())return;const d=document.createElement('div');d.className='modal login';
-  d.innerHTML=`<div><div class="badge">🌳</div><h2 style="font-size:24px">Yeni nesle devret?</h2><p style="font-size:13px;text-align:left"><b>Sıfırlanır:</b> para, ürünler, binalar, araziler, ev, tarlalar, seviye.<br><b>Kalır:</b> 🍀 yonca, koleksiyon, başarımlar, süsler, dostluklar, hikâyeler, kasaba projeleri.<br><b>Kazanılır:</b> kalıcı +%10 üretim ve +🍀10.</p>
+  d.innerHTML=`<div><div class="badge">🌳</div><h2 class="h-sm">Yeni nesle devret?</h2><p class="lt"><b>Sıfırlanır:</b> para, ürünler, binalar, araziler, ev, tarlalar, seviye.<br><b>Kalır:</b> 🍀 yonca, koleksiyon, başarımlar, süsler, dostluklar, hikâyeler, kasaba projeleri.<br><b>Kazanılır:</b> kalıcı +%10 üretim ve +🍀10.</p>
     <button class="btn big gold" data-g="1">Evet, devret</button><button class="btn ghost" data-g="0">Vazgeç</button></div>`;
   document.body.appendChild(d);d.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{d.remove();if(b.dataset.g==='1')doGen()})}
 // Ana hedefler, günlük ödül/görevler, reklam hakkı ve günün panayırı da korunur (yeni nesilde tekrar alınamasın)
