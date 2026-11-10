@@ -3964,7 +3964,10 @@ function relMat(m,anchor,target){anchor.updateWorldMatrix(true,false);m.updateWo
 // (ör. süzülen bir bulut kümesinin parçaları kümenin içinde sabittir → küme başına tek ağ).
 function batchSnap(q){q.list=batchCandidates(q.root,q.skip).map(e=>{const ch=[];for(let o=e.m.parent;o;o=o.parent){ch.push(o);if(o===e.anchor)break}
     return{m:e.m,chain:ch.map(o=>({o,s:relMat(e.m,o,new THREE.Matrix4()).elements.slice()}))}});q.at=performance.now()+q.delay}
-function batchWatch(root,skip,delay=2600){const q={root,skip,delay};batchSnap(q);_bq.push(q)}
+// Yeni kayıtta önce sahneden kaldırılmış (yeniden kurulmuş) grupların kayıtları atılır; masadaysa anlık görüntü alınmaz (batchCheck'in masada yaptığı gibi
+// bayatlar, masadan çıkınca kısa gözlemle alınır). Böylece iki tick arasında çok sayıda yeniden kurulum olsa da kuyruk ve bellek büyümez.
+function batchWatch(root,skip,delay=2600){for(let i=_bq.length-1;i>=0;i--){const o=_bq[i];if(o.root!==world&&!o.root.parent)_bq.splice(i,1)}
+  const q={root,skip,delay};if(mode==='desk'){q.stale=true;q.list=null}else batchSnap(q);_bq.push(q)}
 // Masada dünya 3 sn'de bir güncellenir: orada hareketsiz görünen hayvan/insan gerçekte hareketlidir. Gözlem penceresi masa dışında tamamlanmalı.
 function batchCheck(){const t=performance.now();for(let i=_bq.length-1;i>=0;i--){const q=_bq[i];
     // sahneden kaldırılmış (yeniden kurulmuş) grupların kaydı hemen atılır: kuyruk masada beklerken de büyümez

@@ -96,6 +96,9 @@ await eq('makeModal: sınıf, içerik, ilk düğme kapatır ve geri çağırır'
   const a=[d.className,d.isConnected,d.querySelector('h2').textContent];d.querySelector('button').click();return [...a,d.isConnected,c]},['modal login',true,'Başlık',false,1]);
 await eq('makeModal: nodismiss işareti, close yoksa düğme kendisi bağlanır',()=>{const d=makeModal('',"<div><button>x</button></div>",{nodismiss:1});const r=[d.className,d.dataset.nodismiss,d.querySelector('button').onclick];d.remove();return r},['modal','1',null]);
 await eq('makeModal: gözlemci role=dialog ve başlık adı ekler',()=>new Promise(res=>{const d=makeModal('mg','<div><h2>Deneme</h2></div>');setTimeout(()=>{const r=[d.getAttribute('role'),d.getAttribute('aria-modal'),document.getElementById(d.getAttribute('aria-labelledby')).textContent];d.remove();res(r)},0)}),['dialog','true','Deneme']);
+console.log('— birleştirme kuyruğu');
+await eq('batchWatch: kaldırılmış grubun kaydı atılır, masadayken anlık görüntü alınmaz',()=>{const n=_bq.length,g=G(world);batchWatch(g);world.remove(g);const g2=G(world);batchWatch(g2);
+  const q=_bq[_bq.length-1],r=[_bq.length-n,mode,q.root===g2,q.stale,q.list];world.remove(g2);_bq.splice(_bq.indexOf(q),1);return r},[1,'desk',true,true,null]);
 console.log('— itibar');
 await eq('addRep artırır, 100 ile sınırlar',()=>{S=__base({rep:90});const a=[];addRep(3);a.push(S.rep);addRep(10);a.push(S.rep);return a},[93,100]);
 
