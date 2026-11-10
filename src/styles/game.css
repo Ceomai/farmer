@@ -91,7 +91,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--honey);outline-
 .dot{position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;border-radius:9px;background:var(--brick);color:var(--c-on-primary);font-size:var(--fs-2xs);font-style:normal;font-weight:900;display:grid;place-items:center;border:var(--bw) solid var(--c-border);padding:0 var(--sp-2)}
 .cam{position:fixed;z-index:var(--z-cam);right:max(14px,var(--safe-right));bottom:calc(16px + var(--safe-bottom));display:grid;grid-template-columns:repeat(2,calc(38px * var(--ui-scale)));gap:var(--sp-4)}
 .cam button{width:calc(38px * var(--ui-scale));height:calc(38px * var(--ui-scale));border:var(--bw-thick) solid var(--c-border);border-radius:11px;background:var(--c-surface);box-shadow:var(--sh-2);font-weight:900;font-size:calc(var(--fs-lg) * var(--ui-scale));color:var(--wood)}
-.back{position:fixed;z-index:var(--z-nav);left:max(12px,var(--safe-left));top:calc(62px + var(--safe-top));border:var(--bw-thick) solid var(--c-border);border-radius:var(--r-pill);padding:7px 16px 7px 12px;background:var(--forest);color:var(--c-on-primary);font-weight:900;box-shadow:var(--sh-2)}
+.back{position:fixed;z-index:var(--z-nav);left:max(12px,var(--safe-left));top:calc((var(--hudB,58px) + 4px) / var(--ui-scale));border:var(--bw-thick) solid var(--c-border);border-radius:var(--r-pill);padding:7px 16px 7px 12px;background:var(--forest);color:var(--c-on-primary);font-weight:900;box-shadow:var(--sh-2)}
 
 /* Haritadaki isim etiketleri */
 .mk{position:absolute;left:0;top:0}
@@ -242,7 +242,7 @@ button.job.ready b{font-family:var(--f-display);font-weight:400;font-size:var(--
 .lane.pick{box-shadow:0 0 0 2px var(--honey)}
 .lane::after{content:"";position:absolute;right:0;top:0;bottom:0;width:4px;background:repeating-linear-gradient(var(--white) 0 4px,var(--finish-dark) 4px 8px);border-radius:0 7px 7px 0}
 
-.toast{position:fixed;z-index:var(--z-toast);left:50%;top:calc(62px + var(--safe-top));transform:translateX(-50%);background:var(--ink);color:var(--c-on-dark);padding:var(--sp-4) var(--sp-8);border-radius:var(--r-pill);font-weight:900;border:var(--bw-thick) solid var(--paper);max-width:calc(100% - 32px);text-align:center;animation:toast .35s cubic-bezier(.2,1.5,.4,1)}
+.toast{position:fixed;z-index:var(--z-toast);left:50%;top:calc((var(--hudB,58px) + 8px) / var(--ui-scale));transform:translateX(-50%);background:var(--ink);color:var(--c-on-dark);padding:var(--sp-4) var(--sp-8);border-radius:var(--r-pill);font-weight:900;border:var(--bw-thick) solid var(--paper);max-width:calc(100% - 32px);text-align:center;animation:toast .35s cubic-bezier(.2,1.5,.4,1)}
 @keyframes toast{from{opacity:0;transform:translate(-50%,-10px) scale(.9)}}
 .float{position:fixed;z-index:var(--z-float);pointer-events:none;font-family:var(--f-display);font-size:var(--fs-2xl);color:var(--c-on-primary);text-shadow:var(--sh-press),2px 0 0 var(--ink),-2px 0 0 var(--ink),0 -2px 0 var(--ink);animation:up 1.3s cubic-bezier(.2,1.3,.4,1) forwards;white-space:nowrap;transform:translateX(-50%)}
 @keyframes up{0%{opacity:0;translate:0 8px;scale:.7}15%{opacity:1;scale:1.08}30%{scale:1}100%{opacity:0;translate:0 -60px}}
@@ -267,11 +267,11 @@ body.focus .cam,body.inside .cam,body.focus .dock,body.inside .dock{display:none
 /* İlk oyun rehberi */
 .tut{position:fixed;inset:0;z-index:var(--z-tut);pointer-events:none}
 .tut-hand{position:fixed;left:0;top:0;width:44px;height:50px;line-height:50px;text-align:center;font-size:44px;filter:drop-shadow(2px 3px 0 var(--ink-a85));animation:tap 1s ease-in-out infinite;transition:left .25s,top .25s}
-.tut-hand.up{animation:tapd 1s ease-in-out infinite}
+.tut-hand.above{animation:tapd 1s ease-in-out infinite}
 @keyframes tap{0%,100%{translate:0 0}50%{translate:0 -10px}}@keyframes tapd{0%,100%{translate:0 0;rotate:180deg}50%{translate:0 10px;rotate:180deg}}
 .tut-say{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(170px + var(--safe-bottom));width:min(380px,calc(100% - 28px));display:flex;align-items:center;gap:9px;padding:9px 10px 9px 8px;border:var(--bw-thick) solid var(--c-border);border-radius:var(--r-2xl);background:var(--c-surface-hi);box-shadow:var(--sh-3);font-weight:800;font-size:var(--fs-base);line-height:1.35;pointer-events:auto}
-.tut.top .tut-say{bottom:auto;top:calc(110px + var(--safe-top))}
-@media (max-width:700px){.tut.top .tut-say{top:calc(150px + var(--safe-top))}}
+.tut.top .tut-say{bottom:auto;top:calc((var(--hudB,58px) + 52px) / var(--ui-scale))}
+body.fs-xb .tut.top .tut-say{top:calc((var(--hudB,58px) + 52px) / 1.1)}
 .tut-t{flex:1}.tut-skip{flex:none;border:0;background:none;color:var(--c-text-muted);font-weight:900;font-size:var(--fs-xs);text-decoration:underline;padding:var(--sp-2)}
 /* Diorama: kenar bulanıklığı (tilt-shift) */
 .tilt{display:none;position:fixed;left:0;right:0;z-index:var(--z-fx);pointer-events:none;-webkit-backdrop-filter:blur(4px) saturate(1.08);backdrop-filter:blur(4px) saturate(1.08)}
@@ -341,15 +341,23 @@ body.photo .photo-x{display:block;position:fixed;z-index:var(--z-photo);left:max
 body.photo .cam .ph{display:none}
 @media (max-width:700px){
   body.desk .tag.dk{height:21px;padding:0 7px 0 2px;gap:3px}body.desk .tag.dk b{font-size:var(--fs-xs)}body.desk .tag.dk .ti{width:16px;height:16px;font-size:9.5px}
-  .plate small{display:none}.plate h1{font-size:var(--fs-base)}.plate{padding:4px 10px 5px}
-  .pill{height:31px;font-size:var(--fs-md);padding-right:9px}
-  .coin,.star,.barnic{width:21px;height:21px;font-size:11px}.ring{width:24px;height:24px}.ring b{width:18px;height:18px;font-size:var(--fs-2xs)}
-  .sheet{top:auto;bottom:0;left:0;right:0;width:auto;max-height:52%;border-radius:var(--r-3xl) var(--r-3xl) 0 0;border-bottom:0;padding-bottom:var(--safe-bottom);box-shadow:0 -3px 0 var(--ink)}
-  body.focus .sheet,body.inside .sheet{max-height:48%}
+  /* Üst çubuk tek satır: başlık plakası yerine altta küçük mevsim · hava · saat rozeti, pillerde kısa sayılar */
+  .hud{top:calc(6px + var(--safe-top));left:max(8px,var(--safe-left));right:max(8px,var(--safe-right))}
+  .plate{position:absolute;left:0;top:calc(100% + 10px);margin:0;padding:2px 8px;border-width:var(--bw);border-radius:var(--r-pill);background:var(--c-surface);color:var(--c-text);box-shadow:var(--sh-xs);transform:none;pointer-events:none}
+  .plate h1{display:none}.plate small{display:block;color:var(--c-text);font-size:var(--fs-xs);letter-spacing:0;text-transform:none;white-space:nowrap}.plate .era-n{display:none}
+  .pills{flex-wrap:nowrap;gap:var(--sp-2);margin-left:auto;min-width:0}
+  .pill{height:30px;gap:3px;padding:0 7px 0 2px;font-size:var(--fs-md);border-width:var(--bw);box-shadow:var(--sh-1)}
+  .coin,.star,.barnic,.gem{width:20px;height:20px;font-size:11px}.ring{width:28px;height:28px}.ring b{width:22px;height:22px;font-size:var(--fs-sm)}.pill.lvl{padding:0 1px}
+  /* Panel: alttan açılır; yüksekliği tutamaçla %25 / %45 / %85 arasında seçilir (--sheetF), varsayılan %42 (masada %52) */
+  .sheet{top:auto;bottom:0;left:0;right:0;width:auto;max-height:calc(var(--sheetF,.42) * 100%);border-radius:var(--r-3xl) var(--r-3xl) 0 0;border-bottom:0;padding-bottom:var(--safe-bottom);box-shadow:0 -3px 0 var(--ink)}
+  body.focus .sheet,body.inside .sheet{max-height:calc(var(--sheetF,.42) * 100%)}body.desk .sheet{max-height:calc(var(--sheetF,.52) * 100%)}
+  .sheet.dragging{animation:none;transition:none}
+  .sh-head{padding-top:16px;touch-action:none}.grip{display:block}
+  .thumb{width:46px;height:46px;font-size:22px;border-radius:var(--r-lg)}
   .sh-body{padding-left:max(12px,var(--safe-left));padding-right:max(12px,var(--safe-right))}
-  .dock button{width:min(calc(40px * var(--ui-scale)),calc((100vw - 72px) / 7));height:min(calc(40px * var(--ui-scale)),calc((100vw - 72px) / 7));font-size:calc(19px * var(--ui-scale))}
+  .dock{gap:var(--sp-4)}.dock button{width:min(calc(40px * var(--ui-scale)),calc((100vw - 96px) / 7));height:min(calc(40px * var(--ui-scale)),calc((100vw - 96px) / 7));font-size:calc(19px * var(--ui-scale))}
   .cam{bottom:calc(72px + var(--safe-bottom))}
-  .back{top:calc(96px + var(--safe-top))}
+  .back{top:calc((var(--hudB,46px) + 36px) / var(--ui-scale))}
   .tag{height:25px;padding-right:9px}.tag b{font-size:var(--fs-xs)}.tag .ti{width:19px;height:19px;font-size:11px}
   body.sheet-open .dock,body.sheet-open .cam{display:none}
 }
@@ -381,10 +389,10 @@ body.wx-storm .rainfx i{animation-duration:.36s}body.wx-storm .rainfx i+i{animat
   .sheet{max-height:calc(100vh - 70px)!important}
 }
 /* Rehber */
-.guidebtn{display:none;position:fixed;z-index:var(--z-nav);left:max(12px,var(--safe-left));top:calc(62px + var(--safe-top));border:var(--bw-thick) solid var(--c-border);border-radius:var(--r-pill);padding:7px 14px 7px 11px;background:var(--honey);color:var(--ink);font-weight:900;box-shadow:var(--sh-2)}
+.guidebtn{display:none;position:fixed;z-index:var(--z-nav);left:max(12px,var(--safe-left));top:calc((var(--hudB,58px) + 4px) / var(--ui-scale));width:36px;height:36px;padding:0;place-items:center;border:var(--bw-thick) solid var(--c-border);border-radius:50%;background:var(--honey);color:var(--ink);font-size:18px;line-height:1;box-shadow:var(--sh-2)}
 .guidebtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
-body[data-mode="desk"] .guidebtn,body[data-mode="hub"] .guidebtn,body[data-mode="focus"] .guidebtn{display:block}
-body[data-mode="hub"] .guidebtn,body[data-mode="focus"] .guidebtn{top:calc(112px + var(--safe-top))}
+body[data-mode="desk"] .guidebtn,body[data-mode="hub"] .guidebtn,body[data-mode="focus"] .guidebtn{display:grid}
+body[data-mode="hub"] .guidebtn,body[data-mode="focus"] .guidebtn{top:calc((var(--hudB,58px) + 52px) / var(--ui-scale))}
 body.photo .guidebtn{display:none!important}
 @media (max-width:700px){body.sheet-open .guidebtn{display:none!important}}
 .guide .gsearch{width:100%;border:var(--bw) solid var(--c-border);border-radius:var(--r-pill);padding:9px 14px;font:800 var(--fs-base) var(--f-body);background:var(--c-card);color:var(--ink)}
@@ -398,7 +406,6 @@ body.photo .guidebtn{display:none!important}
 .gd-b{padding:0 12px 11px;font-size:var(--fs-md);line-height:1.5;font-weight:700;color:var(--c-heading)}
 .gd-b p{margin:6px 0}.gd-b ul,.gd-b ol{margin:4px 0;padding-left:18px}.gd-b li{margin:3px 0}
 .gtag{display:inline-block;font-size:var(--fs-xs);font-weight:900;padding:0 var(--sp-3);border-radius:var(--r-xs);background:var(--c-tag-bg);color:var(--c-tag-text);margin-left:3px}.gtag.ok{background:var(--leaf);color:var(--c-on-leaf)}
-@media (max-width:700px){body[data-mode="hub"] .guidebtn,body[data-mode="focus"] .guidebtn{top:calc(146px + var(--safe-top))}}
 .gall{display:flex;flex-direction:column}
 .gall>p.note:not(.gempty){display:none}
 /* Panel içeriği hiçbir zaman ezilmesin: panel kaydırılır, içindeki bölümler küçülmez (tohum satırı 6px'e iniyordu) */
@@ -490,3 +497,62 @@ div.scard{cursor:pointer}
 #boot .boot-retry{min-height:44px}
 /* Ekran okuyucuya özel (görünmez) metin */
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* ===== Oyun arayüzü düzeni (üst bölge, panel, geri ve rehber yerleşimi) ===== */
+/* Rehber: küçük ikon düğme; telefonda ve tablette üst çubuğun altında sağda (masaüstünde solda, geri düğmesinin altında) */
+@media (max-width:700px),(min-width:701px) and (max-width:1024px) and (min-height:501px){
+  .guidebtn,body[data-mode] .guidebtn{left:auto;right:max(12px,var(--safe-right));top:calc((var(--hudB,46px) + 6px) / var(--ui-scale))}
+}
+/* Telefonda büyük yazıda da üst çubuk tek satır kalır (çubuk biraz daha az büyür) */
+@media (max-width:700px){body.fs-b header.hud{zoom:1.04}body.fs-xb header.hud{zoom:1.08}body.fs-xb .hud .pills{flex-wrap:nowrap;gap:3px}
+  body.fs-xb .pill{gap:2px;padding:0 5px 0 2px}body.fs-xb :is(.coin,.star,.barnic,.gem){width:18px;height:18px;font-size:10px}
+  .pill{min-width:0}.pill>span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pill>span:first-child,.pill .ring{flex:none}}
+/* Bildirim üst çubuğun hemen altında; metin gerektiği kadar geniş (ortalama yüzünden yarım genişliğe sıkışmaz) */
+.toast{width:max-content;box-sizing:border-box}
+/* Panel tutamacı (yalnızca telefonda görünür) */
+.grip{display:none;position:absolute;left:50%;top:5px;width:40px;height:5px;margin-left:-20px;border-radius:var(--r-pill);background:var(--ink-a35);pointer-events:none}
+/* Bölümün ana eylem satırı (Ek / Topla / Yükselt / İçeri / işçi) panelin altına yapışık durur, kaydırınca kaybolmaz */
+.urow.mainact{position:sticky;bottom:calc(-1 * var(--sp-6));z-index:1;box-sizing:border-box;min-height:48px;margin:0 calc(-1 * var(--sp-6)) calc(-1 * var(--sp-6));padding:var(--sp-4) var(--sp-6);background:var(--c-surface);border-top:var(--bw) dashed var(--c-divider);border-radius:0 0 var(--r-3xl) var(--r-3xl)}
+.urow.mainact:empty{display:none}
+.urow.mainact{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}.urow.mainact::-webkit-scrollbar{display:none}.urow.mainact>*{flex:none}
+.unit+.unit .urow.mainact,.unit:not(:last-child) .urow.mainact{border-radius:0;margin-bottom:0}
+.sheet.dark .urow.mainact{background:var(--alley-bg)}
+/* Geri düğmesi panel başlığında (telefon): ‹ › oklarıyla aynı boyda yuvarlak ok */
+.back.inbar{position:relative;top:auto;left:auto;right:auto;z-index:1;flex:none;box-shadow:var(--sh-press);zoom:1!important}
+.sh-head>.back.inbar{width:34px;height:34px;padding:0 0 2px;border-width:var(--bw);display:grid;place-items:center;font-size:19px;line-height:1}
+.sh-head>.back.inbar .bk-t{display:none}
+/* Panel kapalıyken geri düğmesi kart şeridinin başında, kaydırınca solda sabit kalır */
+.strip>.back.inbar{position:sticky;left:0;flex:none;align-self:center;width:58px;height:88px;padding:0;border-radius:var(--r-xl);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-1);font-size:22px;line-height:1;box-shadow:var(--sh-3)}
+.strip>.back.inbar .bk-t{font-size:var(--fs-sm)}
+.strip:has(>.back.inbar){scroll-padding-left:82px}body.lefty .strip:has(>.back.inbar){scroll-padding-left:0;scroll-padding-right:82px}
+/* Tohum satırı: dört buçuk kart görünür, yana kaydırılabildiği belli olur */
+.seeds{grid-auto-columns:calc((100% - 32px) / 4.5)}
+/* Çiftçi balonu ~6 sn sonra küçülür: yalnızca yüz kalır, dokununca yeniden açılır */
+.farmer-say.tuck{padding:3px;gap:0;border-radius:50%}.farmer-say.tuck :is(.fs-t,.fs-go){display:none}
+.farmer-say.tuck{animation:sayTuck .3s ease-out}@keyframes sayTuck{from{scale:1.15}}
+/* Tablet (701–1024 px): panel altta ortada, en fazla 560 px */
+@media (min-width:701px) and (max-width:1024px) and (min-height:501px){
+  .sheet{top:auto;bottom:calc(12px + var(--safe-bottom));left:0;right:0;margin:0 auto;width:min(560px,calc(100% - 24px));max-height:50%}
+  body.focus .sheet,body.inside .sheet{max-height:50%}
+  body.desk .sheet{bottom:calc(84px * var(--ui-scale) + var(--safe-bottom));max-height:calc(100% - 200px)}
+  body.hub.sheet-open .strip{display:none}
+  body.focus .sheet,body.inside .sheet,body.hub .sheet{bottom:calc(12px + var(--safe-bottom))}
+}
+/* Yatay telefon: üst çubuk tek ince satır, yan panel ekrana sığar, kart şeridi alçalır */
+@media (max-height:500px) and (orientation:landscape){
+  .hud{top:calc(4px + var(--safe-top))}
+  .plate{display:flex;align-items:center;gap:var(--sp-4);padding:3px 10px 4px;min-width:0;overflow:hidden}.plate h1{font-size:var(--fs-base);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.plate small{white-space:nowrap}.plate .era-n{display:none}.pill>span{white-space:nowrap}
+  .pills{flex-wrap:nowrap}.pill{height:30px;font-size:var(--fs-md)}.coin,.star,.barnic,.gem{width:22px;height:22px;font-size:11px}
+  body.fs-xb .hud .pills{flex-wrap:nowrap}body.fs-xb header.hud{zoom:1.12}
+  .sheet{top:calc((var(--hudB,44px) + 6px) / var(--ui-scale));max-height:calc(100% - (var(--hudB,44px) + 12px + var(--safe-bottom)) / var(--ui-scale))!important}
+  .strip{padding-top:10px;padding-bottom:calc(6px + var(--safe-bottom))}.scard img,.scard .ph{height:34px}.scard .qa{min-height:32px}
+}
+/* Sol el modu: panel başlığındaki ‹ › ve ✕ sola, geri düğmesi sağa; telefonda rehber düğmesi sola */
+body.lefty .sh-head{padding-left:52px;padding-right:12px}
+body.lefty .sh-head .x{right:auto;left:10px}
+body.lefty .sh-head .nav{order:-1}body.lefty .sh-head .nav[data-locstep="-1"]{margin-left:0}
+body.lefty .sh-head>.back.inbar{order:9;margin-left:auto}
+body.lefty .strip>.back.inbar{order:99;left:auto;right:0}
+@media (max-width:700px){
+  body.lefty .guidebtn,body.lefty[data-mode] .guidebtn{right:auto;left:max(12px,var(--safe-left))}
+  body.lefty .plate{left:48px}
+}

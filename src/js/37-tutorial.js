@@ -27,8 +27,10 @@ function tut2Start(){if(S.tut2||!S.tut||!S.tut.done||S.lv<2||!S.units.kumes||mod
 function tut2Tick(){const i=tut2Step();if(i<0)return false;if(document.querySelector('.modal')){tutEl.hidden=true;return true}const st=TUT2[i];
   if(st.tap?S.tut2.tap:st.done()){S.tut2.i++;S.tut2.tap=0;if(S.tut2.i>=TUT2.length){S.tut2={done:1};tutEl.hidden=true;gain(100,'Ödül');S.gems+=2;sfx('win');toast('Çiftlik işleri tamam: +₺100 +🍀2');track('tutorial2_done');commit();return true}save();return tut2Tick()}
   tutEl.hidden=false;tutTxt.innerHTML=st.say;tutNext.hidden=!st.tap;const el=st.el();
-  if(el&&el.getClientRects().length){if(el.closest('#strip')){const r0=el.getBoundingClientRect();if(r0.left<0||r0.right>innerWidth)el.scrollIntoView({inline:'center',block:'nearest'})}const r=el.getBoundingClientRect();tutHand.hidden=false;const up=r.top>innerHeight*.55;tutHand.classList.toggle('up',up);
-    tutHand.style.left=Math.round(r.left+r.width/2-22)+'px';tutHand.style.top=Math.round(up?r.top-56:r.bottom+4)+'px';tutEl.classList.toggle('top',r.top>innerHeight*.5)}else{tutHand.hidden=true;tutEl.classList.add('top')}return true}
+  if(el&&el.getClientRects().length){if(el.closest('#strip')){const r0=el.getBoundingClientRect();if(r0.left<0||r0.right>innerWidth)el.scrollIntoView({inline:'center',block:'nearest'})}const r=el.getBoundingClientRect();tutHand.hidden=false;const up=r.top>innerHeight*.55;tutHand.classList.toggle('above',up);
+    tutPlaceHand(r,up);tutEl.classList.toggle('top',r.top>innerHeight*.5)}else{tutHand.hidden=true;tutEl.classList.add('top')}return true}
+// El hedefin üstüne değil sağ alt (yukarıdaysa sağ üst) köşesine konur: parmak ucu köşeyi gösterir, hedef görünür kalır
+function tutPlaceHand(r,up){const x=Math.max(4,Math.min(innerWidth-48,r.right-30)),y=up?Math.max(4,r.top-44):Math.min(innerHeight-54,r.bottom-6);tutHand.style.left=Math.round(x)+'px';tutHand.style.top=Math.round(y)+'px'}
 const tutStep=()=>S&&S.tut&&!S.tut.done?S.tut.i:-1;
 function tutStart(){if(S.tut)return;if(S.goal>0||(S.stats.plant_bugday||0)>0){S.tut={done:1};return}S.tut={i:0,b:{plant:0,harv:0,sold:0}};track('tutorial_start')}
 function tutTick(){const i=tutStep();if(i<0){tut2Start();if(!tut2Tick())tutEl.hidden=true;return}tutNext.hidden=true;if(document.querySelector('.modal')){tutEl.hidden=true;return}const st=TUT[i];
@@ -38,5 +40,5 @@ function tutTick(){const i=tutStep();if(i<0){tut2Start();if(!tut2Tick())tutEl.hi
     if(S.tut.i>=TUT.length){S.tut={done:1};tutEl.hidden=true;gain(150,'Ödül');S.gems+=3;sfx('win');celebrate('Aferin!');
       setTimeout(()=>toast('İlk adımlar tamam: +₺150 +🍀3 · Çiftçinin baloncukları ve 📖 Rehber seni yönlendirmeye devam edecek'),900);track('tutorial_done');commit();return}save();return}
   tutEl.hidden=false;tutTxt.innerHTML=st.say;const el=st.el();
-  if(el&&el.getClientRects().length){if(el.closest('#strip')){const r0=el.getBoundingClientRect();if(r0.left<0||r0.right>innerWidth)el.scrollIntoView({inline:'center',block:'nearest'})}const r=el.getBoundingClientRect();tutHand.hidden=false;const up=r.top>innerHeight*.55;tutHand.classList.toggle('up',up);
-    tutHand.style.left=Math.round(r.left+r.width/2-22)+'px';tutHand.style.top=Math.round(up?r.top-56:r.bottom+4)+'px';tutEl.classList.toggle('top',r.top>innerHeight*.5)}else{tutHand.hidden=true;tutEl.classList.add('top')}}
+  if(el&&el.getClientRects().length){if(el.closest('#strip')){const r0=el.getBoundingClientRect();if(r0.left<0||r0.right>innerWidth)el.scrollIntoView({inline:'center',block:'nearest'})}const r=el.getBoundingClientRect();tutHand.hidden=false;const up=r.top>innerHeight*.55;tutHand.classList.toggle('above',up);
+    tutPlaceHand(r,up);tutEl.classList.toggle('top',r.top>innerHeight*.5)}else{tutHand.hidden=true;tutEl.classList.add('top')}}

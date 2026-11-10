@@ -43,11 +43,14 @@ document.addEventListener('change',e=>{const id=e.target.id;if(id==='optMusic'){
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(backOverlay())return;if(mode==='interior')leaveInterior();else if(mode==='focus')toHub();else if(view){view=null;renderSheet()}else if(mode==='hub')toDesk()}
   if(mode==='hub'&&!(e.target.closest&&e.target.closest('input'))){if(e.key==='q')rotateCam(Math.PI/4);if(e.key==='e')rotateCam(-Math.PI/4)}});
 
-let lastCoins=null;
-function renderHUD(){$('#coins').textContent=fmt(S.coins);if(lastCoins!=null&&S.coins>lastCoins){const pc=$('#pCoin');pc.classList.remove('bump');void pc.offsetWidth;pc.classList.add('bump')}lastCoins=S.coins;
+let lastCoins=null,eraH='';
+function renderHUD(){$('#coins').textContent=fmtShort(S.coins);if(lastCoins!=null&&S.coins>lastCoins){const pc=$('#pCoin');pc.classList.remove('bump');void pc.offsetWidth;pc.classList.add('bump')}lastCoins=S.coins;
   $('#lv').textContent=S.lv;$('#lvring').style.setProperty('--p',Math.min(100,S.xp/xpNeed(S.lv)*100)+'%');$('#pLv').title=`Seviye ${S.lv} · ${fmt(S.xp)}/${fmt(xpNeed(S.lv))} xp`;
-  $('#rep').textContent=S.rep;$('#store').textContent=stored()+'/'+cap();$('#pStore').classList.toggle('full',stored()/cap()>=.9);
-  $('#gems').textContent=S.gems;const se=SEASONS[season()],wx=WEATHER[S.weather.k];$('#era').textContent=`${se.e} ${se.n} · ${wx.e} ${clockStr()}`;$('#goalDot').hidden=!goalReady()&&!(S.daily&&S.daily.tasks.some(t=>t.p>=t.n&&!t.c))}
+  $('#rep').textContent=fmtShort(S.rep);$('#store').textContent=stored()+'/'+cap();$('#pStore').classList.toggle('full',stored()/cap()>=.9);
+  $('#gems').textContent=fmtShort(S.gems);const se=SEASONS[season()],wx=WEATHER[S.weather.k];const eh=`${se.e}<span class="era-n"> ${se.n} ·</span> ${wx.e} ${clockStr()}`;if(eraH!==eh){eraH=eh;$('#era').innerHTML=eh}$('#goalDot').hidden=!goalReady()&&!(S.daily&&S.daily.tasks.some(t=>t.p>=t.n&&!t.c))}
+// Üst çubuğun alt kenarı CSS'e --hudB olarak yazılır: bildirim, rehber ve geri düğmesi, balonlar bunun altına yerleşir (yazı boyutu ve güvenli alanla değişir)
+const hudBox=document.querySelector('.hud');function measureHud(){const b=Math.round(hudBox.getBoundingClientRect().bottom);if(b>0)document.documentElement.style.setProperty('--hudB',b+'px')}
+if(window.ResizeObserver)new ResizeObserver(measureHud).observe(hudBox);addEventListener('resize',measureHud);
 // Geri / Escape: önce açık pencere (mini oyunsa düzgün kapatılır) ve uzun basma menüsü kapanır
 function backOverlay(){const m=document.querySelector('.modal');if(m){if(m.dataset.nodismiss)return true;const x=m.querySelector('.mgx');if(x)x.click();else m.remove();return true}if(typeof qpop!=='undefined'&&!qpop.hidden){closeQpop();return true}return false}
 function commit(skipSheet){save();renderHUD();syncWorld();if(!skipSheet)renderSheet();refreshQpop();if(interior&&intSig(interior.key)!==interior.sig)interior.refresh()}
@@ -58,5 +61,17 @@ sheet.addEventListener('pointerdown',e=>{const b=e.target.closest('.plot[data-i]
   swipe={kind:k,done:new Set(),n:0,panel:1};panelSwipeUsed=true;try{b.releasePointerCapture&&b.releasePointerCapture(e.pointerId)}catch(err){}const r=b.getBoundingClientRect();swipeApply(i,r.left+r.width/2,r.top)});
 sheet.addEventListener('pointermove',e=>{if(!swipe||!swipe.panel)return;const el=document.elementFromPoint(e.clientX,e.clientY),b=el&&el.closest('.plot[data-i]');if(b){const i=+b.dataset.i;if(!swipe.done.has(i)){const r=b.getBoundingClientRect();swipeApply(i,r.left+r.width/2,r.top)}}});
 // Başlıkta sağa-sola kaydırınca bir sonraki / önceki bölüme geç
-{let hs=null;sheet.addEventListener('pointerdown',e=>{const h=e.target.closest('.sh-head');hs=h&&view&&view.k==='loc'&&!e.target.closest('button')?{x:e.clientX,y:e.clientY}:null});
-  sheet.addEventListener('pointerup',e=>{if(!hs)return;const dx=e.clientX-hs.x,dy=e.clientY-hs.y;hs=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)stepLoc(dx<0?1:-1)})}
+// Telefonda panel yüksekliği: başlıktan (üstteki tutamaç) yukarı-aşağı sürükleyince %25 / %45 / %85 noktalarına oturur; en alttan aşağı çekince
+// bölümde/içeride küçülür, haritada/masada kapanır. Seçilen yükseklik oturum boyunca hatırlanır (sayfa yenilenince varsayılana döner).
+const SHEET_SNAP=[.25,.45,.85];let sheetF=null;
+{let hs=null,dr=null;const zoomOf=()=>parseFloat(getComputedStyle(document.body).getPropertyValue('--ui-scale'))||1;
+  sheet.addEventListener('pointerdown',e=>{const h=e.target.closest('.sh-head');const onBtn=e.target.closest('button');hs=h&&view&&view.k==='loc'&&!onBtn?{x:e.clientX,y:e.clientY}:null;
+    dr=h&&!onBtn&&phoneUI()&&e.isPrimary?{x:e.clientX,y:e.clientY,h:sheet.getBoundingClientRect().height,id:e.pointerId,on:false}:null;if(dr)try{sheet.setPointerCapture(e.pointerId)}catch(err){}});
+  sheet.addEventListener('pointermove',e=>{if(!dr||e.pointerId!==dr.id)return;const dy=e.clientY-dr.y,dx=e.clientX-dr.x;
+    if(!dr.on){if(Math.abs(dy)<8||Math.abs(dy)<Math.abs(dx))return;dr.on=true;hs=null;sheet.classList.add('dragging');if(view&&view.mini&&dy<0){view.mini=false;renderSheet();dr.h=sheet.getBoundingClientRect().height}}
+    const v=Math.max(56,Math.min(innerHeight*.9,dr.h-dy))/zoomOf();sheet.style.height=sheet.style.maxHeight=v+'px'});
+  const end=e=>{if(dr&&dr.on){const dy=e.clientY-dr.y,f=sheet.getBoundingClientRect().height/innerHeight;sheet.style.height=sheet.style.maxHeight='';sheet.classList.remove('dragging');dr=null;if(!view)return;
+      if(dy>0&&f<SHEET_SNAP[0]-.04){if(mode==='focus'||mode==='interior'){view.mini=true;renderSheet()}else{view=null;renderSheet()}return}
+      sheetF=SHEET_SNAP.reduce((a,b)=>Math.abs(b-f)<Math.abs(a-f)?b:a);sheet.style.setProperty('--sheetF',sheetF);return}dr=null};
+  sheet.addEventListener('pointerup',e=>{end(e);if(!hs)return;const dx=e.clientX-hs.x,dy=e.clientY-hs.y;hs=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)stepLoc(dx<0?1:-1)});
+  sheet.addEventListener('pointercancel',e=>{end(e);hs=null})}

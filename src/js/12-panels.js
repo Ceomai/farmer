@@ -3,20 +3,29 @@ let view=null,race=null;const sheet=$('#sheet');
 const THUMB={};
 const img=k=>THUMB[k]?`<img src="${THUMB[k]}" alt="">`:(B[k]?B[k].e:(LOC[k]?LOC[k].e:'🏠'));
 function stars(n,max){return `<div class="stars">${Array.from({length:max},(_,k)=>`<i class="${k<n?'on':''}"></i>`).join('')}</div>`}
-function head(thumb,title,sub){return `<div class="sh-head"><div class="thumb">${thumb}</div><div class="ttl"><h2>${title}</h2>${sub?`<div class="sub">${sub}</div>`:''}</div>${view&&view.k==='loc'&&locOrder().length>1?`<button class="nav" data-locstep="-1" aria-label="Önceki bölüm">‹</button><button class="nav" data-locstep="1" aria-label="Sonraki bölüm">›</button>`:''}<button class="x" data-act="close" aria-label="Kapat">✕</button></div>`}
+function head(thumb,title,sub){return `<div class="sh-head"><span class="grip" aria-hidden="true"></span><div class="thumb">${thumb}</div><div class="ttl"><h2>${title}</h2>${sub?`<div class="sub">${sub}</div>`:''}</div>${view&&view.k==='loc'&&locOrder().length>1?`<button class="nav" data-locstep="-1" aria-label="Önceki bölüm">‹</button><button class="nav" data-locstep="1" aria-label="Sonraki bölüm">›</button>`:''}<button class="x" data-act="close" aria-label="Kapat">✕</button></div>`}
 function closeSheet(){if(!view)return;if(mode==='focus'||mode==='interior'){view.mini=!view.mini;renderSheet();return}view=null;renderSheet()}
 function openView(k){view={k};renderSheet()}
 function setDock(){document.querySelectorAll('.dock button[data-open]').forEach(b=>b.setAttribute('aria-current',String(!!view&&b.dataset.open===view.k)))}
+// Telefonda geri düğmesi panel başlığına (panel açıkken) ya da kart şeridinin başına (panel kapalıyken) taşınır; masaüstünde yerinde kalır.
+// Yeniden çizimde (innerHTML) kaybolmasın diye çizimden önce yerine park edilir.
+const backEl=document.getElementById('backBtn'),backHome=backEl.parentNode,backNext=backEl.nextSibling;
+const phoneUI=()=>matchMedia('(max-width:700px)').matches;
+function parkBack(){if(backEl.parentNode!==backHome)backHome.insertBefore(backEl,backNext)}
+function placeBack(){const st=document.getElementById('strip');let t=null;
+  if(phoneUI()&&!backEl.hidden){if(!sheet.hidden)t=sheet.querySelector('.sh-head');else if(st&&!st.hidden)t=st}
+  if(t){if(backEl.parentNode!==t)t.insertBefore(backEl,t.firstChild)}else parkBack();backEl.classList.toggle('inbar',!!t)}
+addEventListener('resize',()=>placeBack());
 function renderSheet(){
-  if(!view){sheet.hidden=true;delete sheet.dataset.vk;document.body.classList.remove('sheet-open');setDock();return}
+  if(!view){sheet.hidden=true;delete sheet.dataset.vk;document.body.classList.remove('sheet-open');setDock();placeBack();return}
   sheet.hidden=false;document.body.classList.add('sheet-open');sheet.classList.toggle('dark',view.k==='alley');
   const f={loc:sheetLoc,region:sheetRegion,places:sheetPlaces,barn:sheetBarn,goals:sheetGoals,settings:sheetSettings,shop:sheetShop,album:sheetAlbum,ledger:sheetLedger,mail:sheetMail,guide:sheetGuide,borsa:sheetBorsa,budget:sheetBudget,stats:sheetStats}[view.k];
-  const vk=view.k+'|'+(view.loc||''),body=sheet.querySelector('.sh-body'),st=body&&sheet.dataset.vk===vk?body.scrollTop:0;sheet.dataset.vk=vk;const gq=sheet.querySelector('#guideQ'),qv=gq&&view.k==='guide'?gq.value:'',gf=gq&&document.activeElement===gq;sheet.innerHTML=f();
+  const vk=view.k+'|'+(view.loc||''),body=sheet.querySelector('.sh-body'),st=body&&sheet.dataset.vk===vk?body.scrollTop:0;sheet.dataset.vk=vk;const gq=sheet.querySelector('#guideQ'),qv=gq&&view.k==='guide'?gq.value:'',gf=gq&&document.activeElement===gq;parkBack();sheet.innerHTML=f();
   if(qv){const n=sheet.querySelector('#guideQ');if(n){n.value=qv;n.dispatchEvent(new Event('input',{bubbles:true}));if(gf)n.focus()}} // rehber araması yeniden çizimde kaybolmasın
   const nb=sheet.querySelector('.sh-body');if(nb)nb.scrollTop=st; // kaydırma konumu yeniden çizimde korunur
   const canMini=mode==='focus'||mode==='interior';sheet.classList.toggle('mini',canMini&&!!view.mini);
   if(canMini)sheet.querySelectorAll('[data-act="close"]').forEach(b=>{b.textContent=view.mini?'▴':'▾';b.setAttribute('aria-label',view.mini?'Kartı aç':'Kartı küçült')});
-  view.sig=sheetSig();setDock()}
+  view.sig=sheetSig();setDock();placeBack()}
 function sheetSig(){if(!view)return'';let s='';if(view.k==='loc'){const L=LOC[view.loc];if(L.kind==='fields')s+=S.fields.map(f=>f.job?(now()>=f.job.e?'r':'g'):'i').join('');(L.units||[]).forEach(u=>{const x=S.units[u];s+=x?(x.job?(now()>=x.job.e?'r':'g'):'i')+((x.q||[]).length)+(S.workers[u]?(workOn(u)?'w':'b'):''):'-'});if(L.kind==='orders')s+=readyOrders()}
   if(view.k==='loc'&&view.loc==='hipo')s+=S.horses.map(h=>(now()<h.rest?'r':'')+(now()<h.train?'t':'')).join()+has('at');return s}
 const outOf=sc=>{const k=Object.keys(sc.out)[0];return `<span class="big">${ITEMS[k].e}<i>×${sc.out[k]}</i></span>`};
@@ -35,12 +44,12 @@ function unitHTML(u,multi){const d=B[u],s=S.units[u];
   if(d.storage)h+=`<div class="job"><span class="big">📦</span><span class="pw"><b>+${d.storage*s.l} yer</b><small>Ambar ${stored()} / ${cap()}</small></span></div>`;
   h+=loveRow(u);if(s.job){h+=jobRow(u);if(d.recipes)h+=queueHTML(u)}else if(d.recipes)h+=recipeTiles(u);
   const ent=INSIDE_UNITS[u]&&mode!=='interior'?`<button class="pill-btn go" data-act="enterIn" data-k="${u}">🚪 İçeri</button>`:'';
-  return `<div class="unit">${h}<div class="urow">${ent}${upBtn(u)}${extraRow(u)}</div></div>`}
+  const row=ent+upBtn(u)+extraRow(u);return `<div class="unit">${h}<div class="urow${row?' mainact':''}">${row}</div></div>`}
 function sheetLoc(){const k=view.loc,L=LOC[k];const th=img(L.kind==='house'?'kulube'+S.house:L.units?L.units[0]:k);let h,b='';
   switch(L.kind){
     case'house':{h=head(th,HOUSE[S.house-1].n,stars(S.house,4));const nx=HOUSE[S.house];
       b+=`<div class="job"><span class="big">📦</span><span class="pw"><b>Kiler</b><span class="pbar"><i style="width:${Math.min(100,stored()/cap()*100)}%" class="still"></i></span><small>${stored()} / ${cap()}</small></span></div>`;
-      b+=`<div class="urow">${mode!=='interior'?`<button class="pill-btn go" data-act="enterIn" data-k="kulube">🚪 Eve gir</button>`:''}${nx?`<button class="up" data-act="upHouse" ${S.lv>=nx.lvl&&S.coins>=nx.cost?'':'disabled'} title="Ambar büyür, binalar daha üst seviyeye çıkabilir">⬆ ${nx.n} <span>${S.lv>=nx.lvl?'₺'+fmt(nx.cost):'🔒 Sv '+nx.lvl}</span></button>`:''}</div>`+genHTML();break}
+      b+=`<div class="urow mainact">${mode!=='interior'?`<button class="pill-btn go" data-act="enterIn" data-k="kulube">🚪 Eve gir</button>`:''}${nx?`<button class="up" data-act="upHouse" ${S.lv>=nx.lvl&&S.coins>=nx.cost?'':'disabled'} title="Ambar büyür, binalar daha üst seviyeye çıkabilir">⬆ ${nx.n} <span>${S.lv>=nx.lvl?'₺'+fmt(nx.cost):'🔒 Sv '+nx.lvl}</span></button>`:''}</div>`+genHTML();break}
     case'fields':h=head(th,L.n,stars(S.fieldLv,MAXL));b+=fieldsBody();break;
     case'market':h=head(th,L.n,'');b+=`<button class="btn big gold" data-act="mg" data-k="haggle" ${now()<(S.haggleAt||0)?'disabled':''}>🤝 Tüccarla pazarlık et</button>`+marketBody();break;
     case'orders':{h=head(th,L.n,'★ ×'+repMult().toFixed(2));const tb=view.tab||'o';b+=`<div class="tabs"><button aria-selected="${tb==='o'}" data-act="vtab" data-t="o">📜 Sipariş</button><button aria-selected="${tb==='c'}" data-act="vtab" data-t="c">🤝 Sözleşme</button><button aria-selected="${tb==='f'}" data-act="vtab" data-t="f">❤️ Dostlar</button><button aria-selected="${tb==='p'}" data-act="vtab" data-t="p">🏛️ Kasaba</button></div>`+(tb==='o'?ordersBody():tb==='c'?contractsBody():tb==='p'?projBody():friendsBody());break}
@@ -55,7 +64,7 @@ function fieldsBody(){const ready=S.fields.filter(f=>f.job&&now()>=f.job.e).leng
     +(n<9?`<button class="plot buy" data-act="buyPlot" ${S.lv>=PLOT_LV[n]&&S.coins>=PLOT_COST[n]?'':'disabled'} title="Yeni parsel"><em>➕</em>${S.lv<PLOT_LV[n]?'🔒 Sv '+PLOT_LV[n]:'₺'+fmt(PLOT_COST[n])}</button>`:'')+`</div>`;
   const fu=S.fieldLv<MAXL?(()=>{const bl=upBlock(S.fieldLv+1);return `<button class="up" data-act="upFields" ${bl||S.coins<FIELD_UP[S.fieldLv]?'disabled':''} title="+%30 hasat, daha hızlı büyüme">⬆ Sv ${S.fieldLv+1} <span>${bl||'₺'+fmt(FIELD_UP[S.fieldLv])}</span></button>`})():'';
   const run=S.fields.filter(f=>f.job&&now()<f.job.e);
-  return h+`<div class="urow"><button class="pill-btn go" data-act="plantAll" ${empty?'':'disabled'}>🌱 Ek (${empty})</button><button class="pill-btn gold" data-act="harvestAll" ${ready?'':'disabled'}>🧺 Topla (${ready})</button>${fu}${run.length?speedBtns('F',Math.max(...run.map(f=>f.job.e-now()))):''}${workerBtn('fields')}</div>`}
+  return h+`<div class="urow mainact"><button class="pill-btn go" data-act="plantAll" ${empty?'':'disabled'}>🌱 Ek (${empty})</button><button class="pill-btn gold" data-act="harvestAll" ${ready?'':'disabled'}>🧺 Topla (${ready})</button>${fu}${run.length?speedBtns('F',Math.max(...run.map(f=>f.job.e-now()))):''}${workerBtn('fields')}</div>`}
 function marketBody(){const inv=Object.keys(ITEMS).filter(k=>has(k)>0);
   return `<div class="job"><span class="big">🌰</span><span class="pw"><b>Yem · ₺${ITEMS.yem.buy}</b><small>Elde ${has('yem')}</small></span><button class="pill-btn" data-act="feed" data-n="5">+5</button><button class="pill-btn gold" data-act="feed" data-n="20">+20</button></div>
   ${inv.some(k=>satF(k)<.85)?'<p class="note">📉 Pazar bu ürünlerden doydu: çok satınca fiyat düşer, 15 dakikada toparlanır. Siparişler ve sözleşmeler bundan etkilenmez.</p>':''}${inv.length?`<div class="tiles">${inv.map(k=>{const m=S.market.m[k]||1,tr=m>=1.1?' <span class="gain">▲</span>':m<=.9?' <span class="miss">▼</span>':'';

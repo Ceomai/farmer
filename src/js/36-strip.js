@@ -28,18 +28,18 @@ function quickFeedback(res,el){const r=el?el.getBoundingClientRect():{left:inner
   if(res.got>=6)celebrate('Bereketli!');PLATFORM.hap(res.got?'medium':'light');commit();renderStrip(true)}
 function quickAll(el){const tot={got:0,started:0,out:{},full:false,renewed:0};for(const k in LOC){if(!owned(LOC[k].reg))continue;const r=quickLoc(k);tot.got+=r.got;tot.started+=r.started;tot.renewed+=r.renewed;tot.full=tot.full||r.full;for(const i in r.out)tot.out[i]=(tot.out[i]||0)+r.out[i]}
   quickFeedback(tot,el)}
-function renderStrip(force){const show=mode==='hub';stripEl.hidden=!show;if(!show)return;const {own,lock}=stripCards();
+function renderStrip(force){const show=mode==='hub';stripEl.hidden=!show;if(!show){placeBack();return}const {own,lock}=stripCards();
   const qi={};let tr=0,ti=0,tb=0;own.forEach(o=>{qi[o.k]=quickInfo(o.k);tr+=qi[o.k].ready;ti+=qi[o.k].idle;tb+=qi[o.k].brk});
   const sig=own.map(o=>o.k+o.st.c+(o.st.n||'')+qi[o.k].ready+qi[o.k].idle+qi[o.k].brk).join()+lock.map(l=>l.r+(S.lv>=l.d.lvl?1:0)+(S.coins>=regCost(l.r)?1:0)).join()+S.house;if(!force&&sig===stripSig)return;stripSig=sig;const sl=stripEl.scrollLeft;
   const th=k=>{const L=LOC[k],src=THUMB[L.kind==='house'?'kulube'+S.house:L.units?L.units[0]:k];return src?`<img src="${src}" alt="">`:`<span class="ph">${L.e}</span>`};
   const all=tr+ti+tb>1?`<button class="scard all" data-quickall><span class="ph">${tr?'🧺':'▶️'}</span>${tr?'Hepsini topla':'Hepsini başlat'}<small>${tr?tr+' hazır':''}${tr&&ti?' · ':''}${ti?ti+' boşta':''}${tb?(tr||ti?' · ':'')+'☕'+tb:''}</small></button>`:'';
-  stripEl.innerHTML=all+own.map(({k,L,st})=>{const q=qi[k],bd=st.c==='ok'?`<i class="s ok">${st.n||'✓'}</i>`:st.c==='new'?'<i class="s new">🔨</i>':st.c==='idle'?'<i class="s idle">💤</i>':'';
+  parkBack();stripEl.innerHTML=all+own.map(({k,L,st})=>{const q=qi[k],bd=st.c==='ok'?`<i class="s ok">${st.n||'✓'}</i>`:st.c==='new'?'<i class="s new">🔨</i>':st.c==='idle'?'<i class="s idle">💤</i>':'';
       const qa=q.ready?`<button class="qa" data-quick="${k}">🧺 Topla</button>`:q.idle?`<button class="qa re" data-quick="${k}">▶ Başlat</button>`:q.brk?`<button class="qa re" data-quick="${k}">☕ Devam</button>`:'';
       const cd=!qa&&q.next<Infinity?`<small class="cd" data-left="${q.next}" data-pre="⏱" data-short="1">⏱ ${secShort(Math.ceil((q.next-now())/1000))}</small>`:'';
       // düğme içinde düğme olmasın: kart bir kutu, gövdesi tek düğme (görünmez katmanla bütün kartı kaplar), hızlı eylem ayrı düğme
       return `<div class="scard${qa?' has-qa':''}" data-go="${k}">${th(k)}<button class="sc-go" data-go="${k}" title="${st.t||L.n}">${L.n}</button>${cd}${qa}${bd}</div>`}).join('')
     +lock.map(({r,d})=>{const can=S.lv>=d.lvl;return `<button class="scard lock" data-region="${r}"><span class="ph">🔒</span>${d.n}<small>${can?'₺'+fmt(regCost(r)):'Seviye '+d.lvl}</small>${can&&S.coins>=regCost(r)?'<i class="s new">🏳️</i>':''}</button>`}).join('');
-  stripEl.scrollLeft=sl}
+  placeBack();stripEl.scrollLeft=sl}
 // Odaktayken bölümler arasında sırayla geçiş (‹ › düğmeleri ve başlıkta sağa-sola kaydırma)
 function locOrder(){return Object.keys(LOC).filter(k=>owned(LOC[k].reg))}
 function stepLoc(d){const o=locOrder(),cur=view&&view.loc||focus,i=o.indexOf(cur);if(i<0)return;const k=o[(i+d+o.length)%o.length];PLATFORM.hap();goLocation(k)}
