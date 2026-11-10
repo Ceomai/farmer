@@ -29,8 +29,11 @@ function boot(data){
   S=migrate((data&&data.house!=null)?data:(load()||fresh()));const away=S.lastSeen?Date.now()-S.lastSeen:0;refreshMarket();ensureOrders();updateWeather();applySeason();checkDaily();ensureContests();ensureContracts();automate();
   try{makeThumbs()}catch(e){console.warn(e)}
   ctl.enabled=false;buildDesk();resize();syncWorld(true);batchWatch(world,c=>c===farmer||c===dog||c===lampPost||c===regG||c===roadG||c.userData.loc!=null,3000);renderHUD();setModeUI();frame();setInterval(tick,500);setInterval(save,5000);
-  const bt=$('#boot');bt.style.transition='opacity .5s';bt.style.opacity='0';setTimeout(()=>bt.remove(),550);
-  booted=true;awaySummary(away);if(S.consent)showLogin();else askConsent();setTimeout(friendGifts,1500);syncCloud(true);track('session_start',{gfx:GFX.mode,pr:GFX.pr});
+  clearTimeout(window.__bootT);const bt=$('#boot');bt.dataset.done=1;bt.style.transition='opacity .5s';bt.style.opacity='0';setTimeout(()=>bt.remove(),550);
+  booted=true;
+  // Açılış pencereleri sırayla: izin → dönüş özeti → günlük giriş; hediye penceresi açık pencere kalmayınca
+  const afterConsent=()=>awaySummary(away,showLogin);if(S.consent)afterConsent();else askConsent(afterConsent);
+  setTimeout(function fg(){if(document.querySelector('.modal'))return setTimeout(fg,1500);friendGifts()},1500);syncCloud(true);track('session_start',{gfx:GFX.mode,pr:GFX.pr});
   if(!S.stats.welcomed){S.stats.welcomed=1;setTimeout(()=>{if(tutStep()<0&&S.tut)toast('Masadaki haritaya dokun, çiftliğe çık!')},900)}save()
 }
 const startGame=data=>Promise.race([document.fonts?Promise.all([document.fonts.load('20px "Alfa Slab One"'),document.fonts.load('800 14px Nunito')]).then(()=>document.fonts.ready):Promise.resolve(),new Promise(r=>setTimeout(r,2500))]).then(()=>PLATFORM.init()).catch(()=>{}).then(()=>boot(data));

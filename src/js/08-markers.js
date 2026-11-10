@@ -39,6 +39,6 @@ function placeMarks(){const W=R.domElement.clientWidth,H=R.domElement.clientHeig
     m.el.style.transform=`translate(${Math.round(x)}px,${Math.round(y)}px)`}
   tags.sort((a,b)=>b.y-a.y);const placed=[];
   if(tags.some(t=>t.m.below))tags.sort((a,b)=>a.y-b.y);
-  for(const t of tags){let y=t.y;const dn=t.m.below?1:-1;for(let it=0;it<6;it++){const hit=placed.find(p=>Math.abs(p.x-t.x)<(p.w+t.m.w)/2+4&&Math.abs(p.y-y)<t.m.h+6);if(!hit)break;y=hit.y+dn*(t.m.h+6)}
+  for(const t of tags){let y=t.y;const dn=t.m.below?1:-1;for(let it=0;it<6;it++){const hit=placed.find(p=>Math.abs(p.x-t.x)<(p.w+t.m.w)/2+8&&Math.abs(p.y-y)<t.m.h+8);if(!hit)break;y=hit.y+dn*(t.m.h+8)}
     placed.push({x:t.x,y,w:t.m.w});t.m.el.style.transform=`translate(${Math.round(t.x)}px,${Math.round(y)}px)`}}
 function screenOfW(p){_v.copy(p).project(cam);return{x:(_v.x+1)/2*R.domElement.clientWidth,y:(1-_v.y)/2*R.domElement.clientHeight-30}}

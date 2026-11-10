@@ -8,11 +8,12 @@ function closeSheet(){if(!view)return;if(mode==='focus'||mode==='interior'){view
 function openView(k){view={k};renderSheet()}
 function setDock(){document.querySelectorAll('.dock button[data-open]').forEach(b=>b.setAttribute('aria-current',String(!!view&&b.dataset.open===view.k)))}
 function renderSheet(){
-  if(!view){sheet.hidden=true;document.body.classList.remove('sheet-open');setDock();return}
+  if(!view){sheet.hidden=true;delete sheet.dataset.vk;document.body.classList.remove('sheet-open');setDock();return}
   sheet.hidden=false;document.body.classList.add('sheet-open');sheet.classList.toggle('dark',view.k==='alley');
   const f={loc:sheetLoc,region:sheetRegion,places:sheetPlaces,barn:sheetBarn,goals:sheetGoals,settings:sheetSettings,shop:sheetShop,album:sheetAlbum,ledger:sheetLedger,mail:sheetMail,guide:sheetGuide,borsa:sheetBorsa,budget:sheetBudget,stats:sheetStats}[view.k];
-  const body=sheet.querySelector('.sh-body'),st=body?body.scrollTop:0;const gq=sheet.querySelector('#guideQ'),qv=gq&&view.k==='guide'?gq.value:'',gf=gq&&document.activeElement===gq;sheet.innerHTML=f();
-  if(qv){const n=sheet.querySelector('#guideQ');if(n){n.value=qv;n.dispatchEvent(new Event('input',{bubbles:true}));if(gf)n.focus()}} // rehber araması yeniden çizimde kaybolmasınconst nb=sheet.querySelector('.sh-body');if(nb)nb.scrollTop=st;
+  const vk=view.k+'|'+(view.loc||''),body=sheet.querySelector('.sh-body'),st=body&&sheet.dataset.vk===vk?body.scrollTop:0;sheet.dataset.vk=vk;const gq=sheet.querySelector('#guideQ'),qv=gq&&view.k==='guide'?gq.value:'',gf=gq&&document.activeElement===gq;sheet.innerHTML=f();
+  if(qv){const n=sheet.querySelector('#guideQ');if(n){n.value=qv;n.dispatchEvent(new Event('input',{bubbles:true}));if(gf)n.focus()}} // rehber araması yeniden çizimde kaybolmasın
+  const nb=sheet.querySelector('.sh-body');if(nb)nb.scrollTop=st; // kaydırma konumu yeniden çizimde korunur
   const canMini=mode==='focus'||mode==='interior';sheet.classList.toggle('mini',canMini&&!!view.mini);
   if(canMini)sheet.querySelectorAll('[data-act="close"]').forEach(b=>{b.textContent=view.mini?'▴':'▾';b.setAttribute('aria-label',view.mini?'Kartı aç':'Kartı küçült')});
   view.sig=sheetSig();setDock()}
@@ -27,7 +28,7 @@ function jobRow(u){const s=S.units[u],r=unitRecipe(u),sc=scaled(r,s.l);
   return `<div class="job" title="${r.n}">${outOf(sc)}<span class="pw"><span class="pbar"><i data-s="${s.job.s}" data-e="${s.job.e}"></i></span><small data-left="${s.job.e}" data-pre="⏱"></small></span></div>`}
 function upBtn(u){const s=S.units[u];if(s.l>=MAXL)return'';const bl=upBlock(s.l+1);return `<button class="up" data-act="upU" data-u="${u}" ${bl||S.coins<upCost(u)?'disabled':''} title="+%30 ürün, %10 daha kısa süre">⬆ Sv ${s.l+1} <span>${bl||'₺'+fmt(upCost(u))}</span></button>`}
 function queueHTML(u){const s=S.units[u],q=s.q||[];const R=id=>B[u].recipes.find(r=>r.id===id);
-  return `<div class="queue"><span class="ql">Sırada ${q.length}/${QMAX}</span>${q.map((id,i)=>{const r=R(id);return r?`<button class="qchip" data-act="qdel" data-u="${u}" data-i="${i}" title="Sıradan çıkar: ${r.n}">${ITEMS[Object.keys(r.out)[0]].e}<i>✕</i></button>`:''}).join('')}${q.length<QMAX?'<span class="qh">↓ eklemek için tarife dokun</span>':''}</div>`+(q.length<QMAX?recipeTiles(u,true):'')}
+  return `<div class="queue"><span class="ql">Sırada ${q.length}/${QMAX}</span>${q.map((id,i)=>{const r=R(id);return r?`<button class="qchip" data-act="qdel" data-u="${u}" data-i="${i}" title="Sıradan çıkar: ${r.n}" aria-label="Sıradan çıkar: ${r.n}">${ITEMS[Object.keys(r.out)[0]].e}<i>✕</i></button>`:''}).join('')}${q.length<QMAX?'<span class="qh">↓ eklemek için tarife dokun</span>':''}</div>`+(q.length<QMAX?recipeTiles(u,true):'')}
 function unitHTML(u,multi){const d=B[u],s=S.units[u];
   if(!s){const lock=S.lv<d.lvl;return `<div class="unit"><div class="build ${lock?'off':''}"><span class="thumb sm">${img(u)}</span><span class="t"><b>${d.n}</b><small>${d.d}</small></span><button class="btn gold" data-act="build" data-u="${u}" ${lock||S.coins<d.cost?'disabled':''}>${lock?'🔒 '+d.lvl:'🔨 ₺'+fmt(d.cost)}</button></div></div>`}
   let h=multi?`<div class="uhead"><span>${d.e} ${d.n}</span>${stars(s.l,MAXL)}</div>`:'';
@@ -61,7 +62,7 @@ function marketBody(){const inv=Object.keys(ITEMS).filter(k=>has(k)>0);
     return `<div class="tile sell" title="${ITEMS[k].n}"><span class="big">${ITEMS[k].e}<i>×${has(k)}</i></span><span class="tm">₺${sellPrice(k)}${tr}${satF(k)<.85?' <span class="miss" title="Pazar bu üründen doydu, fiyat zamanla toparlanır">📉</span>':''}</span><span class="two"><button data-act="sell" data-k="${k}" data-n="1">1</button><button data-act="sell" data-k="${k}" data-n="999999">Tümü</button></span></div>`}).join('')}</div>`:'<p class="note">Ambar boş. Önce bir şeyler üret.</p>'}`}
 function ordersBody(){ensureOrders();return S.orders.map((o,i)=>{const ok=Object.entries(o.items).every(([k,n])=>has(k)>=n);
   return `<div class="order"><div class="who">${face(o.who)} ${o.who} <small style="font-size:var(--fs-2xs)">${hearts(o.who)}</small><span>₺${fmt(o.base*repMult()*frMult(o.who))} · ${o.xp} xp</span></div><div class="needs">${Object.entries(o.items).map(([k,n])=>`<span class="need ${has(k)<n?'miss':''}" title="${ITEMS[k].n}"><em>${ITEMS[k].e}</em>${Math.min(has(k),n)}/${n}</span>`).join('')}</div>
-  <div class="urow"><button class="pill-btn gold" data-act="order" data-i="${i}" ${ok?'':'disabled'}>✓ Teslim et</button><button class="pill-btn" data-act="reorder" data-i="${i}" title="Başka sipariş iste">↻</button></div></div>`}).join('')}
+  <div class="urow"><button class="pill-btn gold" data-act="order" data-i="${i}" ${ok?'':'disabled'}>✓ Teslim et</button><button class="pill-btn" data-act="reorder" data-i="${i}" title="Başka sipariş iste" aria-label="Başka sipariş iste">↻</button></div></div>`}).join('')}
 function sheetRegion(){const r=view.r,d=REG[r],ok=S.lv>=d.lvl;const locs=Object.keys(LOC).filter(k=>LOC[k].reg===r);
   return head('🗺️',d.n,'Satılık arazi')+`<div class="sh-body"><div class="places">${locs.map(k=>`<div class="place"><span class="thumb sm">${img(LOC[k].units?LOC[k].units[0]:k)}</span>${LOC[k].n}</div>`).join('')}</div>
   <button class="btn big gold" data-act="region" data-r="${r}" ${ok&&S.coins>=regCost(r)?'':'disabled'}>${ok?`🏳️ Satın al · ₺${fmt(regCost(r))}`:`🔒 Seviye ${d.lvl}`}</button></div>`}

@@ -6,7 +6,8 @@
 /*@@STYLE@@*/
 </style>
 
-<div id="boot"><div>Çiftlik<br>İmparatorluğu</div></div>
+<div id="boot"><div>Çiftlik<br>İmparatorluğu</div><span class="boot-st"><span class="boot-bar" role="progressbar" aria-label="Yükleniyor"><i></i></span><button class="btn gold boot-retry" hidden>Yeniden dene</button></span></div>
+<script>/* açılış uzun sürerse (20 sn) ya da açılırken hata olursa "Yeniden dene" düğmesi görünür */(function(){var b=document.getElementById('boot');b.querySelector('.boot-retry').onclick=function(){location.reload()};function show(){if(!b||!b.isConnected||b.dataset.done)return;var r=b.querySelector('.boot-retry');if(r)r.hidden=false}window.__bootT=setTimeout(show,20000);addEventListener('error',function(){setTimeout(show,0)})})()</script>
 <div id="stage"></div>
 <div class="rainfx" aria-hidden="true"><i></i><i></i></div>
 <div id="grain"></div><div id="vignette"></div>

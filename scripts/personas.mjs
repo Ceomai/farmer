@@ -33,7 +33,7 @@ P['01 Yeni oyuncu: izin ekranı + 7 adımlık öğretici, gerçek tıklamalarla'
 P['02 Öğreticiyi geçen oyuncu']=async()=>{const p=await open({save:base({tut:null})});await rmModal(p);await ev(p,()=>{S.consent={analytics:false};tick()});
   ok(await click(p,'.tut-skip'),'"Geç" düğmesine basılıyor');ok(await ev(p,()=>S.tut.done&&S.tut.skipped),'öğretici kapandı ve tekrar çıkmıyor');await ev(p,()=>tick());ok(await ev(p,()=>document.querySelector('.tut').hidden),'öğretici ekranı gizli');await p.ctx.close()};
 P['03 2 saat sonra dönen oyuncu (işçili)']=async()=>{const p=await open({save:base({lv:6,lastSeen:Date.now()-2*3600e3,fields:[{job:{r:'bugday',s:0,e:1}},{},{}],workers:{fields:Date.now()+6e6},units:{kumes:{l:1,job:{r:'besle',s:0,e:1}}}})});
-  ok(await ev(p,()=>!!document.querySelector('.modal.login')&&document.querySelector('.modal.login').textContent.includes('yoktun')),'"Hoş geldin, X yoktun" özeti çıkıyor');
+  ok(await ev(p,()=>!!document.querySelector('.modal.away')&&document.querySelector('.modal.away').textContent.includes('yoktun')),'"Hoş geldin, X yoktun" özeti çıkıyor');
   ok(await ev(p,()=>S.fields.every(f=>f.job)),'tarla işçisi yokken hasat edip yeniden ekti');await p.ctx.close()};
 P['04 30 gün sonra dönen oyuncu (vardiyası bitmiş işçi)']=async()=>{const p=await open({save:base({lv:6,lastSeen:Date.now()-30*864e5,workers:{kumes:Date.now()-29*864e5},units:{kumes:{l:2,job:{r:'besle',s:0,e:1},last:'besle'}},daily:{day:'2020-1-1',streak:5,login:true,bonus:false,tasks:[]}})});
   await rmModal(p);ok(await ev(p,()=>S.daily.day===todayStr()&&S.daily.streak===1),'günlük seri yeni güne sıfırlandı');
