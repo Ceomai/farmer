@@ -6,7 +6,9 @@ const rewardTxt=r=>[r.c?'₺'+r.c:'',r.yem?'🌰'+r.yem:'',r.g?'🍀'+r.g:''].fi
 const DTASK=[{k:'plant',e:'🌱',d:'{n} kez tarlaya ekim yap',a:5,b:12,r:80},{k:'harvest_field',e:'🌾',d:'{n} parsel hasat et',a:4,b:10,r:90},{k:'harvest_kumes',e:'🥚',d:'Kümesten {n} kez yumurta topla',a:2,b:4,r:80,need:'kumes'},
   {k:'sold',e:'💰',d:'Pazarda {n} ürün sat',a:10,b:30,r:100},{k:'orders',e:'📜',d:'{n} sipariş teslim et',a:1,b:3,r:150},{k:'harvest_ahir',e:'🥛',d:'Ahırdan {n} kez süt al',a:1,b:3,r:150,need:'ahir'},
   {k:'mg',e:'🎮',d:'{n} mini oyun oyna',a:1,b:2,r:120,need:'kumes'},{k:'contest',e:'🎪',d:'Panayırda {n} yarışmaya katıl',a:1,b:1,r:150,need:'lv3'}];
-function checkDaily(){const t=todayStr();if(S.daily&&S.daily.day===t)return false;const ys=dayStr(now()-864e5);
+const dayNum=s=>{const a=String(s).split('-').map(Number);return a.length===3&&a.every(Number.isFinite)?a[0]*1e4+a[1]*100+a[2]:0};
+// gün anahtarı hiçbir zaman geriye gitmez: oturum içinde sunucu saati gelince ya da sonraki açılışta cihaz saatine dönünce ödül/görev sıfırlanmasın
+function checkDaily(){const t=todayStr();if(S.daily&&(S.daily.day===t||dayNum(S.daily.day)>dayNum(t)))return false;const ys=dayStr(now()-864e5);
   const streak=S.daily&&S.daily.day===ys?(S.daily.streak%7)+1:1;const pool=DTASK.filter(x=>!x.need||(x.need==='lv3'?S.lv>=3:S.units[x.need])).sort(()=>Math.random()-.5).slice(0,3);
   S.daily={day:t,streak,login:false,bonus:false,tasks:pool.map(x=>{const n=x.a+Math.floor(Math.random()*(x.b-x.a+1));return{k:x.k,e:x.e,d:x.d.replace('{n}',n),n,p:0,r:x.r,c:false}})};save();return true}
 function showLogin(){const D=S.daily;if(!D||D.login||document.querySelector('.modal.login,.modal.away'))return;

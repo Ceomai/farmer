@@ -471,6 +471,8 @@ body:is(.fs-b,.fs-xb) #marks .tag{zoom:var(--ui-scale)}
 /* Dokunma alanı: görsel boyut değişmeden en az 44×44 px; görünmez alan öğenin ortasından eşit taşar */
 :is(.tut-skip,.tut-next,.tile.sell .two button,.tabs button,.pill-btn,.up,.qchip,.cam button,.sh-head .nav){position:relative}.qp-h .x{position:relative}
 :is(.tag,.tut-skip,.tut-next,.tile.sell .two button,.tabs button,.pill-btn,.up,.scard .qa,.qchip,.cam button,.back,.guidebtn,.photo-x,.dock button,.x,.sh-head .nav,.bub)::before{content:"";position:absolute;inset:min(0px,calc((100% - 44px) / 2)) min(0px,calc((100% - 44px) / 2));border-radius:inherit}
+/* yapışkan alt eylem çubuğunda dokunma alanı çubuğun üstüne taşıp alttan kayan içeriği çalmasın */
+.urow.mainact :is(.pill-btn,.up)::before{top:0}
 /* Uzun basmada sistem menüsü (kopyala/paylaş) çıkmasın; metin girişleri ve kurtarma kodu seçilebilir kalır */
 body{-webkit-touch-callout:none}
 :is(input,textarea,[contenteditable],.rcode,.selectable){-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}

@@ -44,7 +44,7 @@ new MutationObserver(ms=>{for(const r of ms){for(const n of r.removedNodes)if(n.
 // Ortak pencere: .modal (+cls) kutusu, html içeriğiyle sayfaya eklenir. Kapanış animasyonu ve role=dialog yukarıdaki gözlemciden gelir.
 // o.close: ilk düğme pencereyi kapatır (fonksiyonsa kapandıktan sonra çağrılır) · o.nodismiss: dışarı dokunma / geri ile kapanmaz
 function makeModal(cls,html,o={}){const d=document.createElement('div');d.className='modal'+(cls?' '+cls:'');if(o.nodismiss)d.dataset.nodismiss=1;d.innerHTML=html;
-  if(o.close)d.querySelector('button').onclick=()=>{d.remove();if(typeof o.close==='function')o.close()};document.body.appendChild(d);return d}
+  if(o.close){d._close=()=>{d.remove();if(typeof o.close==='function')o.close()};d.querySelector('button').onclick=d._close}document.body.appendChild(d);return d}
 function floatXY(x,y,txt){const f=document.createElement('div');f.className='float';f.textContent=txt;f.style.left=x+'px';f.style.top=y+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1300)}
 function finRoll(){const t=todayStr();if(!S.fin)S.fin={day:'',inc:{},exp:{},hist:[]};if(S.fin.day!==t){if(S.fin.day){const sm=o=>Object.values(o).reduce((a,b)=>a+b,0);S.fin.hist.push({d:S.fin.day,i:sm(S.fin.inc),e:sm(S.fin.exp)});S.fin.hist=S.fin.hist.slice(-7)}S.fin.day=t;S.fin.inc={};S.fin.exp={}}}
 const pay=(n,c='Diğer')=>{S.coins-=n;if(n>0){finRoll();S.fin.exp[c]=(S.fin.exp[c]||0)+n}}, gain=(n,c='Diğer')=>{S.coins+=n;if(n>0){finRoll();S.fin.inc[c]=(S.fin.inc[c]||0)+n}};

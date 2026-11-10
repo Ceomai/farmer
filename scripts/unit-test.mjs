@@ -85,6 +85,8 @@ await ok('todayStr Y-A-G biçiminde',()=>/^\d{4}-\d{1,2}-\d{1,2}$/.test(todayStr
 await ok('todayStr oyun saatini (now) izler',()=>{const a=todayStr();TIME_OFF+=864e5;const b=todayStr();const d=new Date(now());return a!==b&&b===d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()});
 await eq('checkDaily aynı gün ikinci kez yenilemez',()=>{S=__base();const a=checkDaily(),b=checkDaily();return [a,b,S.daily.tasks.length,S.daily.streak]},[true,false,3,1]);
 await eq('ertesi gün seri artar, gün atlanırsa 1e döner',()=>{S=__base();checkDaily();TIME_OFF+=864e5;checkDaily();const a=S.daily.streak;TIME_OFF+=864e5*3;checkDaily();return [a,S.daily.streak]},[2,1]);
+await eq('gün anahtarı geri gitmez: saat geri alınınca ödül/görev sıfırlanmaz',()=>{S=__base();TIME_OFF+=864e5*2;checkDaily();S.daily.login=true;const d=S.daily.day;TIME_OFF-=864e5*2;const r=checkDaily();return [r,S.daily.day===d,S.daily.login]},[false,true,true]);
+await ok('dayNum ay/gün sırasını doğru karşılaştırır',()=>dayNum('2026-11-10')>dayNum('2026-11-9')&&dayNum('2026-12-1')>dayNum('2026-11-30')&&dayNum('x')===0);
 await eq('7. günden sonra seri 1e döner',()=>{S=__base();checkDaily();S.daily.streak=7;TIME_OFF+=864e5;checkDaily();return S.daily.streak},1);
 await ok('günlük görev ilerlemesi stat ile artar',()=>{S=__base();checkDaily();S.daily.tasks=[{k:'sold',n:3,p:0,r:1,d:'x'}];stat('sold',2);return S.daily.tasks[0].p===2});
 

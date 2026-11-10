@@ -60,7 +60,7 @@ function renderHUD(){hudNum('coins',S.coins);if(lastCoins!=null&&S.coins>lastCoi
 const hudBox=document.querySelector('.hud');function measureHud(){const b=Math.round(hudBox.getBoundingClientRect().bottom);if(b>0)document.documentElement.style.setProperty('--hudB',b+'px')}
 if(window.ResizeObserver)new ResizeObserver(measureHud).observe(hudBox);addEventListener('resize',measureHud);
 // Geri / Escape: önce açık pencere (mini oyunsa düzgün kapatılır) ve uzun basma menüsü kapanır
-function backOverlay(){const m=document.querySelector('.modal');if(m){if(m.dataset.nodismiss)return true;const x=m.querySelector('.mgx');if(x)x.click();else m.remove();return true}if(typeof qpop!=='undefined'&&!qpop.hidden){closeQpop();return true}return false}
+function backOverlay(){const m=document.querySelector('.modal');if(m){if(m.dataset.nodismiss)return true;const x=m.querySelector('.mgx');if(x)x.click();else if(m._close)m._close();else m.remove();return true}if(typeof qpop!=='undefined'&&!qpop.hidden){closeQpop();return true}return false}
 function commit(skipSheet){save();renderHUD();syncWorld();if(!skipSheet)renderSheet();refreshQpop();if(interior&&intSig(interior.key)!==interior.sig)interior.refresh()}
 
 // Kart içindeki parsel ızgarasında da sürükleyerek ekme/toplama
