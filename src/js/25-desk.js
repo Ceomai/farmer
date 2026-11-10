@@ -22,12 +22,16 @@ function calTex(){return canvasTex(200,240,(x,w,h)=>{x.fillStyle='#fbf3df';x.fil
   x.fillStyle='#2a1a10';x.font='bold 112px Georgia,serif';x.fillText(String(gameDay()%30+1),w/2,172);x.font='34px serif';x.fillText(SEASONS[season()].e,w/2,220);x.fillStyle='#555';for(const cx of[50,150]){x.beginPath();x.arc(cx,10,6,0,7);x.fill()}},null,4)}
 const deskSigNow=()=>Object.keys(S.regions).sort().join()+'|'+Object.keys(S.album).length+'|'+gameDay()+'|'+S.market.at;
 // Masa yeniden kurulurken eski masanın dokuları, malzemeleri ve gölge haritası serbest bırakılır (pencere görüntüsü korunur)
+// Masa sahnesi: ışıklar → oda (duvar, pencere, perde, masa) → masadaki nesneler → dikey ekranda nesnelerin yerleşimi
 function buildDesk(){disposeScene(deskScene,rt.texture);while(deskScene.children.length)deskScene.remove(deskScene.children[0]);deskObjs={};DESKP=[];deskFx=[];const sc=deskScene;
-  const dh=new THREE.HemisphereLight(0xfff0d6,0x5a4030,.7);sc.add(dh);
+  deskLights(sc);const PT=deskPortrait=dcam.aspect<.85;deskRoom(sc,PT);deskItems(sc,PT);if(PT)deskLayoutPT();
+  deskSig=deskSigNow()}
+function deskLights(sc){const dh=new THREE.HemisphereLight(0xfff0d6,0x5a4030,.7);sc.add(dh);
   const fill=new THREE.DirectionalLight(0xffe8c8,.75);fill.position.set(-3,6,6);fill.castShadow=true;fill.shadow.mapSize.set(2048,2048);Object.assign(fill.shadow.camera,{left:-6,right:6,top:6,bottom:-3});fill.shadow.bias=-.0005;fill.shadow.normalBias=.03;sc.add(fill);
-  const win=new THREE.PointLight(0xffe2b0,.8,9);win.position.set(0,2.6,-1.1);sc.add(win);const lamp=new THREE.PointLight(0xffc070,.5,7);lamp.position.set(2.85,2.05,-.55);sc.add(lamp);deskL={dh,fill,win,lamp};
-  const wp=stdTex(canvasTex(128,128,(x,w,h)=>{x.fillStyle='#efe2c2';x.fillRect(0,0,w,h);x.fillStyle='rgba(170,110,60,.13)';for(let i=0;i<w;i+=32)x.fillRect(i,0,14,h);const r=rng(4);for(let k=0;k<8;k++){const a=r()*w,b=r()*h;x.fillStyle='rgba(196,73,46,.35)';x.beginPath();x.arc(a,b,3.5,0,7);x.fill();x.fillStyle='rgba(63,122,74,.4)';x.fillRect(a-1,b+3,2,6)}},[5,3]));
-  const PT=deskPortrait=dcam.aspect<.85;const WY=PT?3.55:2.65,WW=PT?2.6:3.3,WH=PT?1.6:1.95,Z=-1.7;
+  const win=new THREE.PointLight(0xffe2b0,.8,9);win.position.set(0,2.6,-1.1);sc.add(win);const lamp=new THREE.PointLight(0xffc070,.5,7);lamp.position.set(2.85,2.05,-.55);sc.add(lamp);deskL={dh,fill,win,lamp};}
+// Duvar kâğıdı, pencere (içinde kasaba manzarası), çerçeve, saksı, perdeler ve masa tablası
+function deskRoom(sc,PT){const wp=stdTex(canvasTex(128,128,(x,w,h)=>{x.fillStyle='#efe2c2';x.fillRect(0,0,w,h);x.fillStyle='rgba(170,110,60,.13)';for(let i=0;i<w;i+=32)x.fillRect(i,0,14,h);const r=rng(4);for(let k=0;k<8;k++){const a=r()*w,b=r()*h;x.fillStyle='rgba(196,73,46,.35)';x.beginPath();x.arc(a,b,3.5,0,7);x.fill();x.fillStyle='rgba(63,122,74,.4)';x.fillRect(a-1,b+3,2,6)}},[5,3]));
+  const WY=PT?3.55:2.65,WW=PT?2.6:3.3,WH=PT?1.6:1.95,Z=-1.7;
   F(sc,wp,[4.4,6,.2],[-3.85,3,Z]);F(sc,wp,[4.4,6,.2],[3.85,3,Z]);F(sc,wp,[WW,6-(WY+WH/2),.2],[0,(WY+WH/2+6)/2,Z]);F(sc,wp,[WW,WY-WH/2,.2],[0,(WY-WH/2)/2,Z]);
   F(sc,stdTex(TEX.planks('#8a5a34','#7e5030',[6,1],true)),[12,1.1,.22],[0,.55,Z+.05]);P(sc,'box',0x5a3a20,[12,.12,.3],[0,1.12,Z+.08]);
   F(sc,stdTex(TEX.planks('#9a6a3e','#8a5e36',[4,3])),[12,.1,8],[0,0,1.5]);
@@ -38,8 +42,9 @@ function buildDesk(){disposeScene(deskScene,rt.texture);while(deskScene.children
   const ging=stdTex(canvasTex(64,64,(x,w,h)=>{x.fillStyle='#f6efe0';x.fillRect(0,0,w,h);x.fillStyle='rgba(196,73,46,.55)';for(let i=0;i<w;i+=16){x.fillRect(i,0,8,h);x.fillRect(0,i,w,8)}},[3,4]));
   for(const s of[-1,1]){const c=G(sc,[s*(WW/2+.45),WY+WH/2+.1,Z+.25]);P(c,'box',ging,[.7,2.3,.08],[0,-1.15,0]);P(c,'box',0xc4492e,[.72,.12,.1],[0,-1.4,0]);}
   P(sc,'cyl',0x6e4a2a,[.04,WW+2,.04],[0,WY+WH/2+.18,Z+.3],[0,0,Math.PI/2]);
-  P(sc,'box',stdTex(TEX.planks('#a8733f','#9b6837',[4,1])),[6.8,.18,2.7],[0,1,-.1]);F(sc,0x7a4a26,[6.8,1,.1],[0,.5,1.24]);
-  {const g=dobj('map',[-.95,1.1,.2],.06);faceMesh(g,[2.1,.02,1.45],[0,0,0],2,mapTex(),0xead6a4);P(g,'cyl',0xead6a4,[.07,1.45,.07],[1.05,.04,0],[Math.PI/2,0,0]);for(const [a,b,c] of[[-.5,-.3,0xc4492e],[.3,.2,0x3f6fa0],[-.1,.35,0xf2b330]])P(g,'sph',c,[.05,.05,.05],[a,.05,b]);g.userData.tagY=.3}
+  P(sc,'box',stdTex(TEX.planks('#a8733f','#9b6837',[4,1])),[6.8,.18,2.7],[0,1,-.1]);F(sc,0x7a4a26,[6.8,1,.1],[0,.5,1.24]);}
+// Dokunulabilir masa nesneleri (harita, defter, posta, radyo, kumbara, sepet, takvim, kupa rafı, saat, borsa, gazete, bütçe) ve süsler
+function deskItems(sc,PT){{const g=dobj('map',[-.95,1.1,.2],.06);faceMesh(g,[2.1,.02,1.45],[0,0,0],2,mapTex(),0xead6a4);P(g,'cyl',0xead6a4,[.07,1.45,.07],[1.05,.04,0],[Math.PI/2,0,0]);for(const [a,b,c] of[[-.5,-.3,0xc4492e],[.3,.2,0x3f6fa0],[-.1,.35,0xf2b330]])P(g,'sph',c,[.05,.05,.05],[a,.05,b]);g.userData.tagY=.3}
   {const g=dobj('ledger',[1.15,1.1,.3],-.15);P(g,'box',0x7a2f22,[1.36,.06,.92],[0,0,0]);const pg=stdTex(canvasTex(64,96,(x,w,h)=>{x.fillStyle='#fbf3df';x.fillRect(0,0,w,h);x.strokeStyle='rgba(60,90,140,.35)';for(let i=12;i<h;i+=9){x.beginPath();x.moveTo(4,i);x.lineTo(w-4,i);x.stroke()}x.strokeStyle='#3a2a1a';x.lineWidth=1.2;for(let i=15;i<h-10;i+=9){x.beginPath();x.moveTo(8,i);for(let k=8;k<w-10;k+=6)x.lineTo(k,i+Math.sin(k)*1.5);x.stroke()}}));
     P(g,'box',pg,[.62,.05,.86],[-.32,.05,0],[0,0,.04]);P(g,'box',pg,[.62,.05,.86],[.32,.05,0],[0,0,-.04]);const pen=G(g,[.45,.12,.15],.6);P(pen,'cyl',0x2a2a2a,[.025,.6,.025],[0,0,0],[Math.PI/2,0,0]);P(pen,'cone',0xe0b84a,[.025,.08,.025],[0,0,.33],[Math.PI/2,0,0]);g.userData.tagY=.3}
   {const g=dobj('mail',[2.35,1.1,-.5],-.3);P(g,'box',0x8a5a32,[.9,.12,.6],[0,.06,0]);for(let k=0;k<3;k++){const e=G(g,[(k-1)*.06,.16+k*.05,(k-1)*.04],(k-1)*.15);P(e,'box',0xfbf3df,[.7,.03,.45]);P(e,'box',0xc4492e,[.12,.035,.1],[.25,0,-.13])}g.userData.tagY=.45}
@@ -63,12 +68,12 @@ function buildDesk(){disposeScene(deskScene,rt.texture);while(deskScene.children
   {const g=dobj('gazete',[.05,1.1,-.62],.12);faceMesh(g,[.95,.03,.66],[0,0,0],2,paperTex(),0xf3ead2);faceMesh(g,[.95,.025,.66],[.03,.03,.02],2,paperTex(),0xf3ead2).rotation.y=-.08;g.userData.tagY=.25}
   // BÜTÇE (hesap makinesi)
   {const g=dobj('butce',[1.32,1.1,-.66],-.2);P(g,'box',0x3f5a4a,[.62,.26,.5],[0,.13,0]);const top=G(g,[0,.27,.05]);top.rotation.x=-.25;P(top,'box',0x2f4a3a,[.56,.06,.36]);for(let r=0;r<3;r++)for(let c=0;c<4;c++)P(top,'cyl',[0xf6f2e6,0xf6f2e6,0xc4492e][r===2&&c===3?2:0],[.04,.04,.04],[-.18+c*.12,.05,-.1+r*.1]);
-    P(g,'cyl',0xf6f2e6,[.08,.36,.08],[0,.38,-.2],[0,0,Math.PI/2]);P(g,'box',0xfbf3df,[.24,.005,.4],[0,.39,-.42],[-.6,0,0]);const crank=G(g,[.33,.18,0]);P(crank,'box',0xc9ccd2,[.04,.04,.3],[0,0,.15]);P(crank,'sph',0xc4492e,[.05,.05,.05],[0,0,.3]);g.userData.tagY=.38}
-  if(PT){const LAY={clock:[0,4.9,-1.5,.7],borsa:[-.68,2.05,-1.58,.6],calendar:[.38,2.1,-1.58,.48],trophy:[.98,1.7,-1.5,.42],
+    P(g,'cyl',0xf6f2e6,[.08,.36,.08],[0,.38,-.2],[0,0,Math.PI/2]);P(g,'box',0xfbf3df,[.24,.005,.4],[0,.39,-.42],[-.6,0,0]);const crank=G(g,[.33,.18,0]);P(crank,'box',0xc9ccd2,[.04,.04,.3],[0,0,.15]);P(crank,'sph',0xc4492e,[.05,.05,.05],[0,0,.3]);g.userData.tagY=.38}}
+// Dikey ekranda nesneler daha sıkı dizilir ve küçültülür
+function deskLayoutPT(){const LAY={clock:[0,4.9,-1.5,.7],borsa:[-.68,2.05,-1.58,.6],calendar:[.38,2.1,-1.58,.48],trophy:[.98,1.7,-1.5,.42],
       radio:[-.95,1.1,-.72,.6,.2],gazete:[.05,1.1,-.72,.8,.1],butce:[.95,1.1,-.7,.75,-.25],map:[-.4,1.1,.05,.72,.05],ledger:[.85,1.1,.12,.62,-.15],
       basket:[-.98,1.1,.95,.6,0],mail:[.4,1.1,.9,.65,-.2],piggy:[1.0,1.1,.95,.55,-.5]};
     for(const k in LAY){const g=deskObjs[k];if(!g)continue;const [x,y,z,sc2,ry]=LAY[k];g.position.set(x,y,z);if(ry!=null)g.rotation.y=ry;g.userData.s0=sc2;g.scale.setScalar(sc2);g.userData.base=g.position.clone()}}
-  deskSig=deskSigNow()}
 function deskPanRange(){const a=dcam.aspect;return a<.85?0:a<1.3?1:0}
 function deskFrame(dt,t){const d=dayFactor();if(deskL.fill){deskL.fill.intensity=.45+.45*d;deskL.win.intensity=.3+.9*d;deskL.lamp.intensity=.35+(1-d)*1.3;deskL.dh.intensity=.5+.3*d}
   deskFx.forEach(f=>f(dt,t));
@@ -84,7 +89,7 @@ function deskStatus(k){switch(k){case'borsa':{const n=Object.keys(ITEMS).filter(
   case'calendar':return(S.daily&&(!S.daily.login||S.daily.tasks.some(t=>t.p>=t.n&&!t.c)))||goalReady()?{c:'new',n:'!'}:null;case'basket':return stored()/cap()>=.9?{c:'warn',n:'!'}:null;case'trophy':{const n=typeof achReady==='function'?achReady().length:0;return n?{c:'new',n:'🏅'+n}:null}case'radio':return{c:'idle',n:S.sound.music?'♪':'✕'};default:return null}}
 function deskAction(k){const g=deskObjs[k];if(g)g.userData.pop=1;
   switch(k){case'map':case'window':enterWorld();break;case'ledger':view={k:'ledger'};renderSheet();break;case'mail':view={k:'mail'};renderSheet();break;case'calendar':openView('goals');break;
-    case'radio':S.sound.music=!S.sound.music;audioInit();applySound();save();toast(S.sound.music?'📻 Radyo açıldı':'📻 Radyo kapandı');syncMarks();break;case'piggy':openView('shop');break;case'trophy':openView('album');break;case'basket':openView('barn');break;case'clock':openView('settings');break;case'borsa':view={k:'borsa'};renderSheet();break;case'gazete':view={k:'stats'};renderSheet();break;case'butce':view={k:'budget'};renderSheet();break}}
+    case'radio':S.sound.music=!S.sound.music;audioInit();applySound();save();toast(S.sound.music?'📻 Radyo açıldı':'📻 Radyo kapandı');syncMarks();break;case'piggy':openView('shop');break;case'trophy':openView('album');break;case'basket':openView('barn');break;case'clock':openView('settings');break;case'borsa':refreshMarket();view={k:'borsa'};renderSheet();break;case'gazete':view={k:'stats'};renderSheet();break;case'butce':view={k:'budget'};renderSheet();break}}
 function borsaTex(){return canvasTex(300,240,(x,w,h)=>{x.fillStyle='#2f4a3a';x.fillRect(0,0,w,h);x.fillStyle='rgba(255,255,255,.05)';for(let i=0;i<30;i++)x.fillRect(Math.random()*w,Math.random()*h,40,2);
   x.fillStyle='#f6f2e6';x.font='bold 26px Georgia,serif';x.textAlign='center';x.fillText('KÖY BORSASI',w/2,34);x.fillRect(40,44,w-80,2);x.textAlign='left';x.font='20px Georgia,serif';
   const ks=Object.keys(ITEMS).filter(k=>k!=='at'&&k!=='yem').sort((a,b)=>Math.abs((S.market.m[b]||1)-1)-Math.abs((S.market.m[a]||1)-1)).slice(0,6);
@@ -92,7 +97,8 @@ function borsaTex(){return canvasTex(300,240,(x,w,h)=>{x.fillStyle='#2f4a3a';x.f
 function paperTex(){return canvasTex(256,180,(x,w,h)=>{x.fillStyle='#f3ead2';x.fillRect(0,0,w,h);x.fillStyle='#2a1a10';x.font='bold 22px Georgia,serif';x.textAlign='center';x.fillText('ÇİFTLİK POSTASI',w/2,28);x.fillRect(12,36,w-24,2);
   x.font='bold 14px Georgia,serif';x.fillText(`Seviye ${S.lv} çiftlik büyüyor!`,w/2,56);x.fillStyle='rgba(42,26,16,.55)';for(let c=0;c<3;c++)for(let l=0;l<9;l++)x.fillRect(16+c*80,70+l*11,66-(l%3)*8,4);x.fillStyle='#b9a77e';x.fillRect(176,70,64,44)},null,3)}
 function spark(arr){if(!arr||arr.length<2)return'';const mn=Math.min(...arr),mx=Math.max(...arr),r=mx-mn||1;const pts=arr.map((v,i)=>`${(i/(arr.length-1)*60).toFixed(1)},${(18-(v-mn)/r*16).toFixed(1)}`).join(' ');const up=arr[arr.length-1]>=arr[0];return `<svg width="62" height="20" viewBox="-1 0 62 20" style="flex:none"><polyline points="${pts}" fill="none" stroke="${up?'#3f8a3a':'#c4492e'}" stroke-width="2" stroke-linejoin="round"/></svg>`}
-function sheetBorsa(){refreshMarket();const left=Math.max(0,Math.ceil((S.market.at+180000-now())/1000));const ks=producible().concat(Object.keys(ITEMS).filter(k=>has(k)>0)).filter((k,i,a)=>a.indexOf(k)===i&&k!=='yem').sort((a,b)=>(S.market.m[b]||1)-(S.market.m[a]||1));
+// Fiyatlar çizimden önce güncellenir (açılışta deskAction, açıkken tick); çizim durumu değiştirmez
+function sheetBorsa(){const left=Math.max(0,Math.ceil((S.market.at+180000-now())/1000));const ks=producible().concat(Object.keys(ITEMS).filter(k=>has(k)>0)).filter((k,i,a)=>a.indexOf(k)===i&&k!=='yem').sort((a,b)=>(S.market.m[b]||1)-(S.market.m[a]||1));
   return head('📈','Köy Borsası',`Fiyatlar ${secs(left)} sonra değişir`)+`<div class="sh-body"><p class="note">Yeşil oklu ürünleri şimdi satmak kârlı. Satış Köy Pazarı'nda yapılır.</p>`+ks.map(k=>{const m=S.market.m[k]||1,pc=Math.round((m-1)*100);
     return `<div class="job" style="padding:6px 10px"><span class="big ic-md">${ITEMS[k].e}</span><span class="pw"><b>${ITEMS[k].n} · ₺${sellPrice(k)}</b><small>Elde ${has(k)} · taban ₺${ITEMS[k].p}${satF(k)<.85?' · 📉 pazar doydu':''}</small></span>${spark((S.market.h||{})[k])}<b class="${pc>=0?'gain':'miss'}" style="min-width:46px;text-align:right">${pc>=0?'▲':'▼'}${Math.abs(pc)}%</b></div>`}).join('')+`<button class="btn big gold" data-go="pazar">🏪 Pazara git</button></div>`}
 function sheetBudget(){finRoll();const F=S.fin,sm=o=>Object.values(o).reduce((a,b)=>a+b,0),ti=sm(F.inc),te=sm(F.exp),mx=Math.max(1,...Object.values(F.inc),...Object.values(F.exp));

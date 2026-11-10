@@ -22,7 +22,6 @@ const secShort=s=>s<=0?'hazır':s<60?s+'sn':s<3600?Math.ceil(s/60)+'dk':s<86400?
 // Mevsim ürünleri yalnızca kendi mevsiminde ekilir
 const cropSeasonOk=c=>!c.season||c.season.includes(season());
 const cropOf=id=>CROPS.find(c=>c.id===id);
-function chips(obj,check,cls=''){return Object.entries(obj).map(([k,n])=>`<span class="chip ${cls} ${check&&has(k)<n?'miss':''}"><em>${ITEMS[k].e}</em>${n}${check?`<span style="opacity:.55;font-weight:800">/${has(k)}</span>`:''}</span>`).join('')}
 // Hareketi azalt: Ayarlar'daki anahtar (S.ui.rm); hiç seçilmediyse sistemin tercihi (prefers-reduced-motion). applyUI body.rm sınıfını ve _rm'yi günceller.
 const _rmMQ=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):null;let _rm=!!(_rmMQ&&_rmMQ.matches);const RM=()=>_rm;
 if(_rmMQ&&_rmMQ.addEventListener)_rmMQ.addEventListener('change',()=>{if(typeof applyUI==='function')applyUI()});
@@ -34,21 +33,24 @@ function ghostOut(el,from,to,ms){ghostClear(to);if(!el||!document.body)return;co
   for(const n of [g,...g.querySelectorAll('[id],[data-act],[data-go],[data-quick],[data-quickall],[data-region],[data-open],[data-desk],[data-x]')])for(const a of GHOST_ATTR)n.removeAttribute(a);
   g.setAttribute('aria-hidden','true');g.removeAttribute('role');g.removeAttribute('aria-live');g.inert=true;document.body.appendChild(g);_ghost[to]=g;
   const kill=()=>{if(_ghost[to]===g)_ghost[to]=null;g.remove()};g.addEventListener('animationend',e=>{if(e.target===g)kill()});setTimeout(kill,ms+120)}
-// Bildirim: yenisi eskisini anında devralır; süresi dolunca kısa ölçek+opaklıkla kapanır. Yetersiz para / eksik malzeme / dolu ambar uyarısında kısa çift titreşim.
-const TOAST_ERR=/Yeterli .*yok|yetmiyor|[Ee]ksik|Ambar dolu/;
-function toast(msg){document.querySelectorAll('.toast').forEach(t=>t.remove());const t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.setAttribute('aria-live','polite');t.textContent=msg;document.body.appendChild(t);
-  if(TOAST_ERR.test(msg)&&typeof PLATFORM!=='undefined')PLATFORM.hap('err');setTimeout(()=>{if(!t.isConnected)return;t.classList.add('out');setTimeout(()=>t.remove(),180)},2400)}
+// Bildirim: yenisi eskisini anında devralır; süresi dolunca kısa ölçek+opaklıkla kapanır.
+// o.err: yetersiz para / eksik malzeme / dolu ambar uyarısı — kısa çift titreşim.
+function toast(msg,o){document.querySelectorAll('.toast').forEach(t=>t.remove());const t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.setAttribute('aria-live','polite');t.textContent=msg;document.body.appendChild(t);
+  if(o&&o.err&&typeof PLATFORM!=='undefined')PLATFORM.hap('err');setTimeout(()=>{if(!t.isConnected)return;t.classList.add('out');setTimeout(()=>t.remove(),180)},2400)}
 // Erişilebilirlik: eklenen her pencere (.modal) iletişim kutusu olarak işaretlenir, başlığı ad olur
 let _dlgN=0;function a11yModal(m){if(m.getAttribute('role'))return;m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');const h=m.querySelector('h2,h3');if(h){if(!h.id)h.id='dlg-h'+(++_dlgN);m.setAttribute('aria-labelledby',h.id)}}
 // Kapanan pencere kısa ölçek+opaklıkla çıkar (kopyası üzerinden; asıl pencere hemen kaldırılmış olur). Ardından yeni pencere açılırsa kopya hemen silinir.
 new MutationObserver(ms=>{for(const r of ms){for(const n of r.removedNodes)if(n.nodeType===1&&n.classList.contains('modal'))ghostOut(n,'modal','mdx',160);for(const n of r.addedNodes)if(n.nodeType===1&&n.classList.contains('modal')){a11yModal(n);ghostClear('mdx')}}}).observe(document.body,{childList:true});
+// Ortak pencere: .modal (+cls) kutusu, html içeriğiyle sayfaya eklenir. Kapanış animasyonu ve role=dialog yukarıdaki gözlemciden gelir.
+// o.close: ilk düğme pencereyi kapatır (fonksiyonsa kapandıktan sonra çağrılır) · o.nodismiss: dışarı dokunma / geri ile kapanmaz
+function makeModal(cls,html,o={}){const d=document.createElement('div');d.className='modal'+(cls?' '+cls:'');if(o.nodismiss)d.dataset.nodismiss=1;d.innerHTML=html;
+  if(o.close)d.querySelector('button').onclick=()=>{d.remove();if(typeof o.close==='function')o.close()};document.body.appendChild(d);return d}
 function floatXY(x,y,txt){const f=document.createElement('div');f.className='float';f.textContent=txt;f.style.left=x+'px';f.style.top=y+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1300)}
 function finRoll(){const t=todayStr();if(!S.fin)S.fin={day:'',inc:{},exp:{},hist:[]};if(S.fin.day!==t){if(S.fin.day){const sm=o=>Object.values(o).reduce((a,b)=>a+b,0);S.fin.hist.push({d:S.fin.day,i:sm(S.fin.inc),e:sm(S.fin.exp)});S.fin.hist=S.fin.hist.slice(-7)}S.fin.day=t;S.fin.inc={};S.fin.exp={}}}
 const pay=(n,c='Diğer')=>{S.coins-=n;if(n>0){finRoll();S.fin.exp[c]=(S.fin.exp[c]||0)+n}}, gain=(n,c='Diğer')=>{S.coins+=n;if(n>0){finRoll();S.fin.inc[c]=(S.fin.inc[c]||0)+n}};
+const addRep=n=>{S.rep=Math.min(100,S.rep+n)}; // itibar en fazla 100
 function addXP(n){S.xp+=n;while(S.xp>=xpNeed(S.lv)){S.xp-=xpNeed(S.lv);S.lv++;levelUp()}}
 function levelUp(){if(typeof track==='function')track('level_up',{lv:S.lv});
   const all=[...Object.values(B).filter(b=>b.lvl===S.lv).map(b=>b.n),...CROPS.filter(c=>c.lvl===S.lv).map(c=>c.n),...Object.values(REG).filter(z=>z.lvl===S.lv&&z.cost).map(z=>z.n+' arazisi')];
-  S.gems+=2;sfx('level');if(typeof PLATFORM!=='undefined')PLATFORM.hap('medium');const d=document.createElement('div');d.className='modal';
-  d.innerHTML=`<div><div class="badge">${S.lv}</div><h2>Seviye atladın!</h2><p>${all.length?'Yeni açılanlar: <b>'+all.join(', ')+'</b>':'Çiftliğin büyüyor, böyle devam.'}<br>+2 🍀</p><button class="btn big gold">Harika</button></div>`;
-  d.querySelector('button').onclick=()=>d.remove();document.body.appendChild(d);
+  S.gems+=2;sfx('level');if(typeof PLATFORM!=='undefined')PLATFORM.hap('medium');makeModal('',`<div><div class="badge">${S.lv}</div><h2>Seviye atladın!</h2><p>${all.length?'Yeni açılanlar: <b>'+all.join(', ')+'</b>':'Çiftliğin büyüyor, böyle devam.'}<br>+2 🍀</p><button class="btn big gold">Harika</button></div>`,{close:1});
 }

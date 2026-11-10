@@ -71,7 +71,6 @@ const HUBP=[-1,0,5.6];
 function entrance(k){const L=LOC[k];return [L.p[0],L.p[2]+(L.kind==='fields'?7.2:L.kind==='race'?7.5:L.r*.95)]}
 function road(par,x1,z1,x2,z2,w=1.5){const L0=Math.hypot(x2-x1,z2-z1);if(L0<.1)return;const mx=(x1+x2)/2,mz=(z1+z2)/2,bend=(((x1*7+z2*3)%5)/5-.5)*.28*L0,nx=-(z2-z1)/L0,nz=(x2-x1)/L0;
   const pts=[[x1,z1],[mx+nx*bend,mz+nz*bend],[x2,z2]];ribbon(par,pts,w+.5,dirtEdge(),.03);ribbon(par,pts,w,dirtMat(),.045);return}
-function _roadOld(par,x1,z1,x2,z2,w=1.5){const L=Math.hypot(x2-x1,z2-z1);if(L<.1)return;F(par,0xcfb27e,[L+w*.4,.05,w],[(x1+x2)/2,.035,(z1+z2)/2],[0,-Math.atan2(z2-z1,x2-x1),0])}
 function syncRegions(){const sig=Object.keys(S.regions).sort().join();if(sig===regSig)return;regSig=sig;
   if(regG){world.remove(regG);disposeScene(regG)}if(roadG){world.remove(roadG);disposeScene(roadG)}regG=G(world);roadG=G(world);
   for(const r in REG){const d=REG[r];if(!d.rect||owned(r))continue;const [x1,z1,x2,z2]=d.rect,cx=(x1+x2)/2,cz=(z1+z2)/2,w=x2-x1,dd=z2-z1;const g=G(regG,[cx,0,cz]);g.userData.region=r;

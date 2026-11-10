@@ -34,12 +34,11 @@ function traderModal(){const own=Object.keys(ITEMS).filter(k=>has(k)>=8&&ITEMS[k
   const deals=[];if(own.length){const g=own[Math.floor(Math.random()*own.length)],t=rare[Math.floor(Math.random()*rare.length)],n=Math.max(4,Math.min(has(g),Math.ceil(ITEMS[t].p*0.65/ITEMS[g].p)));if(has(g)>=n)deals.push({give:{[g]:n},get:{[t]:1}})}
   const seeds=COL.filter(c=>c.src==='field'&&!S.album[c.id]);if(seeds.length)deals.push({gems:8,col:seeds[0].id});
   deals.push({coins:Math.max(200,S.lv*120),get:{yem:30}});
-  const d=document.createElement('div');d.className='modal login';
-  d.innerHTML=`<div><div class="badge">🧳</div><h2 class="h-sm">Gezgin tüccar</h2><p class="note">"Bugün buradayım, yarın yolda! Ne dersin?"</p>${deals.map((x,i)=>{const txt=x.col?`8 🍀 → ${COL.find(c=>c.id===x.col).e} ${COL.find(c=>c.id===x.col).n}`:x.give?`${Object.entries(x.give).map(([k,n])=>n+' '+ITEMS[k].e).join(' ')} → ${Object.entries(x.get).map(([k,n])=>n+' '+ITEMS[k].e+' '+ITEMS[k].n).join(' ')}`:`₺${fmt(x.coins)} → 30 🌰 yem`;
-    const can=x.col?S.gems>=x.gems:x.give?Object.entries(x.give).every(([k,n])=>has(k)>=n):S.coins>=x.coins;return `<button class="btn big ${can?'gold':''}" data-deal="${i}" ${can?'':'disabled'}>${txt}</button>`}).join('')}<button class="btn ghost" data-deal="x">Teşekkürler, sonra</button></div>`;
-  document.body.appendChild(d);d.querySelectorAll('[data-deal]').forEach(b=>b.onclick=()=>{const v=b.dataset.deal;d.remove();if(v==='x')return;const x=deals[+v];
+  const d=makeModal('login',`<div><div class="badge">🧳</div><h2 class="h-sm">Gezgin tüccar</h2><p class="note">"Bugün buradayım, yarın yolda! Ne dersin?"</p>${deals.map((x,i)=>{const txt=x.col?`8 🍀 → ${COL.find(c=>c.id===x.col).e} ${COL.find(c=>c.id===x.col).n}`:x.give?`${Object.entries(x.give).map(([k,n])=>n+' '+ITEMS[k].e).join(' ')} → ${Object.entries(x.get).map(([k,n])=>n+' '+ITEMS[k].e+' '+ITEMS[k].n).join(' ')}`:`₺${fmt(x.coins)} → 30 🌰 yem`;
+    const can=x.col?S.gems>=x.gems:x.give?Object.entries(x.give).every(([k,n])=>has(k)>=n):S.coins>=x.coins;return `<button class="btn big ${can?'gold':''}" data-deal="${i}" ${can?'':'disabled'}>${txt}</button>`}).join('')}<button class="btn ghost" data-deal="x">Teşekkürler, sonra</button></div>`);
+  d.querySelectorAll('[data-deal]').forEach(b=>b.onclick=()=>{const v=b.dataset.deal;d.remove();if(v==='x')return;const x=deals[+v];
     if(x.col){if(S.gems<x.gems)return;S.gems-=x.gems;S.album[x.col]=(S.album[x.col]||0)+1;stat('trade');showFind(COL.find(c=>c.id===x.col));commit();return}
-    if(x.give){for(const k in x.give)if(has(k)<x.give[k])return toast('Eksik ürün var');for(const k in x.give)S.items[k]-=x.give[k]}else{if(S.coins<x.coins)return toast('Yeterli paran yok');pay(x.coins,'Tüccar')}
+    if(x.give){for(const k in x.give)if(has(k)<x.give[k])return toast('Eksik ürün var',{err:1});for(const k in x.give)S.items[k]-=x.give[k]}else{if(S.coins<x.coins)return toast('Yeterli paran yok',{err:1});pay(x.coins,'Tüccar')}
     stat('trade');evtEnd('Anlaştınız! '+giveItems(x.get))})}
 
 // --- Haftanın yarışması: her hafta bir panayır yarışmasının ödülü iki katı ---
@@ -63,7 +62,7 @@ const questReward=(q)=>({c:Math.round(Object.entries(q.need).reduce((a,[k,n])=>a
 function questHTML(n){if(frLv(n)<1)return'';const q=questOf(n);if(!q)return `<div class="quest done">✓ ${n} ile bütün hikâye tamam</div>`;const r=questReward(q),ok=Object.entries(q.need).every(([k,v])=>has(k)>=v);
   return `<div class="quest"><p>“${q.txt}”</p><div class="needs">${Object.entries(q.need).map(([k,v])=>`<span class="need ${has(k)<v?'miss':''}" title="${ITEMS[k].n}"><em>${ITEMS[k].e}</em>${Math.min(has(k),v)}/${v}</span>`).join('')}</div>
     <div class="urow"><button class="pill-btn gold" data-act="quest" data-n="${n}" data-i="${q.i}" ${ok?'':'disabled'}>Teslim et · ₺${fmt(r.c)} +🍀${r.g}</button><span class="tm">${q.i+1}/3</span></div></div>`}
-function doQuest(n,i){const q=questOf(n);if(!q||(i!=null&&q.i!==i))return;for(const k in q.need)if(has(k)<q.need[k])return toast('Eksik ürün var');for(const k in q.need)S.items[k]-=q.need[k];const r=questReward(q);
+function doQuest(n,i){const q=questOf(n);if(!q||(i!=null&&q.i!==i))return;for(const k in q.need)if(has(k)<q.need[k])return toast('Eksik ürün var',{err:1});for(const k in q.need)S.items[k]-=q.need[k];const r=questReward(q);
   gain(r.c,'Hikâye');S.gems+=r.g;S.quests[n]=q.i+1;befriend(n,2);addXP(Math.round(r.c/20));stat('quest');sfx('win');flyCoins(8);toast(q.last?`${face(n)} ${n}: "Sen olmasan ne yapardık!" Hikâye tamam · +₺${fmt(r.c)} +🍀${r.g}`:`${face(n)} ${n} çok sevindi · +₺${fmt(r.c)} +🍀${r.g}`);commit()}
 
 // --- Başarımlar: koşulu sağlanınca ödülü Koleksiyon > Başarımlar'dan alınır ---
@@ -100,7 +99,6 @@ function claimAch(id){const a=ACH.find(x=>x.id===id);if(!a||S.ach[id]||!a.ok())r
 function achHTML(){achReady();const done=ACH.filter(a=>S.ach[a.id]).length;return `<p class="note">${done} / ${ACH.length} başarım. Koşulu sağladığın başarımın ödülünü buradan al.</p><div class="achs">${ACH.map(a=>{const got=S.ach[a.id],ok=!got&&a.ok();
   return `<div class="ach ${got?'got':ok?'ok':''}"><span class="ae">${a.e}</span><span class="at"><b>${a.n}</b><small>${a.d}</small></span>${got?'<span class="tm">✓</span>':`<button class="pill-btn ${ok?'gold':''}" data-act="ach" data-id="${a.id}" ${ok?'':'disabled'}>🍀${a.g}</button>`}</div>`}).join('')}</div>`}
 function funTick(){evtTick();achTick()}
-// Koleksiyon sayfasına "Başarımlar" sekmesi
-const sheetAlbumCol=sheetAlbum;sheetAlbum=function(){const tb=view.tab||'c',n=achReady().length;const tabs=`<div class="tabs"><button aria-selected="${tb==='c'}" data-act="vtab" data-t="c">📖 Koleksiyon</button><button aria-selected="${tb==='ach'}" data-act="vtab" data-t="ach">🏅 Başarımlar${n?' ('+n+')':''}</button></div>`;
-  if(tb==='ach')return head('🏅','Başarımlar',`${ACH.filter(a=>S.ach[a.id]).length} / ${ACH.length}`)+`<div class="sh-body">${tabs}${achHTML()}</div>`;
-  return sheetAlbumCol().replace('<div class="sh-body">','<div class="sh-body">'+tabs)};
+// Koleksiyon sayfasının sekmeleri (📖 Koleksiyon / 🏅 Başarımlar) ve Başarımlar sekmesi; sheetAlbum (17-collection.js) kullanır
+function albumTabs(tb){const n=achReady().length;return `<div class="tabs"><button aria-selected="${tb==='c'}" data-act="vtab" data-t="c">📖 Koleksiyon</button><button aria-selected="${tb==='ach'}" data-act="vtab" data-t="ach">🏅 Başarımlar${n?' ('+n+')':''}</button></div>`}
+function sheetAch(tabs){return head('🏅','Başarımlar',`${ACH.filter(a=>S.ach[a.id]).length} / ${ACH.length}`)+`<div class="sh-body">${tabs}${achHTML()}</div>`}

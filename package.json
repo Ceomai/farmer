@@ -7,6 +7,7 @@
     "build": "node scripts/build.mjs",
     "build:fast": "node scripts/build.mjs --no-fonts",
     "test": "node scripts/smoke-test.mjs",
+    "test:unit": "node scripts/unit-test.mjs",
     "fuzz": "node scripts/fuzz.mjs",
     "test:backend": "npx -y firebase-tools@13.29.1 emulators:exec --only auth,firestore --project demo-ciftlik \"node scripts/backend-test.mjs\"",
     "bot": "node scripts/bot-sim.mjs",

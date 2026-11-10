@@ -3,7 +3,7 @@ function genContract(){const pool=producible().filter(k=>ITEMS[k].p>=8);const k=
   return{who:NAMES[Math.floor(Math.random()*NAMES.length)],k,total,got:0,until:now()+hrs*3600000,reward:Math.round(ITEMS[k].p*total*2.2),xp:Math.round(20+ITEMS[k].p*total/15),gems:1}}
 function ensureContracts(){const n=S.contracts.length;S.contracts=S.contracts.filter(c=>now()<c.until);while(S.contracts.length<2)S.contracts.push(genContract());return n!==S.contracts.length}
 function deliverContract(i){const c=S.contracts[i];if(!c)return;const n=Math.min(has(c.k),c.total-c.got);if(n<=0)return toast('Elinde bu üründen yok');S.items[c.k]-=n;c.got+=n;
-  if(c.got>=c.total){befriend(c.who,3);const r=Math.round(c.reward*repMult()*frMult(c.who)*(projOn('kopru')?1.15:1));gain(r,'Sözleşme');addXP(c.xp);S.gems+=c.gems;S.rep=Math.min(100,S.rep+2);stat('contracts');S.contracts.splice(i,1,genContract());sfx('win');flyCoins(8);toast(`Sözleşme tamam! +₺${fmt(r)} +🍀${c.gems}`)}
+  if(c.got>=c.total){befriend(c.who,3);const r=Math.round(c.reward*repMult()*frMult(c.who)*(projOn('kopru')?1.15:1));gain(r,'Sözleşme');addXP(c.xp);S.gems+=c.gems;addRep(2);stat('contracts');S.contracts.splice(i,1,genContract());sfx('win');flyCoins(8);toast(`Sözleşme tamam! +₺${fmt(r)} +🍀${c.gems}`)}
   else{sfx('pop');toast(`${n} ${ITEMS[c.k].n} teslim edildi`)}commit()}
 const FACES={'Kasap Rıza':'🧔','Fırıncı Nuri':'👨‍🍳','Lokantacı Sevim':'👩‍🍳','Manav Hilmi':'👴','Otelci Gülten':'👩‍💼','Kooperatif':'🧑‍🌾','Bakkal Ahmet':'🧑','Konakçı Halit Bey':'🎩','Pazarcı Zehra':'👵'};
 const face=n=>FACES[n]||'🧑';

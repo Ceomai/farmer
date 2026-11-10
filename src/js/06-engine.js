@@ -46,22 +46,6 @@ const TEX={
 };
 const stdTex=(map,o)=>toonMat(Object.assign({map},o));
 let _stoneMat;const stoneMat=()=>_stoneMat||(_stoneMat=stdTex(TEX.stone([1,.6])));
-function signTex(lines){return canvasTex(256,160,(x,w,h)=>{x.fillStyle='#f5e6c4';x.fillRect(0,0,w,h);x.strokeStyle='#7a4e2d';x.lineWidth=10;x.strokeRect(5,5,w-10,h-10);x.textAlign='center';x.fillStyle='#b23a22';x.font='900 30px Nunito, sans-serif';x.fillText(lines[0],w/2,46);x.fillStyle='#3a2a18';x.font='800 24px Nunito, sans-serif';x.fillText(lines[1],w/2,84);x.font='900 32px Nunito, sans-serif';x.fillStyle='#2f6b3a';x.fillText(lines[2],w/2,128)})}
-
-// --- çizgi film ahşap tabelalar ---
-const SIGNC={};const PLANE=new THREE.PlaneGeometry(1,1);
-function signBoard(lines){const key=JSON.stringify(lines);if(SIGNC[key])return SIGNC[key];const c=document.createElement('canvas'),x=c.getContext('2d'),pad=34;
-  const L=lines.map(l=>typeof l==='string'?{t:l,s:64}:l),font=sz=>`${sz}px "Titan One","Arial Rounded MT Bold",sans-serif`;
-  let w=0;L.forEach(l=>{x.font=font(l.s);w=Math.max(w,x.measureText(l.t).width)});
-  c.width=Math.ceil(w+pad*2.4);c.height=Math.ceil(L.reduce((a,l)=>a+l.s*1.1,0)+pad*1.4+12);const W=c.width-10,h=c.height-12;
-  const rr=(ox,oy)=>{x.beginPath();const r=22;x.moveTo(r+ox,4+oy);x.lineTo(W-r+ox,oy);x.quadraticCurveTo(W+ox,oy,W+ox,r+oy);x.lineTo(W-4+ox,h-r+oy);x.quadraticCurveTo(W-4+ox,h+oy,W-r-4+ox,h+oy);x.lineTo(r+ox,h-4+oy);x.quadraticCurveTo(4+ox,h-4+oy,4+ox,h-r+oy);x.lineTo(6+ox,r+4+oy);x.quadraticCurveTo(6+ox,4+oy,r+ox,4+oy);x.closePath()};
-  rr(7,9);x.fillStyle='#24160c';x.fill();rr(0,0);const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#c0803f');g.addColorStop(1,'#8f5629');x.fillStyle=g;x.fill();
-  x.save();rr(0,0);x.clip();x.strokeStyle='rgba(70,35,10,.35)';x.lineWidth=3;for(let i=1;i<4;i++){const yy=h*i/4;x.beginPath();x.moveTo(0,yy);x.bezierCurveTo(W*.3,yy-7,W*.6,yy+7,W,yy);x.stroke()}x.restore();
-  rr(0,0);x.lineWidth=7;x.strokeStyle='#24160c';x.stroke();for(const nx of[22,W-22]){x.fillStyle='#3a2a1a';x.beginPath();x.arc(nx,21,5,0,7);x.fill()}
-  let y=pad*.7;x.textAlign='center';x.textBaseline='top';x.lineJoin='round';
-  L.forEach(l=>{x.font=font(l.s);x.lineWidth=l.s*.22;x.strokeStyle='#24160c';x.strokeText(l.t,W/2,y);x.fillStyle=l.c||'#fff1cf';x.fillText(l.t,W/2,y);y+=l.s*1.1});
-  const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=MAXANI;return SIGNC[key]={tex:t,aspect:c.width/c.height}}
-function signMesh(lines,H){const sb=signBoard(lines);const m=new THREE.Mesh(PLANE,new THREE.MeshBasicMaterial({map:sb.tex,transparent:true,alphaTest:.3,side:THREE.DoubleSide,toneMapped:false}));m.scale.set(H*sb.aspect,H,1);return m}
 // --- kıvrımlı şeritler (dere, patika) ---
 function ribbon(par,pts,w,mat,y=.04,segK=1.5,vRep=4){const curve=new THREE.CatmullRomCurve3(pts.map(p=>new V3(p[0],0,p[1])),false,'catmullrom',.5);const N=Math.max(8,Math.round(curve.getLength()*segK));const pos=[],uv=[],idx=[];
   for(let i=0;i<=N;i++){const t=i/N,p=curve.getPointAt(t),tg=curve.getTangentAt(t),nx=-tg.z,nz=tg.x;pos.push(p.x+nx*w/2,y,p.z+nz*w/2,p.x-nx*w/2,y,p.z-nz*w/2);const v=t*curve.getLength()/vRep;uv.push(0,v,1,v);if(i<N){const a=i*2;idx.push(a,a+2,a+1,a+1,a+2,a+3)}}

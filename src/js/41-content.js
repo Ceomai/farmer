@@ -15,9 +15,9 @@ function projBody(){if(!S.proj||typeof S.proj!=='object')S.proj={};
     return `<div class="order ${done?'pdone':''}"><div class="who">${p.e} ${p.n}<span>${done?'✓ Açıldı':lock?'🔒 Sv '+p.lv:'₺'+fmt(p.c)}</span></div><p class="note" style="margin:2px 0 6px">${p.bonus}</p>
       ${done?'':`<div class="needs">${Object.entries(p.need).map(([k,n])=>`<span class="need ${has(k)<n?'miss':''}" title="${ITEMS[k].n}"><em>${ITEMS[k].e}</em>${Math.min(has(k),n)}/${n}</span>`).join('')}</div>
       <div class="urow"><button class="pill-btn gold" data-act="proj" data-id="${p.id}" ${ok?'':'disabled'}>🏗️ Bağışla ve aç</button></div>`}</div>`}).join('')}
-function doProj(id){const p=PROJ.find(x=>x.id===id);if(!p||projOn(id)||S.lv<p.lv)return;if(S.coins<p.c)return toast('Yeterli paran yok');for(const k in p.need)if(has(k)<p.need[k])return toast('Eksik ürün var');
-  pay(p.c,'Kasaba');for(const k in p.need)S.items[k]-=p.need[k];if(!S.proj)S.proj={};S.proj[id]=now();S.rep=Math.min(100,S.rep+5);addXP(Math.round(p.c/200));stat('proj');sfx('win');celebrate(p.n+' açıldı!');
-  const d=document.createElement('div');d.className='modal login';d.innerHTML=`<div><div class="badge">${p.e}</div><h2>${p.n} açıldı!</h2><p>Kasaba sana minnettar. ★ +5<br><b>${p.bonus}</b></p><button class="btn big gold">Harika</button></div>`;d.querySelector('button').onclick=()=>d.remove();document.body.appendChild(d);commit()}
+function doProj(id){const p=PROJ.find(x=>x.id===id);if(!p||projOn(id)||S.lv<p.lv)return;if(S.coins<p.c)return toast('Yeterli paran yok',{err:1});for(const k in p.need)if(has(k)<p.need[k])return toast('Eksik ürün var',{err:1});
+  pay(p.c,'Kasaba');for(const k in p.need)S.items[k]-=p.need[k];if(!S.proj)S.proj={};S.proj[id]=now();addRep(5);addXP(Math.round(p.c/200));stat('proj');sfx('win');celebrate(p.n+' açıldı!');
+  makeModal('login',`<div><div class="badge">${p.e}</div><h2>${p.n} açıldı!</h2><p>Kasaba sana minnettar. ★ +5<br><b>${p.bonus}</b></p><button class="btn big gold">Harika</button></div>`,{close:1});commit()}
 
 // --- Yeni nesil: Konak ve seviye 30'dan sonra çiftlik yeni nesle devredilir ---
 // Sıfırlanır: para, ürünler, binalar, araziler, ev, tarla, seviye. Kalır: yonca, koleksiyon, başarımlar, süsler, dostluklar, hikâyeler, kasaba projeleri, ayarlar.
@@ -27,10 +27,10 @@ const genReady=()=>S.lv>=GEN_LV&&S.house>=4;
 function genHTML(){const g=S.gen||0;return `<div class="unit"><div class="uhead"><span>🌳 Yeni nesil</span><span class="tm">${g?g+'. nesil · üretim +%'+g*10:''}</span></div>
   <p class="note">Çiftliği çocuklarına devret: baştan başlarsın ama bütün üretim kalıcı olarak +%10 artar. Yonca, koleksiyon, başarımlar, süsler, dostluklar ve kasaba projeleri seninle kalır.</p>
   ${genReady()?`<button class="btn big gold" data-act="gen">🌳 Yeni nesle devret (+%10 üretim, +🍀10)</button>`:`<button class="btn big" disabled>🔒 Konak + seviye ${GEN_LV} gerekli</button>`}</div>`}
-function askGen(){if(!genReady())return;const d=document.createElement('div');d.className='modal login';
-  d.innerHTML=`<div><div class="badge">🌳</div><h2 class="h-sm">Yeni nesle devret?</h2><p class="lt"><b>Sıfırlanır:</b> para, ürünler, binalar, araziler, ev, tarlalar, seviye.<br><b>Kalır:</b> 🍀 yonca, koleksiyon, başarımlar, süsler, dostluklar, hikâyeler, kasaba projeleri.<br><b>Kazanılır:</b> kalıcı +%10 üretim ve +🍀10.</p>
-    <button class="btn big gold" data-g="1">Evet, devret</button><button class="btn ghost" data-g="0">Vazgeç</button></div>`;
-  document.body.appendChild(d);d.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{d.remove();if(b.dataset.g==='1')doGen()})}
+function askGen(){if(!genReady())return;
+  const d=makeModal('login',`<div><div class="badge">🌳</div><h2 class="h-sm">Yeni nesle devret?</h2><p class="lt"><b>Sıfırlanır:</b> para, ürünler, binalar, araziler, ev, tarlalar, seviye.<br><b>Kalır:</b> 🍀 yonca, koleksiyon, başarımlar, süsler, dostluklar, hikâyeler, kasaba projeleri.<br><b>Kazanılır:</b> kalıcı +%10 üretim ve +🍀10.</p>
+    <button class="btn big gold" data-g="1">Evet, devret</button><button class="btn ghost" data-g="0">Vazgeç</button></div>`);
+  d.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{d.remove();if(b.dataset.g==='1')doGen()})}
 // Ana hedefler, günlük ödül/görevler, reklam hakkı ve günün panayırı da korunur (yeni nesilde tekrar alınamasın)
 function doGen(){if(!genReady())return;if(typeof race!=='undefined'&&race&&race.running)return toast('Önce süren yarışın bitmesini bekle');const keep={};for(const k of['gems','album','ach','decor','friends','quests','proj','sound','consent','ui','stats','keepN','autoSell','fastNav','created','goal','daily','ads','contests','colDone'])if(S[k]!=null)keep[k]=S[k];
   const g=(S.gen||0)+1;S=Object.assign(fresh(),keep,{gen:g,tut:{done:1},tut2:{done:1}});S.gems=(S.gems||0)+10;S.stats.gens=(S.stats.gens||0)+1;

@@ -8,8 +8,9 @@ const workerMax=()=>WORKER_MAX[S.house-1]||2;
 const workOn=k=>S.workers[k]>now();
 const workersHired=()=>Object.keys(S.workers).length;
 function renewWorker(k,quiet){if(!S.workers[k]||workOn(k))return false;S.workers[k]=now()+SHIFT;if(!quiet){sfx('chime');toast('☕ Çay içildi, işçi işinin başında!');commit()}return true}
+// Not: oyun içinde çağrılmıyor; test betikleri (scripts/bot-sim.mjs, scripts/fuzz.mjs) tüm işçileri tek seferde işe döndürmek için kullanır.
 function renewAll(){let n=0;for(const k in S.workers)if(renewWorker(k,true))n++;if(n){sfx('chime');commit()}return n}
-function hire(k){if(k!=='fields'&&!(B[k]&&B[k].recipes&&S.units[k]))return;if(S.lv<WORKER_LV)return toast('İşçiler seviye 5\'te açılır');if(S.workers[k])return;const c=workerCost(k);if(S.coins<c)return toast('Yeterli paran yok');if(workersHired()>=workerMax())return toast(`Bu evde en fazla ${workerMax()} işçi barınabilir. Evini büyüt!`);pay(c,'İşçi');S.workers[k]=now()+SHIFT;sfx('build');toast('👷 İşçi işe başladı!');popLoc=k==='fields'?'tarla':locOf(k);commit()}
+function hire(k){if(k!=='fields'&&!(B[k]&&B[k].recipes&&S.units[k]))return;if(S.lv<WORKER_LV)return toast('İşçiler seviye 5\'te açılır');if(S.workers[k])return;const c=workerCost(k);if(S.coins<c)return toast('Yeterli paran yok',{err:1});if(workersHired()>=workerMax())return toast(`Bu evde en fazla ${workerMax()} işçi barınabilir. Evini büyüt!`);pay(c,'İşçi');S.workers[k]=now()+SHIFT;sfx('build');toast('👷 İşçi işe başladı!');popLoc=k==='fields'?'tarla':locOf(k);commit()}
 function workerBtn(k){if(S.workers[k]){if(workOn(k))return `<span class="pill-btn" style="cursor:default" title="Vardiya bitince çay molası verir">👷 Çalışıyor · ${secs(Math.ceil((S.workers[k]-now())/1000))}</span>`;
     return `<button class="pill-btn gold" data-act="renew" data-k="${k}" title="İşçi mola verdi. Bir çay ısmarla, 8 saat daha çalışsın">☕ Mola · devam ettir</button>`}
   if(S.lv>=WORKER_LV&&workersHired()>=workerMax())return `<span class="pill-btn" style="cursor:default" title="Evini büyütünce daha fazla işçi tutabilirsin">👷 ${workersHired()}/${workerMax()} işçi</span>`;

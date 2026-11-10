@@ -21,7 +21,7 @@ const barTf=j=>`transform:translateX(${(Math.max(0,Math.min(1,(now()-j.s)/(j.e-j
 let sheetRect=null; // döngüdeki kamera kaydırması için önbellek (33-loop viewOffset); boyut/konum değişince sıfırlanır
 function renderSheet(){sheetRect=null;
   if(!view){if(!sheet.hidden)ghostOut(sheet,'sheet','shx',260);sheet.hidden=true;delete sheet.dataset.vk;document.body.classList.remove('sheet-open');setDock();placeBack();return}
-  if(sheet.hidden)ghostClear('shx');sheet.hidden=false;document.body.classList.add('sheet-open');sheet.classList.toggle('dark',view.k==='alley');
+  if(sheet.hidden)ghostClear('shx');sheet.hidden=false;document.body.classList.add('sheet-open');
   const f={loc:sheetLoc,region:sheetRegion,places:sheetPlaces,barn:sheetBarn,goals:sheetGoals,settings:sheetSettings,shop:sheetShop,album:sheetAlbum,ledger:sheetLedger,mail:sheetMail,guide:sheetGuide,borsa:sheetBorsa,budget:sheetBudget,stats:sheetStats}[view.k];
   const vk=view.k+'|'+(view.loc||''),body=sheet.querySelector('.sh-body'),st=body&&sheet.dataset.vk===vk?body.scrollTop:0;sheet.dataset.vk=vk;const gq=sheet.querySelector('#guideQ'),qv=gq&&view.k==='guide'?gq.value:'',gf=gq&&document.activeElement===gq;parkBack();sheet.innerHTML=f();
   if(qv){const n=sheet.querySelector('#guideQ');if(n){n.value=qv;n.dispatchEvent(new Event('input',{bubbles:true}));if(gf)n.focus()}} // rehber araması yeniden çizimde kaybolmasın
@@ -48,7 +48,7 @@ function unitHTML(u,multi){const d=B[u],s=S.units[u];
   h+=loveRow(u);if(s.job){h+=jobRow(u);if(d.recipes)h+=queueHTML(u)}else if(d.recipes)h+=recipeTiles(u);
   const ent=INSIDE_UNITS[u]&&mode!=='interior'?`<button class="pill-btn go" data-act="enterIn" data-k="${u}">🚪 İçeri</button>`:'';
   const row=ent+upBtn(u)+extraRow(u);return `<div class="unit">${h}<div class="urow${row?' mainact':''}">${row}</div></div>`}
-function sheetLoc(){const k=view.loc,L=LOC[k];const th=img(L.kind==='house'?'kulube'+S.house:L.units?L.units[0]:k);let h,b='';
+function sheetLoc(){const k=view.loc,L=LOC[k];const th=img(locThumb(k));let h,b='';
   switch(L.kind){
     case'house':{h=head(th,HOUSE[S.house-1].n,stars(S.house,4));const nx=HOUSE[S.house];
       b+=`<div class="job"><span class="big">📦</span><span class="pw"><b>Kiler</b><span class="pbar"><i style="width:${Math.min(100,stored()/cap()*100)}%" class="still"></i></span><small>${stored()} / ${cap()}</small></span></div>`;
@@ -80,7 +80,7 @@ function sheetRegion(){const r=view.r,d=REG[r],ok=S.lv>=d.lvl;const locs=Object.
   <button class="btn big gold" data-act="region" data-r="${r}" ${ok&&S.coins>=regCost(r)?'':'disabled'}>${ok?`🏳️ Satın al · ₺${fmt(regCost(r))}`:`🔒 Seviye ${d.lvl}`}</button></div>`}
 function sheetPlaces(){return head('📍','Konumlar','')+`<div class="sh-body"><div class="places">`+Object.keys(LOC).map(k=>{const L=LOC[k],own=owned(L.reg),st=own?locStatus(k):null;
   const bd=st&&st.c==='ok'?`<i class="s ok">${st.n||'✓'}</i>`:st&&st.c==='new'?'<i class="s new">🔨</i>':st&&st.c==='idle'?'<i class="s idle">💤</i>':'';
-  return `<button class="place ${own?'':'locked'}" data-go="${k}"><span class="thumb sm">${own?img(L.kind==='house'?'kulube'+S.house:L.units?L.units[0]:k):'🔒'}</span>${L.n}${bd}</button>`}).join('')+'</div></div>'}
+  return `<button class="place ${own?'':'locked'}" data-go="${k}"><span class="thumb sm">${own?img(locThumb(k)):'🔒'}</span>${L.n}${bd}</button>`}).join('')+'</div></div>'}
 function sheetBarn(){const inv=Object.keys(ITEMS).filter(k=>has(k)>0);
   return head('📦','Ambar',`${stored()} / ${cap()}`)+`<div class="sh-body"><div class="pbar"><i style="width:${Math.min(100,stored()/cap()*100)}%" class="still"></i></div>
   ${inv.length?`<div class="inv">${inv.map(k=>`<div class="slot" title="${ITEMS[k].n}"><em>${ITEMS[k].e}</em><b>${has(k)}</b></div>`).join('')}</div>`:'<p class="note">Ambar boş.</p>'}

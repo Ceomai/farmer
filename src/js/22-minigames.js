@@ -1,6 +1,6 @@
 // ================= MİNİ OYUNLAR =================
-function mgOpen(title,desc){const d=document.createElement('div');d.className='modal mg';d.innerHTML=`<div><h2 class="h-sm">${title}</h2><p class="note">${desc}</p><div class="mgb"></div><button class="btn ghost mgx" style="align-self:center">Vazgeç</button></div>`;
-  document.body.appendChild(d);const o={d,body:d.querySelector('.mgb'),onClose:null};d.querySelector('.mgx').onclick=()=>{o.onClose&&o.onClose();d.remove()};return o}
+function mgOpen(title,desc){const d=makeModal('mg',`<div><h2 class="h-sm">${title}</h2><p class="note">${desc}</p><div class="mgb"></div><button class="btn ghost mgx" style="align-self:center">Vazgeç</button></div>`);
+  const o={d,body:d.querySelector('.mgb'),onClose:null};d.querySelector('.mgx').onclick=()=>{o.onClose&&o.onClose();d.remove()};return o}
 function mgEnd(o,msg){o.onClose&&o.onClose();o.body.innerHTML=`<div class="mgface">🎉</div><p style="text-align:center;font-weight:900">${msg}</p><button class="btn big gold">Harika</button>`;o.body.querySelector('button').onclick=()=>o.d.remove();const x=o.d.querySelector('.mgx');if(x)x.remove()}
 function mgMilk(u){const s=S.units[u];if(!s||!s.job||now()>=s.job.e||s.job.mg)return;const job=s.job;const o=mgOpen('🥛 Sağım ritmi','İbre yeşil bölgedeyken SAĞ! düğmesine bas. 6 deneme.');
   o.body.innerHTML=`<div class="mgbar"><i class="zone"></i><i class="needle"></i></div><div class="mgscore">0 / 6</div><button class="btn big gold mgbtn">SAĞ!</button>`;

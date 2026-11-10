@@ -23,7 +23,7 @@ function quickFeedback(res,el){const r=el?el.getBoundingClientRect():{left:inner
   const txt=Object.entries(res.out).map(([k,v])=>`+${v} ${ITEMS[k].e}`).join('  ');
   if(txt){floatXY(x,y,txt);flyItems(x,y,res.out);sfx('pop')}else if(res.started)sfx('plant');
   if(res.started)floatXY(x,y-(txt?34:0),`▶ ${res.started} yeniden başladı`);if(res.renewed)floatXY(x,y-68,`☕ ${res.renewed} işçi işe döndü`);
-  if(res.full)toast('Ambar dolu! Pazarda sat ya da siloyu büyüt.');
+  if(res.full)toast('Ambar dolu! Pazarda sat ya da siloyu büyüt.',{err:1});
   if(!txt&&!res.started&&!res.full&&!res.renewed)toast('Şu an yapılacak iş yok');
   if(res.got>=6)celebrate('Bereketli!');PLATFORM.hap(res.got?'medium':'light');commit();renderStrip(true)}
 function quickAll(el){const tot={got:0,started:0,out:{},full:false,renewed:0};for(const k in LOC){if(!owned(LOC[k].reg))continue;const r=quickLoc(k);tot.got+=r.got;tot.started+=r.started;tot.renewed+=r.renewed;tot.full=tot.full||r.full;for(const i in r.out)tot.out[i]=(tot.out[i]||0)+r.out[i]}
@@ -31,7 +31,8 @@ function quickAll(el){const tot={got:0,started:0,out:{},full:false,renewed:0};fo
 function renderStrip(force){const show=mode==='hub';stripEl.hidden=!show;if(!show){placeBack();return}const {own,lock}=stripCards();
   const qi={};let tr=0,ti=0,tb=0;own.forEach(o=>{qi[o.k]=quickInfo(o.k);tr+=qi[o.k].ready;ti+=qi[o.k].idle;tb+=qi[o.k].brk});
   const sig=own.map(o=>o.k+o.st.c+(o.st.n||'')+qi[o.k].ready+qi[o.k].idle+qi[o.k].brk).join()+lock.map(l=>l.r+(S.lv>=l.d.lvl?1:0)+(S.coins>=regCost(l.r)?1:0)).join()+S.house;if(!force&&sig===stripSig)return;stripSig=sig;const sl=stripEl.scrollLeft,cards=[];
-  const th=k=>{const L=LOC[k],src=THUMB[L.kind==='house'?'kulube'+S.house:L.units?L.units[0]:k];return src?`<img src="${src}" alt="">`:`<span class="ph">${L.e}</span>`};
+  // küçük resim dizeye gömülmez (base64 her çizimde yüzlerce KB dize üretirdi): anahtarı yazılır, src yalnızca yeni oluşan kartta atanır (stripPatch)
+  const th=k=>{const t=locThumb(k);return THUMB[t]?`<img data-th="${t}" alt="">`:`<span class="ph">${LOC[k].e}</span>`};
   const all=tr+ti+tb>1?`<button class="scard all" data-quickall><span class="ph">${tr?'🧺':'▶️'}</span>${tr?'Hepsini topla':'Hepsini başlat'}<small>${tr?tr+' hazır':''}${tr&&ti?' · ':''}${ti?ti+' boşta':''}${tb?(tr||ti?' · ':'')+'☕'+tb:''}</small></button>`:'';
   if(all)cards.push(['*',all]);own.forEach(({k,L,st})=>{const q=qi[k],bd=st.c==='ok'?`<i class="s ok">${st.n||'✓'}</i>`:st.c==='new'?'<i class="s new">🔨</i>':st.c==='idle'?'<i class="s idle">💤</i>':'';
       const qa=q.ready?`<button class="qa" data-quick="${k}">🧺 Topla</button>`:q.idle?`<button class="qa re" data-quick="${k}">▶ Başlat</button>`:q.brk?`<button class="qa re" data-quick="${k}">☕ Devam</button>`:'';
@@ -44,6 +45,7 @@ function renderStrip(force){const show=mode==='hub';stripEl.hidden=!show;if(!sho
 const stripKeep=new Map();
 function stripPatch(cards){const next=[],seen=new Set();
   for(const [key,html] of cards){let e=stripKeep.get(key);if(!e||e.html!==html){const t=document.createElement('template');t.innerHTML=html;e={html,el:t.content.firstElementChild};stripKeep.set(key,e);
+      for(const im of e.el.querySelectorAll('img[data-th]'))im.src=THUMB[im.dataset.th];
       const cd=e.el.querySelector('[data-left]');if(cd)cd.textContent=cd.dataset.pre+' '+secShort(Math.max(0,Math.ceil((+cd.dataset.left-now())/1000)))}next.push(e.el);seen.add(key)}
   for(const [k,e] of stripKeep)if(!seen.has(k))stripKeep.delete(k);
   next.forEach((el,i)=>{const at=stripEl.children[i];if(at!==el)stripEl.insertBefore(el,at||null)});while(stripEl.children.length>next.length)stripEl.lastElementChild.remove()}

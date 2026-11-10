@@ -231,11 +231,6 @@ button.job.ready b{font-family:var(--f-display);font-weight:400;font-size:var(--
 .switch{display:flex;gap:var(--sp-6);align-items:flex-start;background:var(--c-card);border:var(--bw) solid var(--c-border);border-radius:var(--r-lg);padding:var(--sp-5) var(--sp-6);box-shadow:var(--sh-soft-2)}
 .switch input{width:20px;height:20px;flex:none;accent-color:var(--forest);margin:2px 0 0}
 
-:is(.sheet,.shx).dark{background:var(--alley-bg);color:var(--alley-text)}
-:is(.sheet,.shx).dark .sh-head h2{color:var(--paper)}
-:is(.sheet,.shx).dark .note,:is(.sheet,.shx).dark .pw small,:is(.sheet,.shx).dark .tm{color:var(--alley-muted)}
-:is(.sheet,.shx).dark .job,:is(.sheet,.shx).dark .tile{background:var(--alley-card);color:var(--alley-text)}
-:is(.sheet,.shx).dark .thumb{background:radial-gradient(circle at 50% 35%,var(--alley-thumb),var(--alley-thumb-dk))}
 .log{background:var(--alley-log);color:var(--alley-text);border-radius:var(--r-md);padding:9px 11px;font-size:var(--fs-md);line-height:1.55;max-height:150px;overflow:auto;border:var(--bw) solid var(--c-border)}
 .track{display:flex;flex-direction:column;gap:var(--sp-2);background:linear-gradient(var(--turf),var(--turf-dk));border-radius:var(--r-lg);padding:7px;border:var(--bw) solid var(--c-border)}
 .lane{position:relative;height:21px;border-radius:7px;background:repeating-linear-gradient(90deg,var(--lane) 0 22px,var(--lane-dk) 22px 44px);font-size:var(--fs-xs);font-weight:900;color:var(--c-on-lane)}
@@ -372,7 +367,6 @@ body.photo .cam .ph{display:none}
 /* Bölümler arası geçiş okları */
 .sh-head .nav{flex:none;width:34px;height:34px;border:var(--bw) solid var(--c-border);border-radius:50%;background:var(--c-surface-2);font:900 22px/1 var(--f-display);color:var(--wood);display:grid;place-items:center;padding:0 0 3px;box-shadow:var(--sh-press)}
 .sh-head .nav[data-locstep="-1"]{margin-left:auto}
-:is(.sheet,.shx).dark .sh-head .nav{background:var(--alley-nav);color:var(--paper);border-color:var(--paper)}
 /* Yağmur katmanı: tarayıcının GPU katmanında kayar (3D kare hızından bağımsız, akıcı) */
 .rainfx{position:fixed;left:-15%;right:-15%;top:-200px;bottom:-20px;z-index:var(--z-fx);pointer-events:none;display:none;opacity:.5;overflow:hidden}
 body.wx-rain .rainfx,body.wx-storm .rainfx{display:block}
@@ -514,7 +508,6 @@ div.scard{cursor:pointer}
 .urow.mainact:empty{display:none}
 .urow.mainact{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}.urow.mainact::-webkit-scrollbar{display:none}.urow.mainact>*{flex:none}
 .unit+.unit .urow.mainact,.unit:not(:last-child) .urow.mainact{border-radius:0;margin-bottom:0}
-:is(.sheet,.shx).dark .urow.mainact{background:var(--alley-bg)}
 /* Geri düğmesi panel başlığında (telefon): ‹ › oklarıyla aynı boyda yuvarlak ok */
 .back.inbar{position:relative;top:auto;left:auto;right:auto;z-index:1;flex:none;box-shadow:var(--sh-press);zoom:1!important}
 .sh-head>.back.inbar{width:34px;height:34px;padding:0 0 2px;border-width:var(--bw);display:grid;place-items:center;font-size:19px;line-height:1}

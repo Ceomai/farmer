@@ -16,8 +16,9 @@ const COL_BONUS={kumes:'altin_yumurta',ahir:'simental',agil:'ankara',kovan:'kral
 const has1=id=>!!(S.album&&S.album[id]);
 const cropLocked=c=>c.lvl>S.lv||(c.col&&!has1(c.col))||!cropSeasonOk(c);
 const regCost=r=>Math.round(REG[r].cost*(has1('eski_tapu')?.9:1));
-function showFind(c){sfx('win');const d=document.createElement('div');d.className='modal login';d.innerHTML=`<div><div class="badge">${c.e}</div><h2>Nadir buluntu!</h2><p><b>${c.n}</b><br>${c.bonus}<br>+1 🍀</p><button class="btn big gold">Koleksiyona ekle</button></div>`;d.querySelector('button').onclick=()=>d.remove();document.body.appendChild(d)}
+function showFind(c){sfx('win');makeModal('login',`<div><div class="badge">${c.e}</div><h2>Nadir buluntu!</h2><p><b>${c.n}</b><br>${c.bonus}<br>+1 🍀</p><button class="btn big gold">Koleksiyona ekle</button></div>`,{close:1})}
 function tryDrop(src){for(const c of COL){if(c.src!==src&&c.src!=='any')continue;if(Math.random()<c.p*(c.src==='any'?.3:1)){const first=!S.album[c.id];S.album[c.id]=(S.album[c.id]||0)+1;if(first){S.gems+=1;setTimeout(()=>showFind(c),500)}return c}}return null}
-function sheetAlbum(){const n=COL.filter(c=>S.album[c.id]).length;return head('📖','Koleksiyon',`${n} / ${COL.length}`)+`<div class="sh-body"><div class="places">${COL.map(c=>{const got=S.album[c.id];
+function sheetAlbum(){const tb=view.tab||'c',tabs=albumTabs(tb);if(tb==='ach')return sheetAch(tabs);
+  const n=COL.filter(c=>S.album[c.id]).length;return head('📖','Koleksiyon',`${n} / ${COL.length}`)+`<div class="sh-body">${tabs}<div class="places">${COL.map(c=>{const got=S.album[c.id];
   return `<div class="place ${got?'':'locked'}" title="${got?c.bonus:'Henüz bulunmadı · '+c.hint}"><span class="thumb sm">${got?c.e:'❓'}</span>${got?c.n:'???'}<small class="tm" style="white-space:normal">${got?c.bonus:c.hint}</small></div>`}).join('')}</div>
   ${n===COL.length&&!S.stats.albumDone?`<button class="btn big gold" data-act="albumDone">Albüm tamam! +🍀50</button>`:''}<p class="note">Nadir buluntular üretim ve hasat sırasında rastgele çıkar. Her yeni buluntu +1 🍀 verir.</p></div>`}

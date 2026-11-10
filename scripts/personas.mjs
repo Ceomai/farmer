@@ -1,16 +1,21 @@
 // Persona yolculukları: 22 farklı oyuncu tipi, uçtan uca, mümkün olduğunca gerçek tıklamalarla oynatılır ve her adımda beklenen sonuç denetlenir.
 // Kullanım: npm run build && node scripts/personas.mjs [persona-adı-parçası]
-import {createRequire} from 'node:module';import path from 'node:path';
+import {createRequire} from 'node:module';import path from 'node:path';import http from 'node:http';import fs from 'node:fs';
 const require=createRequire(import.meta.url);const {chromium}=require('playwright');
 const FILE='file://'+path.resolve('www/index.html');const ONLY=process.argv[2]||'';
 let pass=0,fail=0,cur='';const ok=(c,m,x='')=>{console.log(`  ${c?'✓':'✗'} ${m}${c?'':' → '+x}`);c?pass++:fail++};
 const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const SAVE='ciftlik-imparatorlugu-v3';
-async function open({vp={width:390,height:844},save=null,env={},clear=true}={}){const ctx=await b.newContext({viewport:vp,isMobile:vp.width<700,hasTouch:vp.width<700,reducedMotion:env.reduce?'reduce':'no-preference'});
-  const p=await ctx.newPage();p.errs=[];p.on('pageerror',e=>p.errs.push(e.message));await p.route(/^https?:/,r=>r.abort());
+// Yerel http sunucusu (yalnızca gerekince açılır): file:// adresinde Chromium hızlı yeniden yüklemede localStorage'ı ara sıra boş gösteriyor
+// (yeni belge tamamen boş bir depolama görüyor; sonraki yüklemede eski kayıt geri geliyor). Gerçek oyun https/Capacitor'da çalıştığı için
+// hızlı aç-kapa denetimi http://localhost üzerinden yapılır.
+let LOCAL=null;const local=()=>LOCAL||(LOCAL=new Promise(res=>{const html=fs.readFileSync(path.resolve('www/index.html'));
+  const srv=http.createServer((q,s)=>{s.writeHead(200,{'content-type':'text/html; charset=utf-8'});s.end(html)}).listen(0,'127.0.0.1',()=>{srv.unref();res(`http://127.0.0.1:${srv.address().port}/`)})}));
+async function open({vp={width:390,height:844},save=null,env={},clear=true,http:useHttp=false}={}){const ctx=await b.newContext({viewport:vp,isMobile:vp.width<700,hasTouch:vp.width<700,reducedMotion:env.reduce?'reduce':'no-preference'});
+  const p=await ctx.newPage();p.errs=[];p.on('pageerror',e=>p.errs.push(e.message));const url=useHttp?await local():FILE;await p.route(/^https?:/,r=>useHttp&&r.request().url().startsWith(url)?r.continue():r.abort());
   await p.addInitScript(([save,clear,noStore])=>{if(window.name!=='p'){window.name='p';if(clear)localStorage.clear();if(save)localStorage.setItem('ciftlik-imparatorlugu-v3',save)}
     if(noStore){const th=()=>{throw new DOMException('SecurityError','SecurityError')};Storage.prototype.getItem=th;Storage.prototype.setItem=th}},[save?JSON.stringify(save):null,clear,!!env.noStore]);
-  await p.goto(FILE);await p.waitForFunction(()=>typeof S==='object'&&S&&!document.getElementById('boot'),null,{timeout:120000});p.ctx=ctx;return p}
+  await p.goto(url);await p.waitForFunction(()=>typeof S==='object'&&S&&!document.getElementById('boot'),null,{timeout:120000});p.ctx=ctx;return p}
 const ev=(p,f,a)=>p.evaluate(f,a);
 // tıklamadan önce öğeyi taşıyan açılış animasyonları (alttan kayan panel, büyüyen pencere) bitsin: gerçek kullanıcı da animasyon bitmeden dokunamaz
 const click=async(p,sel)=>{const el=await p.$(sel);if(!el)return false;await el.evaluate(e=>Promise.all(document.getAnimations().filter(a=>{const t=a.effect&&a.effect.target;return t&&t.contains&&t.contains(e)&&isFinite(a.effect.getComputedTiming().endTime)}).map(a=>a.finished.catch(()=>{}))));await el.click({force:true});await p.waitForTimeout(120);return true};
@@ -41,7 +46,7 @@ P['04 30 gün sonra dönen oyuncu (vardiyası bitmiş işçi)']=async()=>{const 
   ok(await ev(p,()=>!workOn('kumes')),'işçinin vardiyası bitmiş (çay molası)');await toWorld(p);await ev(p,()=>renderStrip(true));
   ok(await ev(p,()=>!!document.querySelector('[data-quick="kumes"]')),'kümes kartında tek dokunuş düğmesi var');await click(p,'[data-quick="kumes"]');
   ok(await ev(p,()=>workOn('kumes')),'tek dokunuşla işçi işe döndü');ok(!p.errs.length,'sayfa hatası yok',p.errs.join('|'));await p.ctx.close()};
-P['05 Birkaç saniye kullanıp kapatan (10 kez)']=async()=>{let p=await open({save:base({coins:777})});for(let i=0;i<10;i++){await p.waitForTimeout(150);await p.reload();await p.waitForFunction(()=>typeof S==='object'&&S,null,{timeout:120000})}
+P['05 Birkaç saniye kullanıp kapatan (10 kez)']=async()=>{let p=await open({save:base({coins:777}),http:true});for(let i=0;i<10;i++){await p.waitForTimeout(150);await p.reload();await p.waitForFunction(()=>typeof S==='object'&&S,null,{timeout:120000})}
   ok(await ev(p,()=>S.coins===777),'10 hızlı aç-kapa sonrası para korunuyor');ok(!p.errs.length,'sayfa hatası yok',p.errs.join('|'));await p.ctx.close()};
 P['06 Ekranlar arasında çok hızlı gezinen']=async()=>{const p=await open({save:base({lv:10,coins:5e4})});await toWorld(p);
   await ev(p,async()=>{const ks=Object.keys(LOC);for(let i=0;i<60;i++){goLocation(ks[i%ks.length]);if(i%7===0)enterInterior('kumes');if(i%9===0)toDesk();if(i%11===0)enterWorld();if(i%5===0)toHub();await new Promise(r=>setTimeout(r,30))}});
@@ -92,6 +97,8 @@ P['18 Saatini ileri-geri alan']=async()=>{const p=await open({save:base({fields:
   await ev(p,()=>{TIME_OFF-=86400000*3;tick();save()});ok(await ev(p,()=>S.coins>=0&&S.fields[0].job),'saat 3 gün geri: oyun tutarlı, ekin kaybolmadı');
   await ev(p,()=>{TIME_OFF+=86400000*10;tick();checkDaily();save()});ok(await ev(p,()=>isFinite(S.coins)&&S.daily),'saat 10 gün ileri: günlük yenilendi, değerler sonlu');ok(!p.errs.length,'sayfa hatası yok',p.errs.join('|'));await p.ctx.close()};
 P['19 Tablet (yatay) oyuncusu']=async()=>{const p=await open({vp:{width:1024,height:768},save:base()});await toWorld(p);await ev(p,()=>goLocation('tarla'));await p.waitForTimeout(800);
+  // panelin son konumu ölçülür: açılış (alttan kayma) animasyonu bitmeden ölçmek yazılımsal GPU'nun hızına bağlıydı
+  await ev(p,()=>Promise.all(sheet.getAnimations({subtree:true}).filter(a=>isFinite(a.effect.getComputedTiming().endTime)).map(a=>a.finished.catch(()=>{}))));
   ok(await ev(p,()=>{const r=sheet.getBoundingClientRect();return r.right<=innerWidth&&r.bottom<=innerHeight+1}),'panel ekrana sığıyor');ok(await ev(p,()=>document.documentElement.scrollWidth<=innerWidth+1),'sayfa yana taşmıyor');await p.ctx.close()};
 P['20 Kurtarma koduyla yanlış kod deneyen']=async()=>{const p=await open({save:base()});await rmModal(p);await ev(p,()=>{view={k:'settings'};renderSheet()});
   for(const c of['','abc','x'.repeat(5000),'😀😀😀','<script>alert(1)</script>',"' OR 1=1 --"]){await p.fill('#rcode',c).catch(()=>{});await click(p,'[data-act="restore"]')}

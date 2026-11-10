@@ -30,6 +30,8 @@ jobs:
           npm i --no-save playwright@1.47.2
           npx playwright install --with-deps chromium
           npm test
+      - name: Birim testleri
+        run: npm run test:unit
       - name: Simülasyon testi (rastgele senaryolar)
         continue-on-error: true
         run: node scripts/fuzz.mjs 8 120 $((GITHUB_RUN_NUMBER*10)) 2

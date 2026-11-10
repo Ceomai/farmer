@@ -52,4 +52,3 @@ function bakeGeo(items,uv,ol){let n=0;for(const it of items){const g=it.m.geomet
       if(U2&&tuv){U2[w*2]=tuv.getX(v);U2[w*2+1]=tuv.getY(v)}w++}}
   const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(P3,3));geo.setAttribute(ol?'onormal':'normal',new THREE.BufferAttribute(N3,3));if(U2)geo.setAttribute('uv',new THREE.BufferAttribute(U2,2));
   geo.computeBoundingSphere();geo.computeBoundingBox();return geo}
-function disposeBaked(root){root.traverse(o=>{if(o.userData.baked&&o.geometry)o.geometry.dispose()})}

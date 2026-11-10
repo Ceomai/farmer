@@ -7,7 +7,8 @@ sheet.addEventListener('animationstart',e=>{if(e.target===sheet)sheetAnim=true})
 function viewOffset(c){const W=innerWidth,H=innerHeight;let tx=0,ty=0;if(!sheet.hidden&&mode!=='hub'||(!sheet.hidden&&view&&view.k==='region')){const r=sheetAnim||!sheetRect?(sheetRect=sheet.getBoundingClientRect()):sheetRect;if(W>700)tx=Math.max(0,(W-r.left))/2;else ty=Math.max(0,(H-r.top))/2}
   vo.x+=(tx-vo.x)*.12;vo.y+=(ty-vo.y)*.12;if(!tx&&!ty&&Math.abs(vo.x)<.5&&Math.abs(vo.y)<.5){vo.x=vo.y=0;if(c.view&&c.view.enabled)c.clearViewOffset();return}c.setViewOffset(W,H,vo.x,vo.y,W,H)}
 function resize(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);dcam.aspect=w/h;dcam.fov=w<700?50:42;dcam.updateProjectionMatrix();if(typeof S!=='undefined'&&S&&(dcam.aspect<.85)!==deskPortrait&&DESKP.length)buildDesk();cam.aspect=w/h;cam.fov=w<700?50:36;cam.updateProjectionMatrix();icam.aspect=w/h;icam.fov=w<700?60:42;icam.updateProjectionMatrix()}
-addEventListener('resize',resize);
+// Boyut değişimi seyreltilir: ilk olay hemen işlenir, sonrakiler 100 ms'lik pencerelerde birleştirilir; son olay her zaman işlenir
+let _rzT=null,_rzMore=false;addEventListener('resize',()=>{if(_rzT){_rzMore=true;return}resize();_rzT=setTimeout(function rz(){if(_rzMore){_rzMore=false;resize();_rzT=setTimeout(rz,100)}else _rzT=null},100)});
 // Grafik bağlamı kaybolursa (Android'de arka plana atınca sık olur) çizimi durdur, geri gelince kaldığı yerden devam et
 let glLost=false;R.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();glLost=true},false);
 R.domElement.addEventListener('webglcontextrestored',()=>{glLost=false;try{R.shadowMap.needsUpdate=true;deskWinT=0}catch(e){}},false);
@@ -16,7 +17,8 @@ function frame(ts){requestAnimationFrame(frame);if(glLost||R.getContext().isCont
   else if(mode!=='interior'){R.shadowMap.autoUpdate=true;viewOffset(cam);stepFly();ctl.update();worldTick(dt,t);placeMarks();R.render(world,cam)}
   else if(interior){R.shadowMap.autoUpdate=true;viewOffset(icam);ictl.update();interior.fx.forEach(f=>f(dt,t));for(const o of interior.scene.children){const u=o.userData;if(u.hop){u.hop=Math.max(0,u.hop-dt*2.5);o.position.y=Math.sin((1-u.hop)*Math.PI)*.5}}R.render(interior.scene,icam)}
   if(!sayB.hidden)placeBubble()}
-function tick(){
+let tickAt=0; // son tick zamanı: küçük resim üretimi oyun döngüsü gecikirken bekler (32-thumbnails.js)
+function tick(){tickAt=performance.now();
   document.querySelectorAll('.pbar [data-e]').forEach(el=>{const p=Math.max(0,Math.min(100,(now()-el.dataset.s)/(el.dataset.e-el.dataset.s)*100));el.style.transform=`translateX(${(p-100).toFixed(2)}%)`});
   document.querySelectorAll('[data-left]').forEach(el=>{const sec=Math.max(0,Math.ceil((+el.dataset.left-now())/1000));el.textContent=el.dataset.pre+' '+(el.dataset.short?secShort(sec):secs(sec))});
   renderStrip();if(S.consent){tutStart();tutTick()}updateWeather();applySeason();if(checkDaily())showLogin();ensureContests();if(ensureContracts()&&view&&view.loc==='han')renderSheet();
@@ -25,7 +27,7 @@ function tick(){
   notifyReady();if(deskSigNow()!==deskSig)buildDesk();if(!document.body.classList.contains('photo'))farmerSay();else sayB.hidden=true;
   syncWorld();
   if(view&&sheetSig()!==view.sig&&!(race&&race.running))renderSheet();
-  if(view&&view.k==='loc'&&view.loc==='pazar'&&now()-S.market.at>=180000){refreshMarket();renderSheet()}
+  if(view&&(view.k==='borsa'||view.k==='loc'&&view.loc==='pazar')&&now()-S.market.at>=180000){refreshMarket();renderSheet()}
   if(interior&&intSig(interior.key)!==interior.sig)interior.refresh();
   if(queueAll())commit();rescue();funTick();autoSellTick();batchCheck();renderHUD()}
 function boot(data){
