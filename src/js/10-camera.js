@@ -4,7 +4,7 @@ function flyCam(tt,tp){fly={t0:now(),ft:ctl.target.clone(),fp:cam.position.clone
 function rotateCam(a){const off=cam.position.clone().sub(ctl.target);fly={t0:now(),ft:ctl.target.clone(),fp:cam.position.clone(),tt:ctl.target.clone(),arc:a,off}}
 function zoomCam(f){const off=cam.position.clone().sub(ctl.target);const d=Math.max(ctl.minDistance,Math.min(ctl.maxDistance,off.length()*f));flyCam(ctl.target,ctl.target.clone().add(off.setLength(d)))}
 const Y=new V3(0,1,0);
-function stepFly(){if(!fly)return;const k=S&&S.fastNav?1:Math.min(1,(now()-fly.t0)/420),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;ctl.target.lerpVectors(fly.ft,fly.tt,e);
+function stepFly(){if(!fly)return;const k=S&&(S.fastNav||RM())?1:Math.min(1,(now()-fly.t0)/420),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;ctl.target.lerpVectors(fly.ft,fly.tt,e);
   if(fly.arc){cam.position.copy(ctl.target).add(fly.off.clone().applyAxisAngle(Y,fly.arc*e))}else cam.position.lerpVectors(fly.fp,fly.tp,e);if(k>=1)fly=null}
 const FOCUS_DIR=new V3(.16,.8,.58).normalize();
 function goLocation(k){if(mode==='desk'){enterWorld(()=>goLocation(k));return}const L=LOC[k];if(!owned(L.reg)){openRegion(L.reg);return}

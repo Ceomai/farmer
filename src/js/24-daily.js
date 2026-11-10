@@ -50,7 +50,7 @@ function migrate(s){const d=fresh();if(!s||typeof s!=='object'||Array.isArray(s)
   for(const k of['inc','exp'])if(!obj(s.fin[k]))s.fin[k]={};if(!Array.isArray(s.fin.hist))s.fin.hist=[];
   if(!obj(s.contests)||!Array.isArray(s.contests.list)||!obj(s.contests.done))s.contests=d.contests;
   for(const k of['love','friends'])if(s[k]!=null&&!obj(s[k]))delete s[k];
-  if(s.tut!=null&&!obj(s.tut))s.tut={done:1};if(s.tut2!=null&&!obj(s.tut2))s.tut2={done:1};if(s.ui!=null&&!obj(s.ui))delete s.ui;s.keepN=[0,5,10,20].includes(s.keepN)?s.keepN:10;s.autoSell=!!s.autoSell;s.fastNav=!!s.fastNav;
+  if(s.tut!=null&&!obj(s.tut))s.tut={done:1};if(s.tut2!=null&&!obj(s.tut2))s.tut2={done:1};if(s.ui!=null&&!obj(s.ui))delete s.ui;if(s.ui)for(const k of['rm','hap'])if(s.ui[k]!=null&&typeof s.ui[k]!=='boolean')delete s.ui[k];s.keepN=[0,5,10,20].includes(s.keepN)?s.keepN:10;s.autoSell=!!s.autoSell;s.fastNav=!!s.fastNav;
   for(const k of['evt','quests','ach','proj'])if(s[k]!=null&&!obj(s[k]))delete s[k];if(s.quests)for(const n in s.quests){if(!QUESTS[n])delete s.quests[n];else s.quests[n]=num(s.quests[n],0,0,3,true)}
   s.gen=num(s.gen,0,0,99,true);if(s.evt&&s.evt.cur&&!EVENTS[s.evt.cur])s.evt.cur=null;
   s.lastSeen=Math.min(num(s.lastSeen,Date.now()),Date.now());

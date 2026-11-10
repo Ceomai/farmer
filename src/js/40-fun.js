@@ -22,7 +22,8 @@ function runEvent(){const E=evtState(),ev=EVENTS[E.cur];E.cur=null;if(!ev)return
 function evtEnd(msg,gems=0){if(gems)S.gems+=gems;toast(msg);sfx('win');commit()}
 function foxGame(){const o=mgOpen('🦊 Tilkiyi kovala','Tilki kümesin etrafında koşuyor. 10 saniyede 5 kez dokun!');let hits=0,done=false,iv,tm;
   o.body.innerHTML=`<div class="mgfield fox"><button class="foxbtn" aria-label="Tilki">🦊</button></div><div class="mgscore">0 / 5</div>`;const f=o.body.querySelector('.mgfield'),b=f.querySelector('.foxbtn'),sc=o.body.querySelector('.mgscore');
-  const hop=()=>{b.style.left=(5+Math.random()*75)+'%';b.style.top=(8+Math.random()*70)+'%'};hop();iv=setInterval(hop,800);
+  const hop=()=>{b.style.transform=`translate(${Math.round(f.clientWidth*(5+Math.random()*75)/100)}px,${Math.round(f.clientHeight*(8+Math.random()*70)/100)}px) translate(-50%,-50%)`}; // konum transform ile (yerleşim tetiklenmez)
+  hop();iv=setInterval(hop,800);
   const end=win=>{if(done)return;done=true;clearInterval(iv);clearTimeout(tm);if(win){const r=giveItems({yumurta:4+2*lvOf('kumes')});S.gems+=1;stat('fox');mgEnd(o,`Tilki kaçtı, tavuklar güvende! ${r} +1 🍀`)}else mgEnd(o,'Tilki ormana kaçtı. Tavuklar korktu ama hepsi yerinde.');commit()};
   b.onclick=()=>{hits++;sc.textContent=hits+' / 5';PLATFORM.hap();sfx('pop');hop();if(hits>=5)end(true)};o.onClose=()=>{clearInterval(iv);clearTimeout(tm);done=true};tm=setTimeout(()=>end(false),10000)}
 function lambGame(){const o=mgOpen('🐑 Kayıp kuzu','Kuzu üç çalıdan birinin arkasında. İki hakkın var!');const at=Math.floor(Math.random()*3);let tries=2,done=false;

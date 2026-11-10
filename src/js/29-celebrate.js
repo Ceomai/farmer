@@ -1,7 +1,7 @@
 // ================= HASAT KUTLAMASI =================
 let celebT=0;
-function celebrate(txt){if(now()-celebT<4000)return;celebT=now();sfx('win');const st=$('#stage');st.classList.remove('shake');void st.offsetWidth;st.classList.add('shake');
+function celebrate(txt){if(now()-celebT<4000)return;celebT=now();sfx('win');const rm=RM();if(!rm){const st=$('#stage');st.classList.remove('shake');void st.offsetWidth;st.classList.add('shake')} // hareketi azaltta sarsıntı ve konfeti yok, yazı yalnızca belirip kaybolur
   const w=document.createElement('div');w.className='celeb';w.innerHTML=`<b>${txt||'Bereketli!'}</b>`;document.body.appendChild(w);
-  const cols=['var(--brick)','var(--honey)','var(--leaf)','var(--sky)','var(--love)','var(--c-on-dark)'];for(let i=0;i<46;i++){const c=document.createElement('i');c.className='conf';c.style.left=(50+(Math.random()-.5)*20)+'%';c.style.background=cols[i%cols.length];
+  const cols=['var(--brick)','var(--honey)','var(--leaf)','var(--sky)','var(--love)','var(--c-on-dark)'];for(let i=0;i<(rm?0:46);i++){const c=document.createElement('i');c.className='conf';c.style.left=(50+(Math.random()-.5)*20)+'%';c.style.background=cols[i%cols.length];
     c.style.setProperty('--dx',((Math.random()-.5)*110)+'vw');c.style.setProperty('--dy',(-30-Math.random()*45)+'vh');c.style.setProperty('--r',(Math.random()*900-450)+'deg');c.style.animationDelay=(Math.random()*.12)+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),1900)}
-  setTimeout(()=>w.remove(),1700);PLATFORM.hap('heavy')}
+  setTimeout(()=>w.remove(),1700);PLATFORM.hap('medium')}

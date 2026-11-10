@@ -30,16 +30,23 @@ function quickAll(el){const tot={got:0,started:0,out:{},full:false,renewed:0};fo
   quickFeedback(tot,el)}
 function renderStrip(force){const show=mode==='hub';stripEl.hidden=!show;if(!show){placeBack();return}const {own,lock}=stripCards();
   const qi={};let tr=0,ti=0,tb=0;own.forEach(o=>{qi[o.k]=quickInfo(o.k);tr+=qi[o.k].ready;ti+=qi[o.k].idle;tb+=qi[o.k].brk});
-  const sig=own.map(o=>o.k+o.st.c+(o.st.n||'')+qi[o.k].ready+qi[o.k].idle+qi[o.k].brk).join()+lock.map(l=>l.r+(S.lv>=l.d.lvl?1:0)+(S.coins>=regCost(l.r)?1:0)).join()+S.house;if(!force&&sig===stripSig)return;stripSig=sig;const sl=stripEl.scrollLeft;
+  const sig=own.map(o=>o.k+o.st.c+(o.st.n||'')+qi[o.k].ready+qi[o.k].idle+qi[o.k].brk).join()+lock.map(l=>l.r+(S.lv>=l.d.lvl?1:0)+(S.coins>=regCost(l.r)?1:0)).join()+S.house;if(!force&&sig===stripSig)return;stripSig=sig;const sl=stripEl.scrollLeft,cards=[];
   const th=k=>{const L=LOC[k],src=THUMB[L.kind==='house'?'kulube'+S.house:L.units?L.units[0]:k];return src?`<img src="${src}" alt="">`:`<span class="ph">${L.e}</span>`};
   const all=tr+ti+tb>1?`<button class="scard all" data-quickall><span class="ph">${tr?'🧺':'▶️'}</span>${tr?'Hepsini topla':'Hepsini başlat'}<small>${tr?tr+' hazır':''}${tr&&ti?' · ':''}${ti?ti+' boşta':''}${tb?(tr||ti?' · ':'')+'☕'+tb:''}</small></button>`:'';
-  stripEl.innerHTML=all+own.map(({k,L,st})=>{const q=qi[k],bd=st.c==='ok'?`<i class="s ok">${st.n||'✓'}</i>`:st.c==='new'?'<i class="s new">🔨</i>':st.c==='idle'?'<i class="s idle">💤</i>':'';
+  if(all)cards.push(['*',all]);own.forEach(({k,L,st})=>{const q=qi[k],bd=st.c==='ok'?`<i class="s ok">${st.n||'✓'}</i>`:st.c==='new'?'<i class="s new">🔨</i>':st.c==='idle'?'<i class="s idle">💤</i>':'';
       const qa=q.ready?`<button class="qa" data-quick="${k}">🧺 Topla</button>`:q.idle?`<button class="qa re" data-quick="${k}">▶ Başlat</button>`:q.brk?`<button class="qa re" data-quick="${k}">☕ Devam</button>`:'';
-      const cd=!qa&&q.next<Infinity?`<small class="cd" data-left="${q.next}" data-pre="⏱" data-short="1">⏱ ${secShort(Math.ceil((q.next-now())/1000))}</small>`:'';
+      const cd=!qa&&q.next<Infinity?`<small class="cd" data-left="${q.next}" data-pre="⏱" data-short="1"></small>`:''; // geri sayım metni tick() ile (ve kart oluşunca) yazılır
       // düğme içinde düğme olmasın: kart bir kutu, gövdesi tek düğme (görünmez katmanla bütün kartı kaplar), hızlı eylem ayrı düğme
-      return `<div class="scard${qa?' has-qa':''}" data-go="${k}">${th(k)}<button class="sc-go" data-go="${k}" title="${st.t||L.n}">${L.n}</button>${cd}${qa}${bd}</div>`}).join('')
-    +lock.map(({r,d})=>{const can=S.lv>=d.lvl;return `<button class="scard lock" data-region="${r}"><span class="ph">🔒</span>${d.n}<small>${can?'₺'+fmt(regCost(r)):'Seviye '+d.lvl}</small>${can&&S.coins>=regCost(r)?'<i class="s new">🏳️</i>':''}</button>`}).join('');
-  placeBack();stripEl.scrollLeft=sl}
+      cards.push([k,`<div class="scard${qa?' has-qa':''}" data-go="${k}">${th(k)}<button class="sc-go" data-go="${k}" title="${st.t||L.n}">${L.n}</button>${cd}${qa}${bd}</div>`])});
+  lock.forEach(({r,d})=>{const can=S.lv>=d.lvl;cards.push(['R:'+r,`<button class="scard lock" data-region="${r}"><span class="ph">🔒</span>${d.n}<small>${can?'₺'+fmt(regCost(r)):'Seviye '+d.lvl}</small>${can&&S.coins>=regCost(r)?'<i class="s new">🏳️</i>':''}</button>`])});
+  stripPatch(cards);placeBack();stripEl.scrollLeft=sl}
+// Şerit kartları yeniden kullanılır: yalnızca içeriği değişen kart yeniden oluşturulur, diğerleri yerinde kalır (animasyonları baştan başlamaz, küçük resimler yeniden çözülmez)
+const stripKeep=new Map();
+function stripPatch(cards){const next=[],seen=new Set();
+  for(const [key,html] of cards){let e=stripKeep.get(key);if(!e||e.html!==html){const t=document.createElement('template');t.innerHTML=html;e={html,el:t.content.firstElementChild};stripKeep.set(key,e);
+      const cd=e.el.querySelector('[data-left]');if(cd)cd.textContent=cd.dataset.pre+' '+secShort(Math.max(0,Math.ceil((+cd.dataset.left-now())/1000)))}next.push(e.el);seen.add(key)}
+  for(const [k,e] of stripKeep)if(!seen.has(k))stripKeep.delete(k);
+  next.forEach((el,i)=>{const at=stripEl.children[i];if(at!==el)stripEl.insertBefore(el,at||null)});while(stripEl.children.length>next.length)stripEl.lastElementChild.remove()}
 // Odaktayken bölümler arasında sırayla geçiş (‹ › düğmeleri ve başlıkta sağa-sola kaydırma)
 function locOrder(){return Object.keys(LOC).filter(k=>owned(LOC[k].reg))}
 function stepLoc(d){const o=locOrder(),cur=view&&view.loc||focus,i=o.indexOf(cur);if(i<0)return;const k=o[(i+d+o.length)%o.length];PLATFORM.hap();goLocation(k)}
@@ -52,8 +59,8 @@ function qpopHTML(k){const L=LOC[k];let h=`<div class="qp-h"><b>${L.e} ${L.n}</b
   for(const u of us){const s=S.units[u];h+=`<div class="uhead"><span>${B[u].e} ${B[u].n}</span></div>`+(s.job?jobRow(u)+queueHTML(u):recipeTiles(u))}
   if(!us.length&&L.kind!=='fields')h+='<p class="note">Bu bölümde başlatılacak üretim yok.</p>';
   return h+'</div>'}
-function openQpop(k){lpKey=k;qpop.innerHTML=qpopHTML(k);qpop.hidden=false;PLATFORM.hap('medium')}
-function closeQpop(){qpop.hidden=true;lpKey=null}
+function openQpop(k){ghostClear('qpx');lpKey=k;qpop.innerHTML=qpopHTML(k);qpop.hidden=false;PLATFORM.hap('medium')}
+function closeQpop(){if(!qpop.hidden)ghostOut(qpop,null,'qpx',160);qpop.hidden=true;lpKey=null}
 function refreshQpop(){if(!qpop.hidden&&lpKey)qpop.innerHTML=qpopHTML(lpKey)}
 stripEl.addEventListener('pointerdown',e=>{const c=e.target.closest('.scard[data-go]');if(!c||e.target.closest('[data-quick]'))return;lpStart={x:e.clientX,y:e.clientY};clearTimeout(lpT);
   lpT=setTimeout(()=>{lpT=null;lpSuppress=1;openQpop(c.dataset.go)},480)});

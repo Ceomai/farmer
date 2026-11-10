@@ -16,9 +16,12 @@ function placeBack(){const st=document.getElementById('strip');let t=null,on=fal
   if(phoneUI()&&!backEl.hidden){if(!sheet.hidden)t=sheet.querySelector('.sh-head');else on=!!(st&&!st.hidden)}
   if(t){if(backEl.parentNode!==t)t.insertBefore(backEl,t.firstChild)}else parkBack();backEl.classList.toggle('inbar',!!t);backEl.classList.toggle('onstrip',on)}
 addEventListener('resize',()=>placeBack());
-function renderSheet(){
-  if(!view){sheet.hidden=true;delete sheet.dataset.vk;document.body.classList.remove('sheet-open');setDock();placeBack();return}
-  sheet.hidden=false;document.body.classList.add('sheet-open');sheet.classList.toggle('dark',view.k==='alley');
+// İlerleme çubuğu genişlikle değil kaydırmayla (transform) dolar; çizim anında doğru konumda başlar, tick() sürdürür
+const barTf=j=>`transform:translateX(${(Math.max(0,Math.min(1,(now()-j.s)/(j.e-j.s)))*100-100).toFixed(2)}%)`;
+let sheetRect=null; // döngüdeki kamera kaydırması için önbellek (33-loop viewOffset); boyut/konum değişince sıfırlanır
+function renderSheet(){sheetRect=null;
+  if(!view){if(!sheet.hidden)ghostOut(sheet,'sheet','shx',260);sheet.hidden=true;delete sheet.dataset.vk;document.body.classList.remove('sheet-open');setDock();placeBack();return}
+  if(sheet.hidden)ghostClear('shx');sheet.hidden=false;document.body.classList.add('sheet-open');sheet.classList.toggle('dark',view.k==='alley');
   const f={loc:sheetLoc,region:sheetRegion,places:sheetPlaces,barn:sheetBarn,goals:sheetGoals,settings:sheetSettings,shop:sheetShop,album:sheetAlbum,ledger:sheetLedger,mail:sheetMail,guide:sheetGuide,borsa:sheetBorsa,budget:sheetBudget,stats:sheetStats}[view.k];
   const vk=view.k+'|'+(view.loc||''),body=sheet.querySelector('.sh-body'),st=body&&sheet.dataset.vk===vk?body.scrollTop:0;sheet.dataset.vk=vk;const gq=sheet.querySelector('#guideQ'),qv=gq&&view.k==='guide'?gq.value:'',gf=gq&&document.activeElement===gq;parkBack();sheet.innerHTML=f();
   if(qv){const n=sheet.querySelector('#guideQ');if(n){n.value=qv;n.dispatchEvent(new Event('input',{bubbles:true}));if(gf)n.focus()}} // rehber araması yeniden çizimde kaybolmasın
@@ -34,7 +37,7 @@ function recipeTiles(u,queue){const d=B[u],s=S.units[u];return `<div class="tile
   return `<button class="tile" data-act="${queue?'queue':'start'}" data-u="${u}" data-r="${r.id}" ${ok?'':'disabled'} title="${queue?'Sıraya ekle: ':''}${r.n}">${outOf(sc)}<span class="ins">${ins||'<b>Bedava</b>'}</span><span class="tm">${lock?'':'⏱ '+secs(sc.t)}</span></button>`}).join('')+'</div>'}
 function jobRow(u){const s=S.units[u],r=unitRecipe(u),sc=scaled(r,s.l);
   if(now()>=s.job.e)return `<button class="job ready" data-act="collect" data-u="${u}">${outOf(sc)}<b>Topla!</b></button>`;
-  return `<div class="job" title="${r.n}">${outOf(sc)}<span class="pw"><span class="pbar"><i data-s="${s.job.s}" data-e="${s.job.e}"></i></span><small data-left="${s.job.e}" data-pre="⏱"></small></span></div>`}
+  return `<div class="job" title="${r.n}">${outOf(sc)}<span class="pw"><span class="pbar"><i data-s="${s.job.s}" data-e="${s.job.e}" style="${barTf(s.job)}"></i></span><small data-left="${s.job.e}" data-pre="⏱"></small></span></div>`}
 function upBtn(u){const s=S.units[u];if(s.l>=MAXL)return'';const bl=upBlock(s.l+1);return `<button class="up" data-act="upU" data-u="${u}" ${bl||S.coins<upCost(u)?'disabled':''} title="+%30 ürün, %10 daha kısa süre">⬆ Sv ${s.l+1} <span>${bl||'₺'+fmt(upCost(u))}</span></button>`}
 function queueHTML(u){const s=S.units[u],q=s.q||[];const R=id=>B[u].recipes.find(r=>r.id===id);
   return `<div class="queue"><span class="ql">Sırada ${q.length}/${QMAX}</span>${q.map((id,i)=>{const r=R(id);return r?`<button class="qchip" data-act="qdel" data-u="${u}" data-i="${i}" title="Sıradan çıkar: ${r.n}" aria-label="Sıradan çıkar: ${r.n}">${ITEMS[Object.keys(r.out)[0]].e}<i>✕</i></button>`:''}).join('')}${q.length<QMAX?'<span class="qh">↓ eklemek için tarife dokun</span>':''}</div>`+(q.length<QMAX?recipeTiles(u,true):'')}
@@ -60,7 +63,7 @@ function sheetLoc(){const k=view.loc,L=LOC[k];const th=img(L.kind==='house'?'kul
 function fieldsBody(){const ready=S.fields.filter(f=>f.job&&now()>=f.job.e).length,empty=S.fields.filter(f=>!f.job).length,n=S.fields.length,seedE=ITEMS[S.lastCrop].e;
   let h=`<div class="seeds">${CROPS.filter(c=>(!c.col||has1(c.col))&&cropSeasonOk(c)).map(c=>{const lock=cropLocked(c);return `<button class="seed ${c.id===S.lastCrop?'on':''}${c.season?' mev':''}" data-act="seed" data-r="${c.id}" ${lock?'disabled':''} title="${c.n}${c.season?' · mevsim ürünü':''} · ${secs(scaled(c,S.fieldLv).t)}"><em>${ITEMS[c.id].e}</em><small>${lock?'🔒'+c.lvl:'₺'+c.cost}</small></button>`}).join('')}</div>`;
   h+=`<div class="plots">`+S.fields.map((f,i)=>{if(!f.job)return `<button class="plot empty" data-act="plot" data-i="${i}" title="Ek"><em>${seedE}</em>ek</button>`;
-      const c=cropOf(f.job.r);return now()>=f.job.e?`<button class="plot ready" data-act="plot" data-i="${i}"><em>${ITEMS[c.id].e}</em>topla!</button>`:`<button class="plot" data-act="plot" data-i="${i}"><em>${['','🌱','🌿',ITEMS[c.id].e][stageOf(f.job)]}</em><span class="pbar"><i data-s="${f.job.s}" data-e="${f.job.e}"></i></span></button>`}).join('')
+      const c=cropOf(f.job.r);return now()>=f.job.e?`<button class="plot ready" data-act="plot" data-i="${i}"><em>${ITEMS[c.id].e}</em>topla!</button>`:`<button class="plot" data-act="plot" data-i="${i}"><em>${['','🌱','🌿',ITEMS[c.id].e][stageOf(f.job)]}</em><span class="pbar"><i data-s="${f.job.s}" data-e="${f.job.e}" style="${barTf(f.job)}"></i></span></button>`}).join('')
     +(n<9?`<button class="plot buy" data-act="buyPlot" ${S.lv>=PLOT_LV[n]&&S.coins>=PLOT_COST[n]?'':'disabled'} title="Yeni parsel"><em>➕</em>${S.lv<PLOT_LV[n]?'🔒 Sv '+PLOT_LV[n]:'₺'+fmt(PLOT_COST[n])}</button>`:'')+`</div>`;
   const fu=S.fieldLv<MAXL?(()=>{const bl=upBlock(S.fieldLv+1);return `<button class="up" data-act="upFields" ${bl||S.coins<FIELD_UP[S.fieldLv]?'disabled':''} title="+%30 hasat, daha hızlı büyüme">⬆ Sv ${S.fieldLv+1} <span>${bl||'₺'+fmt(FIELD_UP[S.fieldLv])}</span></button>`})():'';
   const run=S.fields.filter(f=>f.job&&now()<f.job.e);
@@ -97,7 +100,9 @@ function sheetSettings(){return head('⚙️','Ayarlar','')+`<div class="sh-body
   <label class="switch"><input type="checkbox" id="optMusic" ${S.sound.music?'checked':''}><span><b>Müzik</b><br><span class="note">50'ler tarzı çiftlik ezgisi</span></span></label>
   <div class="uhead"><span>🔠 Yazı boyutu</span></div><div class="tabs">${[['n','Normal'],['b','Büyük'],['xb','Çok büyük']].map(([k,n])=>`<button aria-selected="${(S.ui&&S.ui.fs||'n')===k}" data-act="fs" data-k="${k}">${n}</button>`).join('')}</div>
   <label class="switch"><input type="checkbox" id="optLeft" ${S.ui&&S.ui.left?'checked':''}><span><b>Sol el modu</b><br><span class="note">Kamera düğmeleri ve menüler sol başparmağa yakın olur</span></span></label>
+  <label class="switch"><input type="checkbox" id="optRM" ${RM()?'checked':''}><span><b>Hareketi azalt</b></span></label>
   <label class="switch"><input type="checkbox" id="optSfx" ${S.sound.sfx?'checked':''}><span><b>Ses efektleri</b><br><span class="note">Hayvanlar, hasat, para sesi</span></span></label>
+  <label class="switch"><input type="checkbox" id="optHap" ${S.ui&&S.ui.hap===false?'':'checked'}><span><b>Titreşim</b></span></label>
   <label class="switch"><input type="checkbox" id="optFast" ${S.fastNav?'checked':''}><span><b>Hızlı gezinme</b><br><span class="note">Kamera uçmadan bölümler arasında anında geçer</span></span></label>
   <label class="switch"><input type="checkbox" id="optNotif" ${S.sound.notif?'checked':''}><span><b>Hazır bildirimleri</b><br><span class="note">Sekme arka plandayken ürün hazır olunca haber verir. Tarayıcı izin vermezse çalışmaz.</span></span></label>
   ${view.confirm?`<div class="urow"><span class="note">Tüm ilerleme silinsin mi?</span><button class="btn red" data-act="reset2">Sil</button><button class="btn soft" data-act="reset0">Vazgeç</button></div>`:`<button class="btn ghost" data-act="reset">Baştan başla</button>`}</div>`}

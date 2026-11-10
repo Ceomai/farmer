@@ -72,8 +72,9 @@ function buildDesk(){disposeScene(deskScene,rt.texture);while(deskScene.children
 function deskPanRange(){const a=dcam.aspect;return a<.85?0:a<1.3?1:0}
 function deskFrame(dt,t){const d=dayFactor();if(deskL.fill){deskL.fill.intensity=.45+.45*d;deskL.win.intensity=.3+.9*d;deskL.lamp.intensity=.35+(1-d)*1.3;deskL.dh.intensity=.5+.3*d}
   deskFx.forEach(f=>f(dt,t));
-  for(const k in deskObjs){const g=deskObjs[k],b=g.userData.base,hv=hoverDesk===k;let pop=g.userData.pop||0;if(pop>0){pop=Math.max(0,pop-dt*2.5);g.userData.pop=pop}
-    g.position.copy(b);const s0=g.userData.s0||1;g.scale.setScalar(s0)}
+  for(const k in deskObjs){const g=deskObjs[k],b=g.userData.base,hv=hoverDesk===k;let pop=g.userData.pop||0;if(pop>0){pop=RM()?0:Math.max(0,pop-dt*4);g.userData.pop=pop}
+    // dokunulan nesne kısa bir yayla zıplar: 1 → ~1,12 → hafif geri sekme → 1 (~250 ms); hareketi azaltta zıplamaz
+    g.position.copy(b);const s0=g.userData.s0||1,x=1-pop;g.scale.setScalar(pop>0?s0*(1+Math.sin(x*Math.PI*1.6)*(1-x)*.16):s0)}
   const a=dcam.aspect,vf=dcam.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*a),PT=a<.85,W=PT?1.5:a<1.3?3:3.9,dist=Math.max(PT?2.95/Math.tan(vf/2):2.5/Math.tan(vf/2),Math.min(12,W/Math.tan(hf/2))),ly=PT?(a>.52?2.95:2.62):2.85;if(PT)dcamX=0;
   dcam.position.set(dcamX,(PT?(a>.52?5.1:4.9):3.45),PT?dist*(a>.52?1.04:.93):dist);dcam.lookAt(dcamX*.9,ly,-.8)}
 // Penceredeki harita artık canlı değil: birkaç saniyede bir yenilenen sabit bir manzara (masa ekranı çok daha hafif ve akıcı)
@@ -113,5 +114,5 @@ function sheetMail(){return head('✉️','Posta','Tedarik sözleşmeleri')+`<di
 function toDesk(){deskWinT=0;fade(()=>{if(mode==='hub')hubSaved={t:ctl.target.clone(),p:cam.position.clone()};mode='desk';focus=null;dropInterior();view=null;ctl.enabled=false;ictl.enabled=false;setModeUI();renderSheet();syncMarks()})}
 function enterWorld(after){fade(()=>{mode='hub';dropInterior();ctl.enabled=true;ictl.enabled=false;hubLimits();const h=hubSaved||{t:HUB_T,p:HUB_T.clone().addScaledVector(HUB_DIR,HUB_D)};ctl.target.copy(h.t);cam.position.copy(h.p);view=null;setModeUI();renderSheet();syncMarks();if(after)after()})}
 function worldTick(dt,t){waterTex.offset.y-=dt*.08;worldFx.forEach(f=>f(dt,t));ambience(dt,t);stepWeather(dt,t);regFx.forEach(f=>f(dt,t));
-  for(const k in locGroups){const g=locGroups[k];if(g.userData.pop!=null){g.userData.pop=Math.min(1,g.userData.pop+dt*2.2);const p=g.userData.pop,s=1+Math.sin(p*Math.PI)*.1;g.scale.set(s,.3+p*.7*s,s);if(p>=1){g.scale.set(1,1,1);delete g.userData.pop}}
+  for(const k in locGroups){const g=locGroups[k];if(g.userData.pop!=null){g.userData.pop=RM()?1:Math.min(1,g.userData.pop+dt*2.2);const p=g.userData.pop,s=1+Math.sin(p*Math.PI)*.1;g.scale.set(s,.3+p*.7*s,s);if(p>=1){g.scale.set(1,1,1);delete g.userData.pop}}
     const fx=g.userData.allFx;for(let i=0;i<fx.length;i++)fx[i](dt,t)}stepPuffs(dt)}

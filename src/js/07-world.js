@@ -102,7 +102,8 @@ function unitWorld(u,y=0){const k=locOf(u),L=LOC[k],o=unitOffset(k,L.units.index
 function plotOff(i){return [((i%3)-1)*4.2,(Math.floor(i/3)-1)*4.2]}
 function plotWorld(i,y=0){const L=LOC.tarla,o=plotOff(i);return new V3(L.p[0]+o[0],y,L.p[2]+o[1])}
 function breathe(g,host,ph,soft=true){g.userData.batchAnchor=1; // içindekiler bu grubun içinde birleştirilir; ezilme/nefes animasyonu korunur
-addFx(host,(dt,tm)=>{let sq=g.userData.squash||0;if(sq>0){sq=Math.max(0,sq-dt*1.8);g.userData.squash=sq}const b=(soft?Math.sin(tm*2.2+ph)*.014:0)+Math.sin((1-sq)*Math.PI*4)*sq*.16;host.scale.set(1-b*.55,1+b,1-b*.55)})}
+addFx(host,(dt,tm)=>{if(RM()){g.userData.squash=0;host.scale.set(1,1,1);return} // hareketi azaltta nefes ve ezilme yok
+  let sq=g.userData.squash||0;if(sq>0){sq=Math.max(0,sq-dt*1.8);g.userData.squash=sq}const b=(soft?Math.sin(tm*2.2+ph)*.014:0)+Math.sin((1-sq)*Math.PI*4)*sq*.16;host.scale.set(1-b*.55,1+b,1-b*.55)})}
 function makeLoc(k){const L=LOC[k],g=G(null,L.p);g.userData.loc=k;if(!owned(L.reg))return g;
   switch(L.kind){
     case'house':{const hg=G(g);const h=house(S.house);h.scale.multiplyScalar(1.35);hg.add(h);breathe(g,hg,1);if(h.userData.chimney)addSmoke(h,h.userData.chimney,()=>true,hg);

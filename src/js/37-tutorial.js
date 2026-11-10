@@ -30,7 +30,7 @@ function tut2Tick(){const i=tut2Step();if(i<0)return false;if(document.querySele
   if(el&&el.getClientRects().length){if(el.closest('#strip')){const r0=el.getBoundingClientRect();if(r0.left<0||r0.right>innerWidth)el.scrollIntoView({inline:'center',block:'nearest'})}const r=el.getBoundingClientRect();tutHand.hidden=false;const up=r.top>innerHeight*.55;tutHand.classList.toggle('above',up);
     tutPlaceHand(r,up);tutEl.classList.toggle('top',r.top>innerHeight*.5)}else{tutHand.hidden=true;tutEl.classList.add('top')}return true}
 // El hedefin üstüne değil sağ alt (yukarıdaysa sağ üst) köşesine konur: parmak ucu köşeyi gösterir, hedef görünür kalır
-function tutPlaceHand(r,up){const x=Math.max(4,Math.min(innerWidth-48,r.right-30)),y=up?Math.max(4,r.top-44):Math.min(innerHeight-54,r.bottom-6);tutHand.style.left=Math.round(x)+'px';tutHand.style.top=Math.round(y)+'px'}
+function tutPlaceHand(r,up){const x=Math.max(4,Math.min(innerWidth-48,r.right-30)),y=up?Math.max(4,r.top-44):Math.min(innerHeight-54,r.bottom-6);tutHand.style.transform=`translate(${Math.round(x)}px,${Math.round(y)}px)`}
 const tutStep=()=>S&&S.tut&&!S.tut.done?S.tut.i:-1;
 function tutStart(){if(S.tut)return;if(S.goal>0||(S.stats.plant_bugday||0)>0){S.tut={done:1};return}S.tut={i:0,b:{plant:0,harv:0,sold:0}};track('tutorial_start')}
 function tutTick(){const i=tutStep();if(i<0){tut2Start();if(!tut2Tick())tutEl.hidden=true;return}tutNext.hidden=true;if(document.querySelector('.modal')){tutEl.hidden=true;return}const st=TUT[i];

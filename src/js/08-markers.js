@@ -34,12 +34,13 @@ function updateMarks(){for(const id in MK){const m=MK[id],[t,k]=id.split(':');
   else if(t==='U'){const s=S.units[k];if(!s||!s.job)continue;m.pos=unitWorld(k,markH(k));bubble(m,ITEMS[Object.keys(unitRecipe(k).out)[0]].e,prog(s.job),'collectU',k)}}}
 const _v=new V3();
 function placeMarks(){const W=R.domElement.clientWidth,H=R.domElement.clientHeight,tags=[];
-  for(const k in MK){const m=MK[k];if(!m.pos)continue;_v.copy(m.pos).project(mode==='desk'?dcam:cam);const vis=_v.z<1&&mode!=='interior'&&Math.abs(_v.x)<1.15&&Math.abs(_v.y)<1.15;m.el.style.display=vis?'':'none';if(!vis)continue;
-    const x=(_v.x+1)/2*W,y=(1-_v.y)/2*H;if(m.tag){if(!m.w){const c=m.el.firstElementChild;m.w=c?c.offsetWidth:0;m.h=c?c.offsetHeight:0}tags.push({m,x,y});const c=m.el.firstElementChild;if(c)c.classList.toggle('hot',(mode==='desk'?hoverDesk:hoverLoc)===m.tag);continue}
-    m.el.style.transform=`translate(${Math.round(x)}px,${Math.round(y)}px)`}
+  for(const k in MK){const m=MK[k];if(!m.pos)continue;_v.copy(m.pos).project(mode==='desk'?dcam:cam);const vis=_v.z<1&&mode!=='interior'&&Math.abs(_v.x)<1.15&&Math.abs(_v.y)<1.15;if(m._vis!==vis){m._vis=vis;m.el.style.display=vis?'':'none'}if(!vis)continue; // stil yalnızca değer değişince yazılır
+    const x=(_v.x+1)/2*W,y=(1-_v.y)/2*H;if(m.tag){if(!m.w){const c=m.el.firstElementChild;m.w=c?c.offsetWidth:0;m.h=c?c.offsetHeight:0;m._hot=null}tags.push({m,x,y});const c=m.el.firstElementChild,hot=(mode==='desk'?hoverDesk:hoverLoc)===m.tag;if(c&&m._hot!==hot){m._hot=hot;c.classList.toggle('hot',hot)}continue}
+    setTf(m.el,m,Math.round(x),Math.round(y))}
   tags.sort((a,b)=>b.y-a.y);const placed=[];
   if(tags.some(t=>t.m.below))tags.sort((a,b)=>a.y-b.y);
   for(const t of tags){let y=t.y;const dn=t.m.below?1:-1,gy=Math.max(t.m.h+8,40);for(let it=0;it<6;it++){const hit=placed.find(p=>Math.abs(p.x-t.x)<Math.max(p.w,44)/2+Math.max(t.m.w,44)/2+4&&Math.abs(p.y-y)<gy);if(!hit)break;y=hit.y+dn*gy}
     y=dn>0?Math.min(y,H-t.m.h-14):Math.max(y,t.m.h+14); // aralık 44 px dokunma alanına göre (etiketler ekran dışına itilmez)
-    placed.push({x:t.x,y,w:t.m.w});t.m.el.style.transform=`translate(${Math.round(t.x)}px,${Math.round(y)}px)`}}
+    placed.push({x:t.x,y,w:t.m.w});setTf(t.m.el,t.m,Math.round(t.x),Math.round(y))}}
+function setTf(el,m,x,y){if(m._x===x&&m._y===y)return;m._x=x;m._y=y;el.style.transform=`translate(${x}px,${y}px)`}
 function screenOfW(p){_v.copy(p).project(cam);return{x:(_v.x+1)/2*R.domElement.clientWidth,y:(1-_v.y)/2*R.domElement.clientHeight-30}}

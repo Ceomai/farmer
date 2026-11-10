@@ -12,7 +12,8 @@ async function open({vp={width:390,height:844},save=null,env={},clear=true}={}){
     if(noStore){const th=()=>{throw new DOMException('SecurityError','SecurityError')};Storage.prototype.getItem=th;Storage.prototype.setItem=th}},[save?JSON.stringify(save):null,clear,!!env.noStore]);
   await p.goto(FILE);await p.waitForFunction(()=>typeof S==='object'&&S&&!document.getElementById('boot'),null,{timeout:120000});p.ctx=ctx;return p}
 const ev=(p,f,a)=>p.evaluate(f,a);
-const click=async(p,sel)=>{const el=await p.$(sel);if(!el)return false;await el.click({force:true});await p.waitForTimeout(120);return true};
+// tıklamadan önce öğeyi taşıyan açılış animasyonları (alttan kayan panel, büyüyen pencere) bitsin: gerçek kullanıcı da animasyon bitmeden dokunamaz
+const click=async(p,sel)=>{const el=await p.$(sel);if(!el)return false;await el.evaluate(e=>Promise.all(document.getAnimations().filter(a=>{const t=a.effect&&a.effect.target;return t&&t.contains&&t.contains(e)&&isFinite(a.effect.getComputedTiming().endTime)}).map(a=>a.finished.catch(()=>{}))));await el.click({force:true});await p.waitForTimeout(120);return true};
 const rmModal=p=>ev(p,()=>document.querySelectorAll('.modal').forEach(m=>m.remove()));
 const toWorld=async p=>{await rmModal(p);await ev(p,()=>{S.fastNav=true;enterWorld()});await p.waitForFunction(()=>mode==='hub',null,{timeout:20000});await p.waitForTimeout(300)};
 const base=(o={})=>({coins:300,lv:1,house:1,regions:{baba:1,town:1},units:{kumes:{l:1}},fields:[{},{}],items:{yem:6},consent:{analytics:false},tut:{done:1},tut2:{done:1},...o});

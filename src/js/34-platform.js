@@ -11,7 +11,11 @@ const PLATFORM={ads:false,iap:false,prices:{},
     try{const P=PL('Preferences');if(P&&!localStorage.getItem(SAVE)){const r=await P.get({key:SAVE});if(r&&r.value)localStorage.setItem(SAVE,r.value)}}catch(e){}
     this.initAds();this.initIap();this.initApp()},
   backup(json){const P=PL('Preferences');if(P)P.set({key:SAVE,value:json}).catch(()=>{})},
-  hap(kind='light'){if(!S||!S.sound.sfx)return;const H=PL('Haptics');if(H){H.impact({style:kind==='heavy'?'HEAVY':kind==='medium'?'MEDIUM':'LIGHT'}).catch(()=>{});return}if(navigator.vibrate)try{navigator.vibrate(kind==='heavy'?[30,40,30]:12)}catch(e){}},
+  // Titreşim: Ayarlar'daki "Titreşim" anahtarına bağlı (S.ui.hap, varsayılan açık; ses efektlerinden bağımsız). light: dokunuş, medium: satın alma/ödül/seviye, err: kısa çift titreşim (hata, yetersiz para).
+  // Arka arkaya gelen hafif titreşimler birleştirilir (aynı dokunuşta iki kez titremesin).
+  hap(kind='light'){if(!S||(S.ui&&S.ui.hap===false))return;const t=performance.now(),dt=t-(this._hapT||0);if(kind==='light'&&dt<90)return;if(kind!=='light'&&kind===this._hapK&&dt<60)return;this._hapT=t;this._hapK=kind;
+    const H=PL('Haptics');if(H){const im=st=>H.impact({style:st}).catch(()=>{});if(kind==='err'){im('LIGHT');setTimeout(()=>im('LIGHT'),90)}else im(kind==='heavy'?'HEAVY':kind==='medium'?'MEDIUM':'LIGHT');return}
+    if(navigator.vibrate)try{navigator.vibrate(kind==='err'?[14,70,14]:kind==='heavy'?[30,40,30]:kind==='medium'?22:10)}catch(e){}},
   // ---- AdMob ödüllü reklam ----
   async initAds(){const A=PL('AdMob');if(!A)return;try{await A.initialize({initializeForTesting:CONFIG.admobTesting});
       try{const ci=await A.requestConsentInfo();if(ci&&ci.isConsentFormAvailable&&ci.status==='REQUIRED')await A.showConsentForm()}catch(e){}

@@ -9,7 +9,7 @@ const check=()=>{const iss=[];const sh=document.querySelector('.sheet:not([hidde
   if(sh){const sr=sh.getBoundingClientRect();if(sr.bottom>vh+1)iss.push('panel ekran altına taşıyor '+Math.round(sr.bottom-vh)+'px');if(sr.right>vw+1||sr.left<-1)iss.push('panel yana taşıyor');
     sh.querySelectorAll('.sh-body *').forEach(e=>{if(!vis(e))return;const r=e.getBoundingClientRect();if(!r.width&&!r.height)return;
       if(e.scrollHeight>24&&r.height<14&&getComputedStyle(e).overflowY!=='visible')iss.push('ezilmiş '+name(e)+' h='+Math.round(r.height));
-      const sc=e.closest('.seeds,.tiles,.inv,.plots,.tabs,.gall,.mgbar,.urow.mainact');
+      const sc=e.closest('.seeds,.tiles,.inv,.plots,.tabs,.gall,.mgbar,.urow.mainact,.pbar'); // .pbar: dolgu transform ile kayar, çubuk kendi kutusunda kırpar
       if(!sc&&(r.right>sr.right+2||r.left<sr.left-2)&&r.width<sr.width*2)iss.push('panel dışına taşan '+name(e));
       if((e.tagName==='BUTTON'||e.classList.contains('pill-btn'))&&e.scrollWidth>e.clientWidth+3&&getComputedStyle(e).overflow!=='visible')iss.push('kesik yazı '+name(e))})}
   const fx=[...document.querySelectorAll('.hud .plate,.hud .pills,#backBtn,#guideBtn,.dock,.strip')].filter(e=>vis(e)&&!e.hidden);
