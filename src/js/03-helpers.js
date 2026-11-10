@@ -1,8 +1,8 @@
 // ================= YARDIMCILAR =================
 const $=s=>document.querySelector(s);
 const fmt=n=>Math.floor(n).toLocaleString('tr-TR');
-// Üst çubuk için kısa sayı: 10.000 ve üstü B (bin), Mn (milyon), Mr (milyar); 100'den küçük katlarda bir ondalık (12,3 B · 1,2 Mn · 123 Mn). Paneller tam sayıyı (fmt) kullanır.
-const fmtShort=n=>{n=Math.floor(n);const a=Math.abs(n),u=a>=1e9?[1e9,'Mr']:a>=1e6?[1e6,'Mn']:a>=1e4?[1e3,'B']:null;if(!u)return fmt(n);const v=n/u[0],d=Math.abs(v)<100?10:1;return (Math.trunc(v*d)/d).toLocaleString('tr-TR',{maximumFractionDigits:1})+' '+u[1]};
+// Üst çubuk için kısa sayı: 10.000 ve üstü B (bin), Mn (milyon), Mr (milyar); 100'den küçük katlarda bir ondalık (12,3 B · 1,2 Mn · 123 Mn; sayı ile birim arasında dar boşluk). Paneller tam sayıyı (fmt) kullanır.
+const fmtShort=n=>{n=Math.floor(n);const a=Math.abs(n),u=a>=1e9?[1e9,'Mr']:a>=1e6?[1e6,'Mn']:a>=1e4?[1e3,'B']:null;if(!u)return fmt(n);const v=n/u[0],d=Math.abs(v)<100?10:1;return (Math.trunc(v*d)/d).toLocaleString('tr-TR',{maximumFractionDigits:1})+'\u202f'+u[1]};
 let TIME_OFF=0;const now=()=>Date.now()+TIME_OFF;
 const has=k=>S.items[k]||0;
 const stored=()=>Object.entries(S.items).reduce((a,[k,v])=>k==='at'?a:a+v,0); // taylar ambarda değil ahırda durur

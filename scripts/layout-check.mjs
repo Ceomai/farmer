@@ -15,6 +15,7 @@ const check=()=>{const iss=[];const sh=document.querySelector('.sheet:not([hidde
   const fx=[...document.querySelectorAll('.hud .plate,.hud .pills,#backBtn,#guideBtn,.dock,.strip')].filter(e=>vis(e)&&!e.hidden);
   for(let i=0;i<fx.length;i++)for(let j=i+1;j<fx.length;j++){if(fx[i].contains(fx[j])||fx[j].contains(fx[i]))continue;const a=fx[i].getBoundingClientRect(),c=fx[j].getBoundingClientRect();if(a.width&&c.width&&a.left<c.right-2&&c.left<a.right-2&&a.top<c.bottom-2&&c.top<a.bottom-2)iss.push('çakışma '+name(fx[i]).slice(0,20)+' × '+name(fx[j]).slice(0,20))}
   if(sh)fx.forEach(e=>{const a=e.getBoundingClientRect(),c=sh.getBoundingClientRect();if((e.id==='backBtn'||e.id==='guideBtn')&&!sh.contains(e))if(a.left<c.right-2&&c.left<a.right-2&&a.top<c.bottom-2&&c.top<a.bottom-2)iss.push('panel düğmeyi örtüyor '+e.id)});
+  {const bk=document.getElementById('backBtn');if(bk&&vis(bk)&&!bk.hidden&&!(sh&&sh.contains(bk))){const a=bk.getBoundingClientRect();document.querySelectorAll('.strip .scard,.strip .scard .s,.cam button').forEach(e=>{if(!vis(e))return;const c=e.getBoundingClientRect();if(c.width&&a.left<c.right-1&&c.left<a.right-1&&a.top<c.bottom-1&&c.top<a.bottom-1)iss.push('geri düğmesi örtüyor '+name(e).slice(0,24))})}}
   if(document.documentElement.scrollWidth>vw+1)iss.push('sayfa yana kayıyor');return [...new Set(iss)].slice(0,8)};
 let total=0;
 for(const [w,h] of VPS){const p=await b.newPage({viewport:{width:w,height:h},deviceScaleFactor:1.5,isMobile:w<700,hasTouch:w<700});const errs=[];p.on('pageerror',e=>errs.push(e.message));

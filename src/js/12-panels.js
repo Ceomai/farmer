@@ -7,14 +7,14 @@ function head(thumb,title,sub){return `<div class="sh-head"><span class="grip" a
 function closeSheet(){if(!view)return;if(mode==='focus'||mode==='interior'){view.mini=!view.mini;renderSheet();return}view=null;renderSheet()}
 function openView(k){view={k};renderSheet()}
 function setDock(){document.querySelectorAll('.dock button[data-open]').forEach(b=>b.setAttribute('aria-current',String(!!view&&b.dataset.open===view.k)))}
-// Telefonda geri düğmesi panel başlığına (panel açıkken) ya da kart şeridinin başına (panel kapalıyken) taşınır; masaüstünde yerinde kalır.
+// Telefonda geri düğmesi panel başlığına (panel açıkken) taşınır, panel kapalıyken kart şeridinin hemen üstünde kendi yerinde (solda) durur; masaüstünde yerinde kalır.
 // Yeniden çizimde (innerHTML) kaybolmasın diye çizimden önce yerine park edilir.
 const backEl=document.getElementById('backBtn'),backHome=backEl.parentNode,backNext=backEl.nextSibling;
 const phoneUI=()=>matchMedia('(max-width:700px)').matches;
 function parkBack(){if(backEl.parentNode!==backHome)backHome.insertBefore(backEl,backNext)}
-function placeBack(){const st=document.getElementById('strip');let t=null;
-  if(phoneUI()&&!backEl.hidden){if(!sheet.hidden)t=sheet.querySelector('.sh-head');else if(st&&!st.hidden)t=st}
-  if(t){if(backEl.parentNode!==t)t.insertBefore(backEl,t.firstChild)}else parkBack();backEl.classList.toggle('inbar',!!t)}
+function placeBack(){const st=document.getElementById('strip');let t=null,on=false;
+  if(phoneUI()&&!backEl.hidden){if(!sheet.hidden)t=sheet.querySelector('.sh-head');else on=!!(st&&!st.hidden)}
+  if(t){if(backEl.parentNode!==t)t.insertBefore(backEl,t.firstChild)}else parkBack();backEl.classList.toggle('inbar',!!t);backEl.classList.toggle('onstrip',on)}
 addEventListener('resize',()=>placeBack());
 function renderSheet(){
   if(!view){sheet.hidden=true;delete sheet.dataset.vk;document.body.classList.remove('sheet-open');setDock();placeBack();return}

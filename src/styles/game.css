@@ -345,9 +345,9 @@ body.photo .cam .ph{display:none}
   .hud{top:calc(6px + var(--safe-top));left:max(8px,var(--safe-left));right:max(8px,var(--safe-right))}
   .plate{position:absolute;left:0;top:calc(100% + 10px);margin:0;padding:2px 8px;border-width:var(--bw);border-radius:var(--r-pill);background:var(--c-surface);color:var(--c-text);box-shadow:var(--sh-xs);transform:none;pointer-events:none}
   .plate h1{display:none}.plate small{display:block;color:var(--c-text);font-size:var(--fs-xs);letter-spacing:0;text-transform:none;white-space:nowrap}.plate .era-n{display:none}
-  .pills{flex-wrap:nowrap;gap:var(--sp-2);margin-left:auto;min-width:0}
-  .pill{height:30px;gap:3px;padding:0 7px 0 2px;font-size:var(--fs-md);border-width:var(--bw);box-shadow:var(--sh-1)}
-  .coin,.star,.barnic,.gem{width:20px;height:20px;font-size:11px}.ring{width:28px;height:28px}.ring b{width:22px;height:22px;font-size:var(--fs-sm)}.pill.lvl{padding:0 1px}
+  .pills{flex-wrap:nowrap;gap:3px;margin-left:auto;min-width:0}
+  .pill{height:30px;gap:2px;padding:0 6px 0 2px;font-size:var(--fs-sm);border-width:var(--bw);box-shadow:var(--sh-1)}
+  .coin,.star,.barnic,.gem{width:18px;height:18px;font-size:10px}.ring{width:28px;height:28px}.ring b{width:22px;height:22px;font-size:var(--fs-sm)}.pill.lvl{padding:0 1px}
   /* Panel: alttan açılır; yüksekliği tutamaçla %25 / %45 / %85 arasında seçilir (--sheetF), varsayılan %42 (masada %52) */
   .sheet{top:auto;bottom:0;left:0;right:0;width:auto;max-height:calc(var(--sheetF,.42) * 100%);border-radius:var(--r-3xl) var(--r-3xl) 0 0;border-bottom:0;padding-bottom:var(--safe-bottom);box-shadow:0 -3px 0 var(--ink)}
   body.focus .sheet,body.inside .sheet{max-height:calc(var(--sheetF,.42) * 100%)}body.desk .sheet{max-height:calc(var(--sheetF,.52) * 100%)}
@@ -508,6 +508,8 @@ div.scard{cursor:pointer}
   .pill{min-width:0}.pill>span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pill>span:first-child,.pill .ring{flex:none}}
 /* Bildirim üst çubuğun hemen altında; metin gerektiği kadar geniş (ortalama yüzünden yarım genişliğe sıkışmaz) */
 .toast{width:max-content;box-sizing:border-box}
+/* Çok dar telefonda (≤374 px) üst çubuk yazı boyutuyla büyümez: en uzun değerlerde (123 Mn, 12,3 B, 1145/1150) bile hiçbir sayı kesilmez */
+@media (max-width:374px){body:is(.fs-b,.fs-xb) header.hud{zoom:1}}
 /* Panel tutamacı (yalnızca telefonda görünür) */
 .grip{display:none;position:absolute;left:50%;top:5px;width:40px;height:5px;margin-left:-20px;border-radius:var(--r-pill);background:var(--ink-a35);pointer-events:none}
 /* Bölümün ana eylem satırı (Ek / Topla / Yükselt / İçeri / işçi) panelin altına yapışık durur, kaydırınca kaybolmaz */
@@ -520,10 +522,9 @@ div.scard{cursor:pointer}
 .back.inbar{position:relative;top:auto;left:auto;right:auto;z-index:1;flex:none;box-shadow:var(--sh-press);zoom:1!important}
 .sh-head>.back.inbar{width:34px;height:34px;padding:0 0 2px;border-width:var(--bw);display:grid;place-items:center;font-size:19px;line-height:1}
 .sh-head>.back.inbar .bk-t{display:none}
-/* Panel kapalıyken geri düğmesi kart şeridinin başında, kaydırınca solda sabit kalır */
-.strip>.back.inbar{position:sticky;left:0;flex:none;align-self:center;width:58px;height:88px;padding:0;border-radius:var(--r-xl);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-1);font-size:22px;line-height:1;box-shadow:var(--sh-3)}
-.strip>.back.inbar .bk-t{font-size:var(--fs-sm)}
-.strip:has(>.back.inbar){scroll-padding-left:82px}body.lefty .strip:has(>.back.inbar){scroll-padding-left:0;scroll-padding-right:82px}
+/* Panel kapalıyken geri düğmesi kart şeridinin hemen üstünde solda kendi yerinde durur (kartları ve sağdaki kamera düğmelerini örtmez; sol el modunda sağda) */
+.back.onstrip{top:auto;bottom:calc(178px + var(--safe-bottom) / var(--ui-scale))}
+body.lefty .back.onstrip{left:auto;right:max(12px,var(--safe-right))}
 /* Tohum satırı: dört buçuk kart görünür, yana kaydırılabildiği belli olur */
 .seeds{grid-auto-columns:calc((100% - 32px) / 4.5)}
 /* Çiftçi balonu ~6 sn sonra küçülür: yalnızca yüz kalır, dokununca yeniden açılır */
@@ -551,7 +552,6 @@ body.lefty .sh-head{padding-left:52px;padding-right:12px}
 body.lefty .sh-head .x{right:auto;left:10px}
 body.lefty .sh-head .nav{order:-1}body.lefty .sh-head .nav[data-locstep="-1"]{margin-left:0}
 body.lefty .sh-head>.back.inbar{order:9;margin-left:auto}
-body.lefty .strip>.back.inbar{order:99;left:auto;right:0}
 @media (max-width:700px){
   body.lefty .guidebtn,body.lefty[data-mode] .guidebtn{right:auto;left:max(12px,var(--safe-left))}
   body.lefty .plate{left:48px}
